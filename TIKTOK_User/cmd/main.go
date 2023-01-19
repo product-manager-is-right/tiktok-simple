@@ -2,6 +2,7 @@ package main
 
 import (
 	"GoProject/api/router"
+	"GoProject/dal"
 	"github.com/cloudwego/hertz/pkg/app/server"
 )
 
@@ -17,5 +18,6 @@ func main() {
 }
 
 func initDeps() {
-	// 初始化数据库等
+	// 初始化数据库
+	dal.Init()
 }
