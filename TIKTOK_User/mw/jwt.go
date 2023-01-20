@@ -45,7 +45,7 @@ func InitJwt() {
 		},
 		LoginResponse: func(ctx context.Context, c *app.RequestContext, code int, token string, expire time.Time) {
 			c.JSON(http.StatusOK, utils.H{
-				"status_code": 1,
+				"status_code": 0,
 				"status_mgs":  "login success",
 				"user_id":     c.Value("user_id").(int64),
 				"token":       token,
