@@ -5,13 +5,11 @@ package handler
 import (
 	"GoProject/model/vo"
 	"GoProject/service/serviceImpl"
-	"GoProject/util"
 	"context"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"strconv"
 
 	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/cloudwego/hertz/pkg/common/utils"
 )
 
 const (
@@ -25,16 +23,7 @@ const (
 */
 func UserInfo(ctx context.Context, c *app.RequestContext) {
 	userId := c.Query("user_id")
-	token := c.Query("token")
 	id, _ := strconv.ParseInt(userId, 10, 64)
-	// token验证
-	if !util.ValidateToken(token) {
-		c.JSON(consts.StatusOK, vo.UserInfoResponse{
-			Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "Token Validate Fail"},
-			UserInfo: vo.UserInfo{},
-		})
-		return
-	}
 
 	// 查询昵称、关注数、粉丝数
 	usi := serviceImpl.UserServiceImpl{}
@@ -56,17 +45,16 @@ func UserInfo(ctx context.Context, c *app.RequestContext) {
 	用户注册接口，新用户注册时提供用户名，密码，昵称即可，用户名需要唯一。创建成功后，返回用户id和权限token
 */
 func Register(ctx context.Context, c *app.RequestContext) {
-	c.JSON(consts.StatusOK, utils.H{
-		"message": "ok",
-	})
-}
+	username := c.PostForm("username")
+	password := c.PostForm("password")
 
-// Login
-/*
-	用户登录，通过用户名和密码进行登录，登录成功后返回用户id和权限token
-*/
-func Login(ctx context.Context, c *app.RequestContext) {
-	c.JSON(consts.StatusOK, utils.H{
-		"message": "ok",
-	})
+	usi := serviceImpl.UserServiceImpl{}
+	if _, err := usi.CreateUserByNameAndPassword(username, password); err != nil {
+		c.JSON(consts.StatusOK, vo.RegisterResponse{
+			Response: vo.Response{
+				StatusCode: ResponseFail,
+				StatusMsg:  err.Error()},
+		})
+		c.Abort()
+	}
 }

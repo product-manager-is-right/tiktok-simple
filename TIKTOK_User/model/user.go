@@ -2,7 +2,7 @@ package model
 
 type User struct {
 	Id       int64  `column:"id"`
-	Name     string `column:"username"`
+	Username string `column:"username"`
 	Password string `column:"password"`
 }
 
