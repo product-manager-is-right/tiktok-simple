@@ -28,7 +28,7 @@ func InitJwt() {
 		Key:         []byte("jwt sign key"),
 		Timeout:     time.Hour,
 		MaxRefresh:  time.Hour,
-		TokenLookup: "query: token",
+		TokenLookup: "query: token, cookie: token",
 		Authenticator: func(ctx context.Context, c *app.RequestContext) (interface{}, error) {
 			username := c.PostForm("username")
 			password := c.PostForm("password")
@@ -75,6 +75,8 @@ func InitJwt() {
 				"status_code": 1,
 				"status_msg":  "jwt authorize fail",
 			})
+			// 鉴权失败，中断handler
+			c.Abort()
 		},
 	})
 	if err != nil {
