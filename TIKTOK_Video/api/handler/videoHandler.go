@@ -12,7 +12,7 @@ import (
 
 // UserInfo
 /*
-	用户信息接口，获取登录用户的id、昵称，如果实现社交部分的功能，还会返回关注数和粉丝数
+	视频流接口
 */
 func Feed(ctx context.Context, c *app.RequestContext) {
 	c.JSON(consts.StatusOK, utils.H{
@@ -20,21 +20,21 @@ func Feed(ctx context.Context, c *app.RequestContext) {
 	})
 }
 
-// Register
 /*
-	用户注册接口，新用户注册时提供用户名，密码，昵称即可，用户名需要唯一。创建成功后，返回用户id和权限token
+	评论操作接口
 */
-func PublishAction(ctx context.Context, c *app.RequestContext) {
+
+func CommentAction(ctx context.Context, c *app.RequestContext) {
 	c.JSON(consts.StatusOK, utils.H{
 		"message": "ok",
 	})
 }
 
-// Login
 /*
-	用户登录，通过用户名和密码进行登录，登录成功后返回用户id和权限token
+*
+评论列表接口
 */
-func PublishList(ctx context.Context, c *app.RequestContext) {
+func CommentList(ctx context.Context, c *app.RequestContext) {
 	c.JSON(consts.StatusOK, utils.H{
 		"message": "ok",
 	})
