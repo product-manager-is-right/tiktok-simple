@@ -1,9 +1,6 @@
 package model
 
-import "gorm.io/gorm"
-
 type User struct {
-	gorm.Model
 	Id       int64  `column:"id"`
 	Name     string `column:"username"`
 	Password string `column:"password"`
