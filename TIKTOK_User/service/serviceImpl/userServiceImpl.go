@@ -27,27 +27,35 @@ func (usi *UserServiceImpl) CreateUserByNameAndPassword(username, password strin
 	return userId, nil
 }
 
-func (usi *UserServiceImpl) GetUserInfoById(userId int64) (vo.UserInfo, error) {
+func (usi *UserServiceImpl) GetUserInfoById(queryUserId int64, userId int64) (vo.UserInfo, error) {
 	// 调用dal层 ： 根据userId查询username
 	userInfo := vo.UserInfo{}
-	user, err := mysql.GetUserByUserId(userId)
+	queryUser, err := mysql.GetUserByUserId(queryUserId)
 	if err != nil {
 		return userInfo, err
 	}
+
 	// 调用dal层 ： 根据userId查询关注数和粉丝数
-	followCnt, err := mysql.GetFollowCntByUserId(userId)
+	followCnt, err := mysql.GetFollowCntByUserId(queryUserId)
 	if err != nil {
 		return userInfo, err
 	}
-	followerCnt, err := mysql.GetFollowerCntByUserId(userId)
+	followerCnt, err := mysql.GetFollowerCntByUserId(queryUserId)
 	if err != nil {
 		return userInfo, err
 	}
-	userInfo.Id = userId
-	userInfo.Name = user.Username
+
+	//调用dal层 ： 判断userId 是否 关注 queryUserId
+	isFollow, err := mysql.GetIsFollow(queryUserId, userId)
+	if err != nil {
+		return userInfo, err
+	}
+
+	userInfo.Id = queryUserId
+	userInfo.Name = queryUser.Username
 	userInfo.FollowerCount = followerCnt
 	userInfo.FollowCount = followCnt
-	userInfo.IsFollow = false
+	userInfo.IsFollow = isFollow
 
 	return userInfo, nil
 }

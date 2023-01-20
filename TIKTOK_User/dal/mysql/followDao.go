@@ -17,3 +17,12 @@ func GetFollowerCntByUserId(userId int64) (int64, error) {
 	// TODO : impl
 	return 0, nil
 }
+
+/*
+GetIsFollow
+判断userIdSrc 是否 关注 userIdDst
+*/
+func GetIsFollow(userIdDst, userIdSrc int64) (bool, error) {
+	// TODO : impl
+	return false, nil
+}

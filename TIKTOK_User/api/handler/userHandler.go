@@ -3,7 +3,9 @@
 package handler
 
 import (
+	"GoProject/model"
 	"GoProject/model/vo"
+	"GoProject/mw"
 	"GoProject/service/serviceImpl"
 	"context"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
@@ -22,12 +24,15 @@ const (
 	用户信息接口，获取登录用户的id、昵称，如果实现社交部分的功能，还会返回关注数和粉丝数
 */
 func UserInfo(ctx context.Context, c *app.RequestContext) {
+	// 查询对象的userId
 	userId := c.Query("user_id")
+	// 通过token获取到的登录用户名
+	user, _ := c.Get(mw.IdentityKey)
 	id, _ := strconv.ParseInt(userId, 10, 64)
 
 	// 查询昵称、关注数、粉丝数
 	usi := serviceImpl.UserServiceImpl{}
-	if u, err := usi.GetUserInfoById(id); err == nil {
+	if u, err := usi.GetUserInfoById(id, user.(*model.User).Id); err == nil {
 		c.JSON(consts.StatusOK, vo.UserInfoResponse{
 			Response: vo.Response{StatusCode: ResponseSuccess},
 			UserInfo: u,
@@ -35,7 +40,6 @@ func UserInfo(ctx context.Context, c *app.RequestContext) {
 	} else {
 		c.JSON(consts.StatusOK, vo.UserInfoResponse{
 			Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "Query UserInfo error"},
-			UserInfo: u,
 		})
 	}
 }
