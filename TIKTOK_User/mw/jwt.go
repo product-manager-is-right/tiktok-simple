@@ -30,14 +30,10 @@ func InitJwt() {
 		MaxRefresh:  time.Hour,
 		TokenLookup: "query: token",
 		Authenticator: func(ctx context.Context, c *app.RequestContext) (interface{}, error) {
-			var loginStruct struct {
-				UserName string `form:"username" json:"username" query:"username" `
-				Password string `form:"password" json:"password" query:"password"`
-			}
-			if err := c.BindAndValidate(&loginStruct); err != nil {
-				return nil, err
-			}
-			users, err := mysql.CheckUser(loginStruct.UserName, util.MD5(loginStruct.Password))
+			username := c.PostForm("username")
+			password := c.PostForm("password")
+
+			users, err := mysql.CheckUser(username, util.MD5(password))
 			if err != nil {
 				return nil, err
 			}
@@ -59,13 +55,13 @@ func InitJwt() {
 		IdentityHandler: func(ctx context.Context, c *app.RequestContext) interface{} {
 			claims := jwt.ExtractClaims(ctx, c)
 			return &model.User{
-				Name: claims[IdentityKey].(string),
+				Username: claims[IdentityKey].(string),
 			}
 		},
 		PayloadFunc: func(data interface{}) jwt.MapClaims {
 			if v, ok := data.(*model.User); ok {
 				return jwt.MapClaims{
-					IdentityKey: v.Name,
+					IdentityKey: v.Username,
 				}
 			}
 			return jwt.MapClaims{}
