@@ -3,11 +3,20 @@
 package handler
 
 import (
+	"GoProject/model/vo"
+	"GoProject/service/serviceImpl"
+	"GoProject/util"
 	"context"
+	"github.com/cloudwego/hertz/pkg/protocol/consts"
+	"strconv"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/utils"
-	"github.com/cloudwego/hertz/pkg/protocol/consts"
+)
+
+const (
+	ResponseSuccess = 0
+	ResponseFail    = 1
 )
 
 // UserInfo
@@ -15,9 +24,31 @@ import (
 	用户信息接口，获取登录用户的id、昵称，如果实现社交部分的功能，还会返回关注数和粉丝数
 */
 func UserInfo(ctx context.Context, c *app.RequestContext) {
-	c.JSON(consts.StatusOK, utils.H{
-		"message": "ok",
-	})
+	userId := c.Query("user_id")
+	token := c.Query("token")
+	id, _ := strconv.ParseInt(userId, 10, 64)
+	// token验证
+	if !util.ValidateToken(token) {
+		c.JSON(consts.StatusOK, vo.UserInfoResponse{
+			Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "Token Validate Fail"},
+			UserInfo: vo.UserInfo{},
+		})
+		return
+	}
+
+	// 查询昵称、关注数、粉丝数
+	usi := serviceImpl.UserServiceImpl{}
+	if u, err := usi.GetUserInfoById(id); err == nil {
+		c.JSON(consts.StatusOK, vo.UserInfoResponse{
+			Response: vo.Response{StatusCode: ResponseSuccess},
+			UserInfo: u,
+		})
+	} else {
+		c.JSON(consts.StatusOK, vo.UserInfoResponse{
+			Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "Query UserInfo error"},
+			UserInfo: u,
+		})
+	}
 }
 
 // Register
