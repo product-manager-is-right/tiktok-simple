@@ -38,6 +38,10 @@ func CheckUser(username string, password string) ([]*model.User, error) {
 // GetUserByUserId
 // 通过UserId获取User
 func GetUserByUserId(userId int64) (*model.User, error) {
-	// TODO : impl
-	return &model.User{}, nil
+	res := &model.User{}
+	if err := DB.Where("id = ?", userId).
+		First(&res).Error; err != nil {
+		return nil, err
+	}
+	return res, nil
 }

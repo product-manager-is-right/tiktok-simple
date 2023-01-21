@@ -18,7 +18,7 @@ import (
 
 var (
 	JwtMiddleware *jwt.HertzJWTMiddleware
-	IdentityKey   = "user_name"
+	IdentityKey   = "user"
 )
 
 func InitJwt() {
@@ -30,15 +30,15 @@ func InitJwt() {
 		MaxRefresh:  time.Hour,
 		TokenLookup: "query: token, cookie: token",
 		Authenticator: func(ctx context.Context, c *app.RequestContext) (interface{}, error) {
-			username := c.PostForm("username")
-			password := c.PostForm("password")
+			username := c.Query("username")
+			password := c.Query("password")
 
 			users, err := mysql.CheckUser(username, util.MD5(password))
 			if err != nil {
 				return nil, err
 			}
 			if len(users) == 0 {
-				return nil, errors.New("user already exists or wrong password")
+				return nil, errors.New("username or password is wrong")
 			}
 			c.Set("user_id", users[0].Id)
 			return users[0], nil

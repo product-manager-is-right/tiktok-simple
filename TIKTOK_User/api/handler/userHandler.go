@@ -49,8 +49,8 @@ func UserInfo(ctx context.Context, c *app.RequestContext) {
 	用户注册接口，新用户注册时提供用户名，密码，昵称即可，用户名需要唯一。创建成功后，返回用户id和权限token
 */
 func Register(ctx context.Context, c *app.RequestContext) {
-	username := c.PostForm("username")
-	password := c.PostForm("password")
+	username := c.Query("username")
+	password := c.Query("password")
 
 	usi := serviceImpl.UserServiceImpl{}
 	if _, err := usi.CreateUserByNameAndPassword(username, password); err != nil {

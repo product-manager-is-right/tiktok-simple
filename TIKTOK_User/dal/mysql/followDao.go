@@ -6,7 +6,7 @@ GetFollowCntByUserId
 */
 func GetFollowCntByUserId(userId int64) (int64, error) {
 	// TODO : impl
-	return 0, nil
+	return 1, nil
 }
 
 /*
@@ -15,7 +15,7 @@ GetFollowerCntByUserId
 */
 func GetFollowerCntByUserId(userId int64) (int64, error) {
 	// TODO : impl
-	return 0, nil
+	return 1, nil
 }
 
 /*
