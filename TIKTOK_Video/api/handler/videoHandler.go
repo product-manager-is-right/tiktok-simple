@@ -3,20 +3,26 @@
 package handler
 
 import (
+	"TIKTOK_Video/model"
 	"context"
+	"time"
 
 	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 )
 
 // UserInfo
+
+// Demo structure
+
 /*
-	视频流接口
+视频流接口
 */
 func Feed(ctx context.Context, c *app.RequestContext) {
-	c.JSON(consts.StatusOK, utils.H{
-		"message": "ok",
+	c.JSON(consts.StatusOK, model.FeedResponse{
+		StatusCode: 0,
+		VideoList:  model.DemoVideos,
+		NextTime:   time.Now().Unix(),
 	})
 }
 
