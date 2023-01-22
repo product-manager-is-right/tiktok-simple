@@ -26,6 +26,7 @@ var DemoVideos = []TableVideo{
 		FavoriteCount: 0,
 		CommentCount:  0,
 		IsFavorite:    false,
+		Title:         "bear",
 	},
 }
 

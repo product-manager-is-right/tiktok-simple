@@ -5,6 +5,8 @@ package handler
 import (
 	"TIKTOK_Video/model"
 	"context"
+	"log"
+	"strconv"
 	"time"
 
 	"github.com/cloudwego/hertz/pkg/app"
@@ -18,7 +20,19 @@ import (
 /*
 视频流接口
 */
+
 func Feed(ctx context.Context, c *app.RequestContext) {
+	inputTime := c.Query("latest_time")
+	var lastTime time.Time
+	// TODO:这里需要token判断是否登入
+	if inputTime != "0" {
+		me, _ := strconv.ParseInt(inputTime, 10, 64)
+		lastTime = time.Unix(me, 0)
+	} else {
+		lastTime = time.Now()
+	}
+	log.Printf("获取到时间戳%v", lastTime)
+
 	c.JSON(consts.StatusOK, model.FeedResponse{
 		StatusCode: 0,
 		VideoList:  model.DemoVideos,
