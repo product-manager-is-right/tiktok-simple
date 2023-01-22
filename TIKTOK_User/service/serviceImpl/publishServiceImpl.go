@@ -64,7 +64,7 @@ func (psi *PublishServiceImpl) GetVideoList(userIdTar, userIdSrc int64) ([]vo.Vi
 	userId: 登录的userId，用于查询登录账号与<视频(是否喜欢)和用户(是否关注)>的关系
 */
 func getVideoInfosByVideoIds(videoIds []int64, userId int64, mode string) ([]vo.VideoInfo, error) {
-	videoInfos, err := remoteGetVideoInfo(videoIds)
+	videoInfos, err := remoteGetVideoInfoCall(videoIds)
 	if err != nil {
 		return videoInfos, err
 	}
@@ -99,7 +99,7 @@ func getVideoInfosByVideoIds(videoIds []int64, userId int64, mode string) ([]vo.
 /*
 远程调用Video模块，获取每个Video的具体信息
 */
-func remoteGetVideoInfo(videoIds []int64) ([]vo.VideoInfo, error) {
+func remoteGetVideoInfoCall(videoIds []int64) ([]vo.VideoInfo, error) {
 	// TODO : impl
 	return []vo.VideoInfo{}, nil
 }
