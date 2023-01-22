@@ -10,10 +10,10 @@ func CreatePublishVideo(UserId, VideoId int64) error {
 }
 
 /*
-GetVideoIdsById
-根据UserId查找所有的VideoIds
+GetPublishVideoIdsById
+根据UserId查找所有发布的VideoIds
 */
-func GetVideoIdsById(UserId int64) ([]int64, error) {
+func GetPublishVideoIdsById(UserId int64) ([]int64, error) {
 	// TODO : impl
 	return []int64{}, nil
 }
