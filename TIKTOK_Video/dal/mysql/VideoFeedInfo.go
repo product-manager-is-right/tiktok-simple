@@ -18,6 +18,7 @@ func GetVideoByID(id int64) ([]model.TableVideo, error) {
 func GetVideoByTime(LatestTime time.Time) ([]model.TableVideo, error) {
 	res := make([]model.TableVideo, 0)
 	log.Print(LatestTime)
+	//result := DB.Where("video_id = ?", 1).Limit(1).Find(&res)
 	result := DB.Where("publish_time < ?", LatestTime).Order("publish_time desc").Limit(1).Find(&res)
 	if result.Error != nil {
 		return res, result.Error
