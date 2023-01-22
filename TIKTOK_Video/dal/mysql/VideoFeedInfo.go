@@ -7,13 +7,25 @@ import (
 )
 
 // 暂时先使用id 后期扩展为时间
-func GetVideoByID(id int64) ([]model.TableVideo, error) {
-	res := make([]model.TableVideo, 0)
+func GetVideoByID(id int64) (*model.TableVideo, error) {
+	res := &model.TableVideo{}
 	if err := DB.Where("video_id = ?", id).
 		Find(&res).Error; err != nil {
 		return nil, err
 	}
 	return res, nil
+}
+func GetFavorCountByID(id int64) (int64, error) {
+
+	return 1, nil
+}
+func GetCommentCountByID(id int64) (int64, error) {
+
+	return 1, nil
+}
+func IsFavorByID(id int64) (bool, error) {
+
+	return false, nil
 }
 func GetVideoByTime(LatestTime time.Time) ([]model.TableVideo, error) {
 	res := make([]model.TableVideo, 0)

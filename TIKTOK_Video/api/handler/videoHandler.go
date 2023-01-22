@@ -7,6 +7,7 @@ import (
 	"TIKTOK_Video/service/Imp"
 	"context"
 	"log"
+	"net/http"
 	"time"
 
 	"github.com/cloudwego/hertz/pkg/app"
@@ -38,9 +39,14 @@ func Feed(ctx context.Context, c *app.RequestContext) {
 	VideoFeedService := Imp.VideoFeedServiceImpl{}
 	feed, nextTime, err := VideoFeedService.GetVideoByLatestTime(lastTime)
 	if err != nil {
-		log.Printf("mistake in %v", nil)
+		log.Printf("方法videoService.Feed(lastTime, userId) 失败：%v", err)
+		c.JSON(http.StatusOK, vo.FeedResponse{
+			StatusCode: 1,
+			StatusMsg:  "获取视频流失败",
+		})
+		return
 	}
-
+	//fmt.Println(feed[0].PlayUrl)
 	c.JSON(consts.StatusOK, vo.FeedResponse{
 		StatusCode: 0,
 		VideoList:  feed,
