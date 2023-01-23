@@ -1,16 +1,29 @@
 package vo
 
-import "TIKTOK_Video/model"
-
+/*
+CommentInfo 返回评论信息的实体类
+*/
 type CommentInfo struct {
-	Id int64 `json:"id,omitempty"`
-	// TODO:在完成http传输之后改为User
-	User       int64  `json:"user"`
-	Content    string `json:"content,omitempty"`
-	CreateDate string `json:"create_date,omitempty"`
+	Id         int64    `json:"id"`
+	User       UserInfo `json:"user"`
+	Content    string   `json:"content"`
+	CreateDate string   `json:"create_date"`
 }
-type Response struct {
-	StatusCode int32         `json:"status_code"`
-	StatusMsg  string        `json:"status_msg,omitempty"`
-	Comment    model.Comment `json:"comment,omitempty"`
+
+/*
+CommentResponse
+单个评论的响应
+*/
+type CommentResponse struct {
+	Response
+	Comment CommentInfo `json:"comment"`
+}
+
+/*
+CommentListResponse
+评论列表响应实体
+*/
+type CommentListResponse struct {
+	Response
+	CommentList []CommentInfo `json:"comment_list"`
 }
