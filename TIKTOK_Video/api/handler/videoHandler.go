@@ -27,7 +27,10 @@ func Feed(ctx context.Context, c *app.RequestContext) {
 	queryTime := c.Query("latest_time")
 	// TODO : 通过token获取user，需要jwt支持
 	userId, _ := c.Get("user")
-
+	Id := vo.DemoUser.Id
+	if userId != nil {
+		Id = userId.(int64)
+	}
 	var err error
 	var latestTime int64
 	if queryTime == "" {
@@ -42,7 +45,7 @@ func Feed(ctx context.Context, c *app.RequestContext) {
 	}
 
 	vsi := ServiceImpl.VideoServiceImpl{}
-	videoInfoList, nextTime, err := vsi.GetVideoInfosByLatestTime(latestTime, userId.(int64))
+	videoInfoList, nextTime, err := vsi.GetVideoInfosByLatestTime(latestTime, Id)
 	if err != nil {
 		c.JSON(http.StatusOK, vo.Response{
 			StatusCode: ResponseFail,
