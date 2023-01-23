@@ -49,7 +49,8 @@ func bindVideoInfo(videoInfos []vo.VideoInfo, videos []model.Video, userId int64
 		}
 
 		videoInfos[i].Id = videoId
-		videoInfos[i].Author.Id = video.AuthorId
+		videoInfos[i].Author = vo.DemoUser
+		//videoInfos[i].Author.Id = video.AuthorId
 		videoInfos[i].PlayUrl = video.PlayUrl
 		videoInfos[i].CoverUrl = video.CoverUrl
 		videoInfos[i].FavoriteCount = favoriteCount
