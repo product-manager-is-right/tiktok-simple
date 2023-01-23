@@ -16,10 +16,9 @@ import (
 	"github.com/hertz-contrib/jwt"
 )
 
-var (
-	JwtMiddleware *jwt.HertzJWTMiddleware
-	IdentityKey   = "user"
-)
+var JwtMiddleware *jwt.HertzJWTMiddleware
+
+const IdentityKey = "user"
 
 func InitJwt() {
 	var err error
