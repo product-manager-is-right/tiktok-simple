@@ -4,14 +4,14 @@ package handler
 
 import (
 	"TIKTOK_Video/model/vo"
+	"TIKTOK_Video/mw"
 	"TIKTOK_Video/service/ServiceImpl"
 	"context"
+	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"net/http"
 	"strconv"
 	"time"
-
-	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/cloudwego/hertz/pkg/protocol/consts"
 )
 
 const (
@@ -24,24 +24,31 @@ const (
 */
 
 func Feed(ctx context.Context, c *app.RequestContext) {
-	queryTime := c.Query("latest_time")
-	// TODO : 通过token获取user，需要jwt支持
-	userId, _ := c.Get("user")
-	Id := vo.DemoUser.Id
-	if userId != nil {
-		Id = userId.(int64)
-	}
+	var Id int64
 	var err error
+
+	queryTime := c.Query("latest_time")
+
+	// TODO : 通过token获取user，需要jwt支持
+	if user, exist := c.Get(mw.IdentityKey); exist {
+		Id = user.(mw.User).Id
+	} else {
+		Id = vo.DemoUser.Id
+	}
+
 	var latestTime int64
-	if queryTime == "" {
+	if queryTime != "" {
+		latestTime, err = strconv.ParseInt(queryTime, 10, 64)
+	} else {
 		latestTime = time.Now().Unix()
 	}
-	latestTime, err = strconv.ParseInt(queryTime, 10, 64)
+
 	if err != nil {
 		c.JSON(http.StatusOK, vo.Response{
 			StatusCode: ResponseFail,
 			StatusMsg:  "时间戳请求错误",
 		})
+		return
 	}
 
 	vsi := ServiceImpl.VideoServiceImpl{}
