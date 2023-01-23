@@ -6,6 +6,7 @@ import (
 	"TIKTOK_Video/model/vo"
 	"TIKTOK_Video/service/Imp"
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -46,9 +47,10 @@ func Feed(ctx context.Context, c *app.RequestContext) {
 		})
 		return
 	}
-	//fmt.Println(feed[0].PlayUrl)
+	fmt.Println(feed[0].PlayUrl)
 	c.JSON(consts.StatusOK, vo.FeedResponse{
 		StatusCode: 0,
+		StatusMsg:  " ok",
 		VideoList:  feed,
 		NextTime:   nextTime.Unix(),
 	})

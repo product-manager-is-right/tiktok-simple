@@ -5,13 +5,13 @@ import (
 )
 
 type TableVideo struct {
-	Id            int64     `column:"video_id"`
-	AuthorId      int64     `column:"user_id"`
-	PlayUrl       string    `column:"play_url"`
-	CoverUrl      string    `column:"cover_url"`
-	FavoriteCount int64     `column:"favorite_count"`
-	CommentCount  int64     `column:"comment_count"`
-	PublishTime   time.Time `column:"publish_time"`
+	Id            int64     `json:"video_id"`
+	AuthorId      int64     `json:"user_id"`
+	PlayUrl       string    `json:"play_url"`
+	CoverUrl      string    `json:"cover_url"`
+	FavoriteCount int64     `json:"favorite_count"`
+	CommentCount  int64     `json:"comment_count"`
+	PublishTime   time.Time `json:"publish_time"`
 	//IsFavorite    bool   `json:"is_favorite"`
 	Title string `json:"title"`
 }
