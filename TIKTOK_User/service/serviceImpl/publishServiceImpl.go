@@ -3,19 +3,23 @@ package serviceImpl
 import (
 	"GoProject/dal/mysql"
 	"GoProject/model/vo"
+	"GoProject/mw"
+	"bytes"
 	"errors"
+	"fmt"
+	"github.com/satori/go.uuid"
+	ffmpeg "github.com/u2takey/ffmpeg-go"
+	"image"
+	"image/jpeg"
+	"log"
+	"os"
 )
 
 type PublishServiceImpl struct {
 }
 
 func (psi *PublishServiceImpl) PublishVideo(userId int64, videoData []byte, videoTitle string) error {
-	// 调用Dao层，存入ums_publish_video
-	// 检查是否是重复视频 videoTitle + UserId
-	err := mysql.CheckRepPublishVideo(userId, videoTitle)
-	if err != nil {
-		return err
-	}
+	// 调用Dao层，存入vms_publish_video
 	// 远程调用video接口
 	videoId, err := remoteCreateVideoCall(userId, videoData, videoTitle)
 	if err != nil {
@@ -35,7 +39,44 @@ remoteVideoCall
 */
 func remoteCreateVideoCall(userId int64, videoData []byte, videoTitle string) (int64, error) {
 	// TODO : impl
+	fileReader := bytes.NewReader(videoData)
+	uu1 := uuid.NewV4().String()
+	fileName := uu1 + "." + "mp4"
+	uu2 := uuid.NewV4().String()
+	pictureName := uu2 + "." + "jpg"
+	buketNameVideo := "tiktok/videos"
+	buketNamePicture := "tiktok/picture"
+	err := mw.UploadFile(buketNameVideo, fileName, fileReader, int64(len(videoData)))
+	if err != nil {
+		log.Print("update File failed")
+	}
+	playUrl := "http://120.25.2.146:9000/" + buketNameVideo + fileName
+	coverData, err := readFrameAsJpeg(playUrl)
+	pictureReader := bytes.NewReader(coverData)
+	if mw.UploadFile(buketNamePicture, pictureName, pictureReader, int64(len(coverData))) != nil {
+		log.Print("update picture failed")
+	}
 	return 0, nil
+}
+func readFrameAsJpeg(filePath string) ([]byte, error) {
+	reader := bytes.NewBuffer(nil)
+	err := ffmpeg.Input(filePath).
+		Filter("select", ffmpeg.Args{fmt.Sprintf("gte(n,%d)", 1)}).
+		Output("pipe:", ffmpeg.KwArgs{"vframes": 1, "format": "image2", "vcodec": "mjpeg"}).
+		WithOutput(reader, os.Stdout).
+		Run()
+	if err != nil {
+		return nil, err
+	}
+	img, _, err := image.Decode(reader)
+	if err != nil {
+		return nil, err
+	}
+
+	buf := new(bytes.Buffer)
+	jpeg.Encode(buf, img, nil)
+
+	return buf.Bytes(), err
 }
 
 /*

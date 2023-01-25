@@ -19,7 +19,7 @@ func PublishAction(ctx context.Context, c *app.RequestContext) {
 	user, _ := c.Get(mw.IdentityKey)
 	videoData := c.Query("data")
 	videoTitle := c.Query("title")
-
+	//reader := bytes.NewReader([]byte(videoData))
 	psi := serviceImpl.PublishServiceImpl{}
 	if err := psi.PublishVideo(user.(*model.User).Id, []byte(videoData), videoTitle); err != nil {
 		c.JSON(consts.StatusOK, vo.Response{

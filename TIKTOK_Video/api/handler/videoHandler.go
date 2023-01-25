@@ -50,7 +50,6 @@ func Feed(ctx context.Context, c *app.RequestContext) {
 		})
 		return
 	}
-
 	vsi := ServiceImpl.VideoServiceImpl{}
 	videoInfoList, nextTime, err := vsi.GetVideoInfosByLatestTime(latestTime, Id)
 	log.Print(videoInfoList[0].Title)
