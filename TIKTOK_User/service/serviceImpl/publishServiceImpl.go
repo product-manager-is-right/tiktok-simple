@@ -10,12 +10,17 @@ type PublishServiceImpl struct {
 }
 
 func (psi *PublishServiceImpl) PublishVideo(userId int64, videoData []byte, videoTitle string) error {
+	// 调用Dao层，存入ums_publish_video
+	// 检查是否是重复视频 videoTitle + UserId
+	err := mysql.CheckRepPublishVideo(userId, videoTitle)
+	if err != nil {
+		return err
+	}
 	// 远程调用video接口
 	videoId, err := remoteCreateVideoCall(userId, videoData, videoTitle)
 	if err != nil {
 		return err
 	}
-
 	// 调用Dao层，存入ums_publish_video
 	if err = mysql.CreatePublishVideo(userId, videoId); err != nil {
 		return err

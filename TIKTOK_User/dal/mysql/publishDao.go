@@ -1,6 +1,14 @@
 package mysql
 
 /*
+CheckRepPublishVideo
+*/
+func CheckRepPublishVideo(UserId int64, VideoTitle string) error {
+	// TODO : impl
+	return nil
+}
+
+/*
 CreatePublishVideo
 根据UserId 和 VideoId，在ums_publish_video添加一行数据
 */

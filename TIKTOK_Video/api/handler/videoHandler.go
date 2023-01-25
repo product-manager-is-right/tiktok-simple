@@ -9,6 +9,7 @@ import (
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -37,12 +38,11 @@ func Feed(ctx context.Context, c *app.RequestContext) {
 	}
 
 	var latestTime int64
-	if queryTime != "" {
+	if queryTime != "0" {
 		latestTime, err = strconv.ParseInt(queryTime, 10, 64)
 	} else {
 		latestTime = time.Now().Unix()
 	}
-
 	if err != nil {
 		c.JSON(http.StatusOK, vo.Response{
 			StatusCode: ResponseFail,
@@ -53,6 +53,7 @@ func Feed(ctx context.Context, c *app.RequestContext) {
 
 	vsi := ServiceImpl.VideoServiceImpl{}
 	videoInfoList, nextTime, err := vsi.GetVideoInfosByLatestTime(latestTime, Id)
+	log.Print(videoInfoList[0].Title)
 	if err != nil {
 		c.JSON(http.StatusOK, vo.Response{
 			StatusCode: ResponseFail,
