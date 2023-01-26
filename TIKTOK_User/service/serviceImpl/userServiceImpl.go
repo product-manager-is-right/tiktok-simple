@@ -4,6 +4,7 @@ import (
 	"GoProject/dal/mysql"
 	"GoProject/model/vo"
 	"errors"
+	"gorm.io/gorm"
 )
 
 type UserServiceImpl struct {
@@ -11,15 +12,14 @@ type UserServiceImpl struct {
 
 func (usi *UserServiceImpl) CreateUserByNameAndPassword(username, password string) (int64, error) {
 	if len(username) > 32 || len(password) > 32 {
-		return -1, errors.New("username or password's length > 32")
+		return -1, errors.New("username or password's length must be < 32")
 	}
-	users, err := mysql.GetUserByUserName(username)
-	if err != nil {
-		return -1, err
+	// 判断用户名是否存在
+	_, err := mysql.GetUserByUserName(username)
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		return -1, errors.New("the username has existed")
 	}
-	if len(users) > 0 {
-		return -1, errors.New("this username has exist")
-	}
+
 	userId, err := mysql.CreateUser(username, password)
 	if err != nil {
 		return -1, err
@@ -28,7 +28,7 @@ func (usi *UserServiceImpl) CreateUserByNameAndPassword(username, password strin
 }
 
 func (usi *UserServiceImpl) GetUserInfoById(queryUserId int64, userId int64) (vo.UserInfo, error) {
-	// 调用dal层 ： 根据userId查询username
+	// 调用dal层 ： 根据queryUserId查询username
 	userInfo := vo.UserInfo{}
 	queryUser, err := mysql.GetUserByUserId(queryUserId)
 	if err != nil {
@@ -45,7 +45,7 @@ func (usi *UserServiceImpl) GetUserInfoById(queryUserId int64, userId int64) (vo
 		return userInfo, err
 	}
 
-	//调用dal层 ： 判断userId 是否 关注 queryUserId
+	//调用dal层 ： 判断主user 是否 关注 queryUser
 	isFollow, err := mysql.GetIsFollow(queryUserId, userId)
 	if err != nil {
 		return userInfo, err

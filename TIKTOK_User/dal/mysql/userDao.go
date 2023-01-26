@@ -15,10 +15,10 @@ func CreateUser(username string, password string) (int64, error) {
 
 // GetUserByUserName
 // 通过用户名查找User
-func GetUserByUserName(username string) ([]*model.User, error) {
-	res := make([]*model.User, 0)
+func GetUserByUserName(username string) (*model.User, error) {
+	var res *model.User
 	if err := DB.Where("username = ?", username).
-		Find(&res).Error; err != nil {
+		First(&res).Error; err != nil {
 		return nil, err
 	}
 	return res, nil
