@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"GoProject/dal/mysql"
 	"GoProject/model"
 	"GoProject/model/vo"
 	"GoProject/mw"
@@ -43,12 +44,15 @@ func PublishAction(ctx context.Context, c *app.RequestContext) {
 func PublishList(ctx context.Context, c *app.RequestContext) {
 	// 查询对象的userId
 	userId := c.Query("user_id")
-	// 通过token获取到的登录用户名
-	user, _ := c.Get(mw.IdentityKey)
+
+	// 通过token获取到的登录用户名，并通过sql查到userID
+	userName, _ := c.Get(mw.IdentityKey)
+	user, _ := mysql.GetUserByUserName(userName.(string))
+
 	id, _ := strconv.ParseInt(userId, 10, 64)
 
 	psi := serviceImpl.PublishServiceImpl{}
-	videoList, err := psi.GetVideoList(id, user.(*model.User).Id)
+	videoList, err := psi.GetVideoList(id, user.Id)
 	if err != nil {
 		c.JSON(consts.StatusOK, vo.Response{
 			StatusCode: ResponseFail,
