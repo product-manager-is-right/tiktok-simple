@@ -25,5 +25,7 @@ CommentListResponse
 */
 type CommentListResponse struct {
 	Response
-	CommentList []CommentInfo `json:"comment_list"`
+	//用指针好像就不用结构体拷贝，会快一点
+	CommentList []*CommentInfo `json:"comment_list"`
+	//CommentList []CommentInfo  `json:"comment_list"`
 }
