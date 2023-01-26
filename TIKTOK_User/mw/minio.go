@@ -19,6 +19,7 @@ func UploadFile(BucketName string, objectName string, reader io.Reader, objectsi
 	if err != nil {
 		log.Printf("mistaken in store info in minio")
 	}
+	//上传文件根据不同的种类，使url可访问
 	n, err := minioClient.PutObject(ctx, BucketName, objectName, reader, objectsize, minio.PutObjectOptions{
 		ContentType: fileType,
 	})
