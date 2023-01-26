@@ -11,7 +11,7 @@ import (
 type VideoServiceImpl struct {
 }
 
-func (vsi *VideoServiceImpl) GetVideoInfosByLatestTime(latestTime int64, userId int64) ([]vo.VideoInfo, int64, error) {
+func (vsi *VideoServiceImpl) GetVideoInfosByLatestTime(latestTime int64, userName string) ([]vo.VideoInfo, int64, error) {
 	var videoInfos []vo.VideoInfo
 	nextTime := time.Now().Unix()
 
@@ -24,14 +24,15 @@ func (vsi *VideoServiceImpl) GetVideoInfosByLatestTime(latestTime int64, userId 
 		return videoInfos, nextTime, errors.New("video is empty")
 	}
 	videoInfos = make([]vo.VideoInfo, len(videos))
-	videoInfos, err = bindVideoInfo(videoInfos, videos, userId)
+	videoInfos, err = bindVideoInfo(videoInfos, videos, userName)
 
 	nextTime = videos[len(videos)-1].PublishTime
 	return videoInfos, nextTime, err
 }
 
-func bindVideoInfo(videoInfos []vo.VideoInfo, videos []model.Video, userId int64) ([]vo.VideoInfo, error) {
+func bindVideoInfo(videoInfos []vo.VideoInfo, videos []model.Video, userName string) ([]vo.VideoInfo, error) {
 	for i, video := range videos {
+		var err error
 		videoId := video.VideoId
 
 		favoriteCount, err := mysql.GetFavoriteCountByID(videoId)
@@ -43,9 +44,12 @@ func bindVideoInfo(videoInfos []vo.VideoInfo, videos []model.Video, userId int64
 			return videoInfos, err
 		}
 		// 需要与user通信，应定义到service层
-		isFavorite, err := isFavorite(videoId, userId)
-		if err != nil {
-			return videoInfos, err
+		var favorite bool
+		if userName != "" {
+			favorite, err = isFavorite(videoId, userName)
+			if err != nil {
+				return videoInfos, err
+			}
 		}
 
 		videoInfos[i].Id = videoId
@@ -55,7 +59,7 @@ func bindVideoInfo(videoInfos []vo.VideoInfo, videos []model.Video, userId int64
 		videoInfos[i].CoverUrl = video.CoverUrl
 		videoInfos[i].FavoriteCount = favoriteCount
 		videoInfos[i].CommentCount = commentCount
-		videoInfos[i].IsFavorite = isFavorite
+		videoInfos[i].IsFavorite = favorite
 		videoInfos[i].Title = video.Title
 
 	}
@@ -63,8 +67,8 @@ func bindVideoInfo(videoInfos []vo.VideoInfo, videos []model.Video, userId int64
 	return videoInfos, nil
 }
 
-// 调用远程接口，判断userId是否喜欢videoId视频
-func isFavorite(videoId, userId int64) (bool, error) {
+// 调用远程接口，判断userName是否喜欢videoId视频
+func isFavorite(videoId int64, userName string) (bool, error) {
 	// TODO : impl
 	return false, nil
 }
