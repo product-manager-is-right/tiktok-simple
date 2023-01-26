@@ -1,8 +1,8 @@
 package model
 
 type Video struct {
-	Id            int64
-	AuthorId      int64
+	Id            int64 `gorm:"column:video_id"`
+	AuthorId      int64 `gorm:"column:user_id"`
 	PlayUrl       string
 	CoverUrl      string
 	FavoriteCount int64

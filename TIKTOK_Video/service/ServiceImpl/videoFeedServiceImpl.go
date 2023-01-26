@@ -34,14 +34,14 @@ func bindVideoInfo(videoInfos []vo.VideoInfo, videos []model.Video, userId int64
 	for i, video := range videos {
 		videoId := video.Id
 
-		favoriteCount, err := mysql.GetFavoriteCountByID(videoId)
-		if err != nil {
-			return videoInfos, err
-		}
-		commentCount, err := mysql.GetCommentCountByID(videoId)
-		if err != nil {
-			return videoInfos, err
-		}
+		//favoriteCount, err := mysql.GetFavoriteCountByID(videoId)
+		//if err != nil {
+		//	return videoInfos, err
+		//}
+		//commentCount, err := mysql.GetCommentCountByID(videoId)
+		//if err != nil {
+		//	return videoInfos, err
+		//}
 		// 需要与user通信，应定义到service层
 		isFavorite, err := isFavorite(videoId, userId)
 		if err != nil {
@@ -53,8 +53,8 @@ func bindVideoInfo(videoInfos []vo.VideoInfo, videos []model.Video, userId int64
 		//videoInfos[i].Author.Id = video.AuthorId
 		videoInfos[i].PlayUrl = video.PlayUrl
 		videoInfos[i].CoverUrl = video.CoverUrl
-		videoInfos[i].FavoriteCount = favoriteCount
-		videoInfos[i].CommentCount = commentCount
+		videoInfos[i].FavoriteCount = video.FavoriteCount
+		videoInfos[i].CommentCount = video.CommentCount
 		videoInfos[i].IsFavorite = isFavorite
 		videoInfos[i].Title = video.Title
 

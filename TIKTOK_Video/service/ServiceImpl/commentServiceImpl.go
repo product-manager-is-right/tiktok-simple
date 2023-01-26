@@ -73,12 +73,23 @@ func (csi *CommentServiceImpl) DeleteCommentByCommentId(commentId, userId int64)
 	if commentId <= 0 {
 		return errors.New("wrong commentId")
 	}
-	return mysql.DeleteCommentByCommentId(commentId, userId)
+	comment, err := mysql.GetCommentByID(commentId)
+	if err != nil {
+		return err
+	}
+	if err = mysql.DeleteCommentByCommentId(commentId, userId); err != nil {
+		return err
+	}
+	err = mysql.DecrementCommentCount(comment.VideoId)
+	if err != nil {
+		return err
+	}
+	return nil
 
 }
 
 func (csi *CommentServiceImpl) InsertComment(commentText string, videoId, userId int64) (commentInfo *vo.CommentInfo, err error) {
-	//由于没有外键约束，手动检查是否存在这个videoId和userID
+	//由于没有外键约束，手动检查是否存在这个videoId和是不是userID对得上
 	userInfo, err := getUserInfoById(userId, userId)
 	if err != nil {
 		return nil, err
@@ -90,6 +101,10 @@ func (csi *CommentServiceImpl) InsertComment(commentText string, videoId, userId
 	}
 	comment, err := mysql.InsertComment(commentText, videoId, userId)
 	if err != nil {
+		return nil, err
+	}
+	//到这里没问题，给video的comment_count字段加一
+	if err = mysql.IncrementCommentCount(videoId); err != nil {
 		return nil, err
 	}
 	//封装commentInfo对象
