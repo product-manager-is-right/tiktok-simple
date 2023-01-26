@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"GoProject/model"
+	"time"
 )
 
 /*
@@ -21,9 +22,9 @@ CreateVideo
 */
 func CreateVideo(UserId int64, playUrl string, coverUrl string, title string) (int64, error) {
 	// TODO : impl
-	video := model.Video{AuthorId: UserId, PlayUrl: playUrl, CoverUrl: coverUrl, Title: title}
+	video := model.Video{UserId: UserId, PlayUrl: playUrl, CoverUrl: coverUrl, Title: title, PublishTime: time.Now().Unix()}
 	result := DBV.Create(&video)
-	return video.Id, result.Error
+	return video.VideoId, result.Error
 }
 
 /*
