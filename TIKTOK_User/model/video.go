@@ -1,7 +1,7 @@
 package model
 
 type Video struct {
-	VideoId       int64
+	Id            int64
 	UserId        int64
 	PlayUrl       string
 	CoverUrl      string
