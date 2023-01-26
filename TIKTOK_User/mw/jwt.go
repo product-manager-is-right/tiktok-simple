@@ -18,16 +18,18 @@ import (
 
 var JwtMiddleware *jwt.HertzJWTMiddleware
 
-const IdentityKey = "user"
+const IdentityKey = "userName"
 
 func InitJwt() {
 	var err error
 	JwtMiddleware, err = jwt.New(&jwt.HertzJWTMiddleware{
 		Realm:       "tiktok",
 		Key:         []byte("jwt sign key"),
+		SendCookie:  true,
+		CookieName:  "jwt-cookie",
 		Timeout:     time.Hour,
 		MaxRefresh:  time.Hour,
-		TokenLookup: "query: token, cookie: token",
+		TokenLookup: "query: token, cookie: jwt",
 		Authenticator: func(ctx context.Context, c *app.RequestContext) (interface{}, error) {
 			username := c.Query("username")
 			password := c.Query("password")
@@ -53,9 +55,7 @@ func InitJwt() {
 		IdentityKey: IdentityKey,
 		IdentityHandler: func(ctx context.Context, c *app.RequestContext) interface{} {
 			claims := jwt.ExtractClaims(ctx, c)
-			return &model.User{
-				Username: claims[IdentityKey].(string),
-			}
+			return claims[IdentityKey].(string)
 		},
 		PayloadFunc: func(data interface{}) jwt.MapClaims {
 			if v, ok := data.(*model.User); ok {

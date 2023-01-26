@@ -42,7 +42,7 @@ GetVideoList
 	userIdTar: 请求查询的userId
 	userIdSrc: 登录userId
 */
-func (psi *PublishServiceImpl) GetVideoList(userIdTar, userIdSrc int64) ([]vo.VideoInfo, error) {
+func (psi *PublishServiceImpl) GetVideoList(userIdTar int64, userIdSrc int64) ([]vo.VideoInfo, error) {
 	// 调用Dao层，查找userIdTar用户的所有videoIds
 	var videoInfos []vo.VideoInfo
 	videoIds, err := mysql.GetPublishVideoIdsById(userIdTar)

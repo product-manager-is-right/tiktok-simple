@@ -10,7 +10,7 @@ import (
 func main() {
 	initDeps()
 
-	r := server.Default()
+	r := server.Default(server.WithHostPorts(":8080"))
 
 	// 注册路由
 	router.GeneratedRegister(r)
