@@ -11,17 +11,24 @@ import (
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 	"image"
 	"image/jpeg"
+	"io"
 	"log"
+	"mime/multipart"
 	"os"
 )
 
 type PublishServiceImpl struct {
 }
 
-func (psi *PublishServiceImpl) PublishVideo(userId int64, videoData []byte, videoTitle string) error {
+func (psi *PublishServiceImpl) PublishVideo(userId int64, fileHeader *multipart.FileHeader, videoTitle string) error {
 	// 调用Dao层，存入vms_publish_video
+	file, err := fileHeader.Open()
+	buf := bytes.NewBuffer(nil)
+	if _, err := io.Copy(buf, file); err != nil {
+		return err
+	}
 	// 远程调用video接口
-	videoId, err := remoteCreateVideoCall(userId, videoData, videoTitle)
+	videoId, err := remoteCreateVideoCall(userId, buf.Bytes(), videoTitle)
 	if err != nil {
 		return err
 	}
@@ -44,19 +51,25 @@ func remoteCreateVideoCall(userId int64, videoData []byte, videoTitle string) (i
 	fileName := uu1 + "." + "mp4"
 	uu2 := uuid.NewV4().String()
 	pictureName := uu2 + "." + "jpg"
-	buketNameVideo := "tiktok/videos"
-	buketNamePicture := "tiktok/picture"
-	err := mw.UploadFile(buketNameVideo, fileName, fileReader, int64(len(videoData)))
+	buketNameVideo := "tiktok"
+	buketNamePicture := "tikpic"
+	err := mw.UploadFile(buketNameVideo, fileName, fileReader, int64(len(videoData)), "video/mp4")
 	if err != nil {
 		log.Print("update File failed")
 	}
-	playUrl := "http://120.25.2.146:9000/" + buketNameVideo + fileName
+	playUrl := "http://120.25.2.146:9000/" + buketNameVideo + "/" + fileName
+	//playUrl := mw.GetFileUrl(buketNameVideo,fileName,0)
+	//url, err := mw.GetFileUrl(buketNameVideo, fileName, 0)
+	//playUrl = strings.Split(url.String(), "?")[0]
+	//playUrl := strings.Split(url.String(), "?")[0]
 	coverData, err := readFrameAsJpeg(playUrl)
 	pictureReader := bytes.NewReader(coverData)
-	if mw.UploadFile(buketNamePicture, pictureName, pictureReader, int64(len(coverData))) != nil {
+
+	if mw.UploadFile(buketNamePicture, pictureName, pictureReader, int64(len(coverData)), "image/jpeg") != nil {
 		log.Print("update picture failed")
 	}
-	videoId, err := mysql.CreateVideo(userId, playUrl, playUrl, videoTitle)
+	coverUrl := "http://120.25.2.146:9000/" + buketNamePicture + "/" + pictureName
+	videoId, err := mysql.CreateVideo(userId, playUrl, coverUrl, videoTitle)
 	if err != nil {
 		return 0, err
 	}
