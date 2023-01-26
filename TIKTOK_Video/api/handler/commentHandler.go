@@ -14,7 +14,7 @@ func CommentAction(ctx context.Context, c *app.RequestContext) {
 }
 
 /*
-*
+CommentList
 评论列表接口
 */
 func CommentList(ctx context.Context, c *app.RequestContext) {
