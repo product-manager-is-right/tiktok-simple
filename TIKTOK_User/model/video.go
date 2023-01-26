@@ -10,7 +10,3 @@ type Video struct {
 	PublishTime   int64
 	Title         string
 }
-
-func (v *Video) TableName() string {
-	return "vms_video"
-}

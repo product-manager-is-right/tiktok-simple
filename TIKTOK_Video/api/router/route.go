@@ -13,4 +13,7 @@ func GeneratedRegister(r *server.Hertz) {
 	apiRouter.GET("/feed/", handler.Feed)
 	apiRouter.POST("/comment/action/", handler.CommentAction)
 	apiRouter.GET("/comment/list/", handler.CommentList)
+
+	//publish action
+	apiRouter.POST("/publish/action/", handler.PublishAction)
 }

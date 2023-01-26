@@ -1,7 +1,7 @@
 package mw
 
 import (
-	"GoProject/configs"
+	"TIKTOK_Video/configs"
 	"context"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"

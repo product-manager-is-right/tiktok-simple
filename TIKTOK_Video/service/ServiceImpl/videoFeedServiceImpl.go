@@ -32,7 +32,7 @@ func (vsi *VideoServiceImpl) GetVideoInfosByLatestTime(latestTime int64, userId 
 
 func bindVideoInfo(videoInfos []vo.VideoInfo, videos []model.Video, userId int64) ([]vo.VideoInfo, error) {
 	for i, video := range videos {
-		videoId := video.Id
+		videoId := video.VideoId
 
 		favoriteCount, err := mysql.GetFavoriteCountByID(videoId)
 		if err != nil {

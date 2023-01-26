@@ -18,8 +18,7 @@ func GeneratedRegister(r *server.Hertz) {
 	// publish路由组
 	publishRouter := r.Group("/douyin/publish")
 
-	//publishRouter.Use(mw.JwtMiddleware.MiddlewareFunc())
-	publishRouter.POST("/action/", handler.PublishAction)
+	publishRouter.Use(mw.JwtMiddleware.MiddlewareFunc())
 	publishRouter.GET("/list/", handler.PublishList)
 
 	// favorite路由组

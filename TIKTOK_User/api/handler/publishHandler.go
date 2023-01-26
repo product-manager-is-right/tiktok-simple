@@ -2,44 +2,14 @@ package handler
 
 import (
 	"GoProject/dal/mysql"
-	"GoProject/model"
 	"GoProject/model/vo"
 	"GoProject/mw"
 	"GoProject/service/serviceImpl"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
-	"log"
 	"strconv"
 )
-
-// PublishAction
-/*
-	登录用户选择视频上传
-*/
-func PublishAction(ctx context.Context, c *app.RequestContext) {
-	// get the basic info from meta
-	user, _ := c.Get(mw.IdentityKey)
-	videoTitle := c.PostForm("title")
-	videoData, err := c.Request.FormFile("data")
-	if err != nil {
-		log.Print("can not get this filestream")
-	}
-	psi := serviceImpl.PublishServiceImpl{}
-	if err := psi.PublishVideo(user.(*model.User).Id, videoData, videoTitle); err != nil {
-		c.JSON(consts.StatusOK, vo.Response{
-			StatusCode: ResponseFail,
-			StatusMsg:  err.Error(),
-		})
-		return
-	}
-
-	c.JSON(consts.StatusOK, vo.Response{
-		StatusCode: ResponseSuccess,
-		StatusMsg:  "publish success!",
-	})
-
-}
 
 // PublishList
 /*

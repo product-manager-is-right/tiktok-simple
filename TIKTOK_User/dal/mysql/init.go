@@ -10,9 +10,8 @@ import (
 )
 
 var dsn = "root1:root1234@tcp(120.25.2.146:3306)/tiktok_ums?charset=utf8&parseTime=True&loc=Local"
-var dsv = "root1:root1234@tcp(120.25.2.146:3306)/tiktok_vms?charset=utf8&parseTime=True&loc=Local"
+
 var DB *gorm.DB
-var DBV *gorm.DB
 
 func Init() {
 	// gorm日志打印
@@ -29,9 +28,7 @@ func Init() {
 	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
 		Logger: newLogger,
 	})
-	DBV, err = gorm.Open(mysql.Open(dsv), &gorm.Config{
-		Logger: newLogger,
-	})
+
 	if err != nil {
 		panic(err)
 	}
