@@ -24,17 +24,23 @@ const (
 */
 
 func Feed(ctx context.Context, c *app.RequestContext) {
-	var Id int64
+	var userName string
 	var err error
 
 	queryTime := c.Query("latest_time")
+	token := c.Query("token")
 
-	// TODO : 通过token获取user，需要jwt支持
-	if user, exist := c.Get(mw.IdentityKey); exist {
-		Id = user.(mw.User).Id
-	} else {
-		Id = vo.DemoUser.Id
+	// 如果token不是空的，则可能登录状态，调用jwt鉴权。
+	// 1. 鉴权失败，username为空，仍可以调用feed流
+	// 2. 鉴权成功，可获取username
+	// 如果token是空的，是未登录状态，username为空，仍可以调用feed流
+	if token != "" {
+		c.Next(ctx)
+		if user, _ := c.Get(mw.IdentityKey); user != nil {
+			userName = user.(string)
+		}
 	}
+	c.Abort()
 
 	var latestTime int64
 	if queryTime != "" {
@@ -52,7 +58,7 @@ func Feed(ctx context.Context, c *app.RequestContext) {
 	}
 
 	vsi := ServiceImpl.VideoServiceImpl{}
-	videoInfoList, nextTime, err := vsi.GetVideoInfosByLatestTime(latestTime, Id)
+	videoInfoList, nextTime, err := vsi.GetVideoInfosByLatestTime(latestTime, userName)
 	if err != nil {
 		c.JSON(http.StatusOK, vo.Response{
 			StatusCode: ResponseFail,
