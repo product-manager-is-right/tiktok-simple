@@ -8,9 +8,13 @@ import (
 
 func GetCommentByID(id int64) (*model.Comment, error) {
 	res := &model.Comment{}
-	if err := DB.Where("id = ?", id).
-		Find(&res).Error; err != nil {
-		return nil, err
+	result := DB.Where("id = ?", id).
+		Find(&res)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	if result.RowsAffected == 0 {
+		return nil, errors.New("查找失败")
 	}
 	return res, nil
 }

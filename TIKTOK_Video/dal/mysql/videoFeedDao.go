@@ -9,11 +9,13 @@ import (
 // GetVideoByID 暂时先使用id 后期扩展为时间
 func GetVideoByID(id int64) (*model.Video, error) {
 	res := &model.Video{}
-	if err := DB.Where("video_id = ?", id).
-		Find(&res).Error; err != nil {
-		return nil, err
+	result := DB.Where("video_id = ?", id).Find(&res)
+	if result.Error != nil {
+		return nil, result.Error
 	}
-
+	if result.RowsAffected == 0 {
+		return nil, errors.New("查找失败")
+	}
 	return res, nil
 }
 func GetFavoriteCountByID(id int64) (int64, error) {
