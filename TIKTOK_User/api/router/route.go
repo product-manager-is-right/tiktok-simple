@@ -19,7 +19,6 @@ func GeneratedRegister(r *server.Hertz) {
 	publishRouter := r.Group("/douyin/publish")
 
 	publishRouter.Use(mw.JwtMiddleware.MiddlewareFunc())
-
 	publishRouter.POST("/action/", handler.PublishAction)
 	publishRouter.GET("/list/", handler.PublishList)
 

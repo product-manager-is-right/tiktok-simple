@@ -56,7 +56,11 @@ func remoteCreateVideoCall(userId int64, videoData []byte, videoTitle string) (i
 	if mw.UploadFile(buketNamePicture, pictureName, pictureReader, int64(len(coverData))) != nil {
 		log.Print("update picture failed")
 	}
-	return 0, nil
+	videoId, err := mysql.CreateVideo(userId, playUrl, playUrl, videoTitle)
+	if err != nil {
+		return 0, err
+	}
+	return videoId, nil
 }
 func readFrameAsJpeg(filePath string) ([]byte, error) {
 	reader := bytes.NewBuffer(nil)
@@ -74,7 +78,9 @@ func readFrameAsJpeg(filePath string) ([]byte, error) {
 	}
 
 	buf := new(bytes.Buffer)
-	jpeg.Encode(buf, img, nil)
+	if jpeg.Encode(buf, img, nil) != nil {
+		return nil, err
+	}
 
 	return buf.Bytes(), err
 }

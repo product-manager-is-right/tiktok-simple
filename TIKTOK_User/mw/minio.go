@@ -13,7 +13,7 @@ func UploadFile(BucketName string, objectName string, reader io.Reader, objectsi
 	ctx := context.Background()
 	// Minio 对象存储初始化
 	minioClient, err := minio.New("120.25.2.146:9000", &minio.Options{
-		Creds:  credentials.NewStaticV4(configs.AccessKeyId, configs.AccessKeyId, ""),
+		Creds:  credentials.NewStaticV4(configs.AccessKeyId, configs.SecretAccessKey, ""),
 		Secure: false,
 	})
 	n, err := minioClient.PutObject(ctx, BucketName, objectName, reader, objectsize, minio.PutObjectOptions{

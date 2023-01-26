@@ -1,12 +1,29 @@
 package mysql
 
+import (
+	"GoProject/model"
+)
+
 /*
 CreatePublishVideo
 根据UserId 和 VideoId，在ums_publish_video添加一行数据
 */
 func CreatePublishVideo(UserId, VideoId int64) error {
 	// TODO : impl
-	return nil
+	video := model.Publish{UserId: UserId, VideoId: VideoId}
+	result := DB.Create(&video)
+	return result.Error
+}
+
+/*
+CreateVideo
+根据UserId 和 VideoId url，在vms中添加一行数据
+*/
+func CreateVideo(UserId int64, playUrl string, coverUrl string, title string) (int64, error) {
+	// TODO : impl
+	video := model.Video{AuthorId: UserId, PlayUrl: playUrl, CoverUrl: coverUrl, Title: title}
+	result := DBV.Create(&video)
+	return video.Id, result.Error
 }
 
 /*
