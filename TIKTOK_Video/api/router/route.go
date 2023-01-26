@@ -14,4 +14,7 @@ func GeneratedRegister(r *server.Hertz) {
 	apiRouter.GET("/feed/", handler.Feed, mw.JwtMiddleware.MiddlewareFunc())
 	apiRouter.POST("/comment/action/", mw.JwtMiddleware.MiddlewareFunc(), handler.CommentAction)
 	apiRouter.GET("/comment/list/", mw.JwtMiddleware.MiddlewareFunc(), handler.CommentList)
+
+	//publish action
+	apiRouter.POST("/publish/action/", handler.PublishAction)
 }

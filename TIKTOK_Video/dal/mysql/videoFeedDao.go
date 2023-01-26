@@ -24,8 +24,8 @@ func GetCommentCountByID(id int64) (int64, error) {
 }
 
 func GetVideosByTime(LatestTime int64) ([]model.Video, error) {
-	res := make([]model.Video, 0)
-	result := DB.Where("publish_time < ?", LatestTime).Order("publish_time desc").Limit(1).Find(&res)
+	res := make([]model.Video, 2)
+	result := DB.Where("publish_time<=?", LatestTime).Order("publish_time desc").Limit(2).Find(&res)
 
 	return res, result.Error
 }

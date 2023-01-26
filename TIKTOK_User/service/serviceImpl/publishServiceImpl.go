@@ -9,30 +9,6 @@ import (
 type PublishServiceImpl struct {
 }
 
-func (psi *PublishServiceImpl) PublishVideo(userId int64, videoData []byte, videoTitle string) error {
-	// 远程调用video接口
-	videoId, err := remoteCreateVideoCall(userId, videoData, videoTitle)
-	if err != nil {
-		return err
-	}
-
-	// 调用Dao层，存入ums_publish_video
-	if err = mysql.CreatePublishVideo(userId, videoId); err != nil {
-		return err
-	}
-	return nil
-}
-
-/*
-remoteVideoCall
-发起远程调用视频模块，存储video，返回videoId
-@ return videoId
-*/
-func remoteCreateVideoCall(userId int64, videoData []byte, videoTitle string) (int64, error) {
-	// TODO : impl
-	return 0, nil
-}
-
 /*
 GetVideoList
 获取userId发布的视频列表

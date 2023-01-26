@@ -1,12 +1,18 @@
 package mysql
 
+import (
+	"GoProject/model"
+)
+
 /*
 CreatePublishVideo
 根据UserId 和 VideoId，在ums_publish_video添加一行数据
 */
 func CreatePublishVideo(UserId, VideoId int64) error {
 	// TODO : impl
-	return nil
+	video := model.Publish{UserId: UserId, VideoId: VideoId}
+	result := DB.Create(&video)
+	return result.Error
 }
 
 /*

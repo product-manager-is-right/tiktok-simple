@@ -2,8 +2,11 @@ package service
 
 import (
 	"TIKTOK_Video/model/vo"
+	"mime/multipart"
 )
 
 type VideoService interface {
-	GetVideoByLatestTime(lastTime int64) ([]vo.VideoInfo, int64, error)
+	PublishVideo(userId int64, videoData *multipart.FileHeader, videoTitle string) error
+
+	GetVideoInfosByLatestTime(lastTime int64, userName string) ([]vo.VideoInfo, int64, error)
 }
