@@ -24,7 +24,7 @@ type VideoServiceImpl struct {
 
 func (vsi *VideoServiceImpl) GetVideoInfosByLatestTime(latestTime int64, userName string) ([]vo.VideoInfo, int64, error) {
 	var videoInfos []vo.VideoInfo
-	nextTime := time.Now().Unix()
+	nextTime := time.Now().UnixMilli()
 
 	videos, err := mysql.GetVideosByTime(latestTime)
 	if err != nil {

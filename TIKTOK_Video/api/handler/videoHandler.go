@@ -47,7 +47,7 @@ func Feed(ctx context.Context, c *app.RequestContext) {
 	if queryTime != "" {
 		latestTime, err = strconv.ParseInt(queryTime, 10, 64)
 	} else {
-		latestTime = time.Now().Unix()
+		latestTime = time.Now().UnixMilli()
 	}
 
 	if err != nil {
