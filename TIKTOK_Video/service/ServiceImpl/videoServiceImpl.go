@@ -124,7 +124,7 @@ func CreateVideoCall(userId int64, videoData []byte, videoTitle string) (int64, 
 		log.Print("update File failed")
 	}
 	// 生成对应的视频url
-	playUrl := "http://120.25.2.146:9000/" + buketNameVideo + "/" + fileName
+	playUrl := "http://150.158.135.49:9000/" + buketNameVideo + "/" + fileName
 	//使用ffmpeg切帧
 	coverData, err := readFrameAsJpeg(playUrl)
 	pictureReader := bytes.NewReader(coverData)
@@ -133,7 +133,7 @@ func CreateVideoCall(userId int64, videoData []byte, videoTitle string) (int64, 
 		log.Print("update picture failed")
 	}
 	//生成对应的图片url
-	coverUrl := "http://120.25.2.146:9000/" + buketNamePicture + "/" + pictureName
+	coverUrl := "http://150.158.135.49:9000/" + buketNamePicture + "/" + pictureName
 	//写入vm数据库
 	videoId, err := mysql.CreateVideo(userId, playUrl, coverUrl, videoTitle)
 	if err != nil {

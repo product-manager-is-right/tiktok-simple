@@ -12,7 +12,7 @@ import (
 func UploadFile(BucketName string, objectName string, reader io.Reader, objectsize int64, fileType string) error {
 	ctx := context.Background()
 	// Minio 对象存储初始化
-	minioClient, err := minio.New("120.25.2.146:9000", &minio.Options{
+	minioClient, err := minio.New("150.158.135.49:9000", &minio.Options{
 		Creds:  credentials.NewStaticV4(configs.AccessKeyId, configs.SecretAccessKey, ""),
 		Secure: false,
 	})
