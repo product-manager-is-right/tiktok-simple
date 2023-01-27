@@ -18,7 +18,7 @@ import (
 
 var JwtMiddleware *jwt.HertzJWTMiddleware
 
-const IdentityKey = "userName"
+const IdentityKey = "userId"
 
 func InitJwt() {
 	var err error
@@ -55,12 +55,12 @@ func InitJwt() {
 		IdentityKey: IdentityKey,
 		IdentityHandler: func(ctx context.Context, c *app.RequestContext) interface{} {
 			claims := jwt.ExtractClaims(ctx, c)
-			return claims[IdentityKey].(string)
+			return int64(claims[IdentityKey].(float64))
 		},
 		PayloadFunc: func(data interface{}) jwt.MapClaims {
 			if v, ok := data.(*model.User); ok {
 				return jwt.MapClaims{
-					IdentityKey: v.Username,
+					IdentityKey: v.Id,
 				}
 			}
 			return jwt.MapClaims{}

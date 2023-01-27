@@ -2,6 +2,7 @@ package handler
 
 import (
 	"TIKTOK_Video/model/vo"
+	"TIKTOK_Video/mw"
 	"TIKTOK_Video/service"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
@@ -10,7 +11,6 @@ import (
 )
 
 func CommentAction(ctx context.Context, c *app.RequestContext) {
-	var userid int64
 	var actionTypeStr string
 	videoIdStr := c.Query("video_id")
 	//videoIdStr为空字符串说明请求中没有带这个参数
@@ -24,8 +24,7 @@ func CommentAction(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	// TODO  通过token获取userId，需要jwt支持,先默认为1,删除和评论必须登录，要有userid
-	userid = 1
+	userId, _ := c.Get(mw.IdentityKey)
 
 	instance := service.NewCommentServiceInstance()
 
@@ -36,7 +35,7 @@ func CommentAction(ctx context.Context, c *app.RequestContext) {
 			returnEmptyResponse("need param named 'comment_text'", c)
 			return
 		}
-		commentInfo, err := instance.InsertComment(commentText, videoId, userid)
+		commentInfo, err := instance.InsertComment(commentText, videoId, userId.(int64))
 		if err != nil {
 			returnEmptyResponse(err.Error(), c)
 			return
@@ -60,7 +59,7 @@ func CommentAction(ctx context.Context, c *app.RequestContext) {
 			returnEmptyResponse("comment_id error", c)
 			return
 		}
-		if err = instance.DeleteCommentByCommentId(commentId, userid); err != nil {
+		if err = instance.DeleteCommentByCommentId(commentId, userId.(int64)); err != nil {
 			returnEmptyResponse(err.Error(), c)
 		} else {
 			c.JSON(consts.StatusOK, vo.Response{
@@ -79,7 +78,6 @@ CommentList
 评论列表接口
 */
 func CommentList(ctx context.Context, c *app.RequestContext) {
-	var userid int64
 	//解析videoId
 	videoIdStr := c.Query("video_id")
 	//videoIdStr为空字符串说明请求中没有带这个参数
@@ -105,11 +103,11 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 		})
 		return
 	}
-	// TODO  通过token获取userId，需要jwt支持,先默认为1
-	userid = 1
+
+	userId, _ := c.Get(mw.IdentityKey)
 
 	instance := service.NewCommentServiceInstance()
-	commentInfos, err := instance.GetCommentListByVideoId(videoId, userid)
+	commentInfos, err := instance.GetCommentListByVideoId(videoId, userId.(int64))
 	if err != nil {
 		c.JSON(consts.StatusOK, vo.CommentListResponse{
 			Response: vo.Response{

@@ -25,7 +25,7 @@ const (
 */
 
 func Feed(ctx context.Context, c *app.RequestContext) {
-	var userName string
+	var userId int64 = -1
 	var err error
 
 	queryTime := c.Query("latest_time")
@@ -37,8 +37,8 @@ func Feed(ctx context.Context, c *app.RequestContext) {
 	// 如果token是空的，是未登录状态，username为空，仍可以调用feed流
 	if token != "" {
 		c.Next(ctx)
-		if user, _ := c.Get(mw.IdentityKey); user != nil {
-			userName = user.(string)
+		if userid, exist := c.Get(mw.IdentityKey); exist {
+			userId = userid.(int64)
 		}
 	}
 	c.Abort()
@@ -58,7 +58,7 @@ func Feed(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	vsi := ServiceImpl.VideoServiceImpl{}
-	videoInfoList, nextTime, err := vsi.GetVideoInfosByLatestTime(latestTime, userName)
+	videoInfoList, nextTime, err := vsi.GetVideoInfosByLatestTime(latestTime, userId)
 	if err != nil {
 		c.JSON(http.StatusOK, vo.Response{
 			StatusCode: ResponseFail,
