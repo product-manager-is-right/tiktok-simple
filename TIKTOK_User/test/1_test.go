@@ -30,7 +30,6 @@ func TestFollow(t *testing.T) {
 	fmt.Printf(strconv.FormatInt(res, 10))
 	if err != nil {
 		log.Print(err)
-		log.Print("find object failed")
 	}
 	assert.Nil(t, nil)
 }
@@ -39,16 +38,13 @@ func TestFollower(t *testing.T) {
 	fmt.Printf(strconv.FormatInt(res, 10))
 	if err != nil {
 		log.Print(err)
-		log.Print("find object failed")
 	}
 	assert.Nil(t, nil)
 }
 func TestIsFollow(t *testing.T) {
 	res, err := mysql.GetIsFollow(24, 25)
-
 	if err != nil {
 		log.Print(err)
-		log.Print("find object failed")
 	}
 	if res {
 		fmt.Println("successful")
