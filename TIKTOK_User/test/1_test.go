@@ -9,6 +9,7 @@ import (
 )
 
 func TestA(t *testing.T) {
+	mysql.Init()
 	res, err := mysql.GetPublishVideoIdsById(24)
 	if err != nil {
 		log.Print(err)

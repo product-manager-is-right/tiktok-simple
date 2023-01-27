@@ -20,7 +20,7 @@ GetPublishVideoIdsById
 根据UserId查找所有发布的VideoIds
 */
 func GetPublishVideoIdsById(UserId int64) ([]int64, error) {
-	res := make([]model.Publish, 0)
+	res := make([]*model.Publish, 0)
 	result := DB.Where("user_id = ?", UserId).Find(&res)
 	videoIds := make([]int64, 0)
 	for _, publish := range res {
