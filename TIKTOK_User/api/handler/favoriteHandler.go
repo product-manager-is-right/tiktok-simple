@@ -5,7 +5,6 @@ import (
 	"GoProject/service/serviceImpl"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"strconv"
 )
@@ -15,9 +14,24 @@ import (
 	赞操作，登录用户对视频的点赞和取消点赞操作
 */
 func FavoriteAction(ctx context.Context, c *app.RequestContext) {
-	c.JSON(consts.StatusOK, utils.H{
-		"message": "ok",
-	})
+	//url获取的用户id、视频id
+	userId := c.Query("user_id")
+	videoId := c.Query("video_id")
+	// 通过token获取到的登录用户名
+	//user, _ := c.Get(mw.IdentityKey)
+	userid, _ := strconv.ParseInt(userId, 10, 64)
+	videoid, _ := strconv.ParseInt(videoId, 10, 64)
+	fsi := serviceImpl.FavoriteServiceImpl{}
+	res, err := fsi.CreateNewFavorite(userid, videoid)
+	if res != -1 && err == nil {
+		c.JSON(consts.StatusOK, vo.FavorVideoResponse{
+			Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "点赞成功"},
+		})
+	} else {
+		c.JSON(consts.StatusOK, vo.FavorVideoResponse{
+			Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "点赞失败"},
+		})
+	}
 }
 
 // FavoriteList

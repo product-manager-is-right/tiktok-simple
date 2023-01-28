@@ -5,7 +5,9 @@ type FavoriteInfo struct {
 	UserId  int64 `json:"userId"`
 	VideoId int64 `json:"videoId"`
 }
-
+type FavorVideoResponse struct {
+	Response
+}
 type FavoriteListResponse struct {
 	Response
 	VideoList []VideoInfo `json:"video_list"`
