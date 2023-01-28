@@ -13,5 +13,5 @@ type VideoInfo struct {
 
 type VideoInfoResponse struct {
 	Response
-	VideoList []VideoInfo `json:"video_list"`
+	VideoList []VideoInfo `json:"video_list,omitempty"`
 }

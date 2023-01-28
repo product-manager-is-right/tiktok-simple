@@ -22,10 +22,10 @@ GetPublishVideoIdsById
 func GetPublishVideoIdsById(UserId int64) ([]int64, error) {
 	res := make([]*model.Publish, 0)
 	result := DB.Where("user_id = ?", UserId).Find(&res)
-	videoIds := make([]int64, 0)
+	videoIds := make([]int64, 0, 10)
 	for _, publish := range res {
 		videoIds = append(videoIds, publish.VideoId)
 	}
-	// TODO : impl
+
 	return videoIds, result.Error
 }

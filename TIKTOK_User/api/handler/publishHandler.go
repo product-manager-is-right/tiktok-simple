@@ -17,6 +17,12 @@ import (
 func PublishList(ctx context.Context, c *app.RequestContext) {
 	// 查询对象的userId
 	queryUserId := c.Query("user_id")
+	if queryUserId == "" {
+		c.JSON(consts.StatusOK, vo.VideoInfoResponse{
+			Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "query user_id empty"},
+		})
+		return
+	}
 
 	// 通过token获取到的登录用户名，并通过sql查到userID
 	userId, _ := c.Get(mw.IdentityKey)

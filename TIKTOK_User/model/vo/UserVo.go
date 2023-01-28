@@ -21,7 +21,7 @@ type Response struct {
 
 type UserInfoResponse struct {
 	Response
-	UserInfo UserInfo `json:"user"`
+	UserInfo *UserInfo `json:"user,omitempty"`
 }
 
 type RegisterResponse struct {

@@ -25,6 +25,12 @@ const (
 func UserInfo(ctx context.Context, c *app.RequestContext) {
 	// 查询对象的userId
 	queryUserId := c.Query("user_id")
+	if queryUserId == "" {
+		c.JSON(consts.StatusOK, vo.UserInfoResponse{
+			Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "query user_id empty"},
+		})
+		return
+	}
 	id, _ := strconv.ParseInt(queryUserId, 10, 64)
 
 	// 通过token获取到的登录用户名
@@ -39,7 +45,7 @@ func UserInfo(ctx context.Context, c *app.RequestContext) {
 		})
 	} else {
 		c.JSON(consts.StatusOK, vo.UserInfoResponse{
-			Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "Query UserInfo error"},
+			Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "error :" + err.Error()},
 		})
 	}
 }
@@ -51,13 +57,19 @@ func UserInfo(ctx context.Context, c *app.RequestContext) {
 func Register(ctx context.Context, c *app.RequestContext) {
 	username := c.Query("username")
 	password := c.Query("password")
-
+	if username == "" || password == "" {
+		c.JSON(consts.StatusOK, vo.RegisterResponse{
+			Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "query username or password empty"},
+		})
+		c.Abort()
+		return
+	}
 	usi := serviceImpl.UserServiceImpl{}
 	if _, err := usi.CreateUserByNameAndPassword(username, password); err != nil {
 		c.JSON(consts.StatusOK, vo.RegisterResponse{
 			Response: vo.Response{
 				StatusCode: ResponseFail,
-				StatusMsg:  err.Error()},
+				StatusMsg:  "error :" + err.Error()},
 		})
 		c.Abort()
 	}
