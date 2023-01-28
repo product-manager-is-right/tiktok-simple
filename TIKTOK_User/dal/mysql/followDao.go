@@ -53,3 +53,17 @@ func GetFollowingIds(userId int64) ([]int64, error) {
 	// 查询成功。
 	return ids, nil
 }
+
+func GetFollowerIds(userId int64) ([]int64, error) {
+	var ids []int64
+	if err := DB.Model(model.Follower{}).Where("user_id_from = ?", userId).
+		Where("cancel = ?", 0).Pluck("user_id_to", &ids).Error; nil != err {
+		if "record not found" == err.Error() {
+			return nil, nil
+		}
+		// 查询出错。
+		log.Println(err.Error())
+		return nil, err
+	}
+	return ids, nil
+}

@@ -30,7 +30,7 @@ func FollowList(ctx context.Context, c *app.RequestContext) {
 	fsi := serviceImpl.FollowServiceImpl{}
 	if UserInfoList, err := fsi.GetFollowListById(id); err == nil {
 		c.JSON(consts.StatusOK, vo.FollowResponse{
-			Response:     vo.Response{StatusCode: ResponseSuccess},
+			Response:     vo.Response{StatusCode: ResponseSuccess, StatusMsg: "Query UserInfo success"},
 			UserInfoList: UserInfoList,
 		})
 	} else {
@@ -45,9 +45,19 @@ func FollowList(ctx context.Context, c *app.RequestContext) {
 	所有关注登录的粉丝列表
 */
 func FollowerList(ctx context.Context, c *app.RequestContext) {
-	c.JSON(consts.StatusOK, utils.H{
-		"message": "ok",
-	})
+	userId := c.Query("user_id")
+	id, _ := strconv.ParseInt(userId, 10, 64)
+	fsi := serviceImpl.FollowerServiceImpl{}
+	if UserInfoList, err := fsi.GetFollowerListById(id); err == nil {
+		c.JSON(consts.StatusOK, vo.FollowResponse{
+			Response:     vo.Response{StatusCode: ResponseSuccess, StatusMsg: "Query UserInfo success"},
+			UserInfoList: UserInfoList,
+		})
+	} else {
+		c.JSON(consts.StatusOK, vo.FollowResponse{
+			Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "Query UserInfo error"},
+		})
+	}
 }
 
 // FriendList
