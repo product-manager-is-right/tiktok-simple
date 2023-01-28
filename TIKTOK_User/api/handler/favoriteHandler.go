@@ -1,9 +1,7 @@
 package handler
 
 import (
-	"GoProject/model"
 	"GoProject/model/vo"
-	"GoProject/mw"
 	"GoProject/service/serviceImpl"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
@@ -35,7 +33,7 @@ func FavoriteList(ctx context.Context, c *app.RequestContext) {
 	id, _ := strconv.ParseInt(userId, 10, 64)
 
 	fsi := serviceImpl.FavoriteServiceImpl{}
-	if vl, err := fsi.GetFavoriteVideosListByUserId(id, user.(*model.User).Id); err == nil {
+	if vl, err := fsi.GetFavoriteVideosListByUserId(id, 23); err == nil {
 		c.JSON(consts.StatusOK, vo.FavoriteListResponse{
 			Response:  vo.Response{StatusCode: ResponseFail, StatusMsg: "查询点赞列表成功"},
 			VideoList: vl,

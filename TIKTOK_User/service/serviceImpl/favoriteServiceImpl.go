@@ -4,6 +4,7 @@ import (
 	"GoProject/dal/mysql"
 	"GoProject/model/vo"
 	"errors"
+	"fmt"
 )
 
 type FavoriteServiceImpl struct {
@@ -12,14 +13,19 @@ type FavoriteServiceImpl struct {
 func (fsi *FavoriteServiceImpl) GetFavoriteVideosListByUserId(userIdTar, userIdSrc int64) ([]vo.VideoInfo, error) {
 	var videoInfos []vo.VideoInfo
 	videoIds, err := mysql.GetFavoritesById(userIdTar)
-
 	if err != nil {
+		fmt.Print("userIdTar=", userIdTar)
+		//fmt.Print("获取视频id列表失败")
 		return videoInfos, err
 	}
+
 	if len(videoIds) == 0 {
-		return videoInfos, errors.New("VideoList is empty")
+		return videoInfos, errors.New("获取视频id列表为空")
 	}
 	videoInfos, err = getVideoInfosByVideoIds(videoIds, userIdSrc, "favorite_query")
+	if err != nil {
+		fmt.Print("获取视频信息列表失败")
+	}
 	return videoInfos, err
 
 }

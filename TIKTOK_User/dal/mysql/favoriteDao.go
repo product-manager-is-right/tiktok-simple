@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"GoProject/model"
+	"fmt"
 )
 
 /*
@@ -14,11 +15,12 @@ func GetIsFavorite(userId, videoId int64) (bool, error) {
 }
 
 func GetFavoritesById(userId int64) ([]int64, error) {
-	res := make([]int64, 0)
-	if err := DB.Where("user_id = ?", userId).
-		Pluck("video_id", &res).Error; err != nil {
-		return nil, err
+	var res []int64
+	err := DB.Model(model.Favorite{}).Where(map[string]interface{}{"user_id": userId}).Pluck("video_id", &res).Error
+	if err != nil {
+		fmt.Print(err)
 	}
+
 	return res, nil
 }
 func GetFavoriteInfo(userId, videoId int64) (*model.Favorite, error) {
