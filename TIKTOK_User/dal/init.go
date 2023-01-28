@@ -1,6 +1,6 @@
 package dal
 
-import "GoProject/dal/mysql"
+import "TIKTOK_User/dal/mysql"
 
 func Init() {
 	mysql.Init()

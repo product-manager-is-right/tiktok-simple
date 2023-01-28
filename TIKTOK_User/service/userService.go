@@ -1,6 +1,6 @@
 package service
 
-import "GoProject/model/vo"
+import "TIKTOK_User/model/vo"
 
 type UserService interface {
 	GetUserInfoById(queryUserId int64, userId int64) (vo.UserInfo, error)

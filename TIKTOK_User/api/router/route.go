@@ -1,8 +1,8 @@
 package router
 
 import (
-	"GoProject/api/handler"
-	"GoProject/mw"
+	"TIKTOK_User/api/handler"
+	"TIKTOK_User/mw"
 	"github.com/cloudwego/hertz/pkg/app/server"
 )
 

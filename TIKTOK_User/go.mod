@@ -1,4 +1,4 @@
-module GoProject
+module TIKTOK_User
 
 go 1.19
 

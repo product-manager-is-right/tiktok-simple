@@ -1,7 +1,7 @@
 package test
 
 import (
-	"GoProject/dal/mysql"
+	"TIKTOK_User/dal/mysql"
 	"fmt"
 	"github.com/cloudwego/hertz/pkg/common/test/assert"
 	"log"

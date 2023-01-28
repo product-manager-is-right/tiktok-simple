@@ -1,8 +1,8 @@
 package mysql
 
 import (
-	"GoProject/model"
-	"GoProject/util"
+	"TIKTOK_User/model"
+	"TIKTOK_User/util"
 )
 
 // CreateUser

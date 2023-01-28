@@ -1,7 +1,7 @@
 package mysql
 
 import (
-	"GoProject/model"
+	"TIKTOK_User/model"
 	"gorm.io/gorm"
 	"log"
 )

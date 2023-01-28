@@ -1,9 +1,9 @@
 package main
 
 import (
-	"GoProject/api/router"
-	"GoProject/dal"
-	"GoProject/mw"
+	"TIKTOK_User/api/router"
+	"TIKTOK_User/dal"
+	"TIKTOK_User/mw"
 	"github.com/cloudwego/hertz/pkg/app/server"
 )
 

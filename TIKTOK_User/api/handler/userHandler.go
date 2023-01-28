@@ -3,9 +3,9 @@
 package handler
 
 import (
-	"GoProject/model/vo"
-	"GoProject/mw"
-	"GoProject/service/serviceImpl"
+	"TIKTOK_User/model/vo"
+	"TIKTOK_User/mw"
+	"TIKTOK_User/service/serviceImpl"
 	"context"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"strconv"

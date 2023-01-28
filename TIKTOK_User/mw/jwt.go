@@ -1,9 +1,9 @@
 package mw
 
 import (
-	"GoProject/dal/mysql"
-	"GoProject/model"
-	"GoProject/util"
+	"TIKTOK_User/dal/mysql"
+	"TIKTOK_User/model"
+	"TIKTOK_User/util"
 	"context"
 	"errors"
 	"log"
