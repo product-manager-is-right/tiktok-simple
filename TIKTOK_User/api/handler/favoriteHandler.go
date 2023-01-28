@@ -1,10 +1,15 @@
 package handler
 
 import (
+	"GoProject/model"
+	"GoProject/model/vo"
+	"GoProject/mw"
+	"GoProject/service/serviceImpl"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
+	"strconv"
 )
 
 // FavoriteAction
@@ -22,7 +27,24 @@ func FavoriteAction(ctx context.Context, c *app.RequestContext) {
 	登录用户的所有点赞视频
 */
 func FavoriteList(ctx context.Context, c *app.RequestContext) {
-	c.JSON(consts.StatusOK, utils.H{
-		"message": "ok",
-	})
+
+	//url获取的用户id
+	userId := c.Query("user_id")
+	// 通过token获取到的登录用户名
+	//user, _ := c.Get(mw.IdentityKey)
+	id, _ := strconv.ParseInt(userId, 10, 64)
+
+	fsi := serviceImpl.FavoriteServiceImpl{}
+	if vl, err := fsi.GetFavoriteVideosListByUserId(id, user.(*model.User).Id); err == nil {
+		c.JSON(consts.StatusOK, vo.FavoriteListResponse{
+			Response:  vo.Response{StatusCode: ResponseFail, StatusMsg: "查询点赞列表成功"},
+			VideoList: vl,
+		})
+	} else {
+		c.JSON(consts.StatusOK, vo.FavoriteListResponse{
+			Response:  vo.Response{StatusCode: ResponseFail, StatusMsg: "查询点赞列表失败"},
+			VideoList: vl,
+		})
+	}
+
 }
