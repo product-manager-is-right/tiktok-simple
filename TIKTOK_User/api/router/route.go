@@ -32,7 +32,7 @@ func GeneratedRegister(r *server.Hertz) {
 	// relation路由组
 	relationRouter := r.Group("/douyin/relation")
 
-	relationRouter.Use(mw.JwtMiddleware.MiddlewareFunc())
+	//elationRouter.Use(mw.JwtMiddleware.MiddlewareFunc())
 
 	relationRouter.POST("/action/", handler.RelationAction)
 	relationRouter.GET("/follow/list/", handler.FollowList)
