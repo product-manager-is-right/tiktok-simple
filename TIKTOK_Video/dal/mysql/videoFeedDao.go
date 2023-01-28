@@ -17,17 +17,27 @@ func GetVideoByID(id int64) (*model.Video, error) {
 	return res, nil
 }
 func GetFavoriteCountByID(id int64) (int64, error) {
+	res := &model.Video{}
+	if err := DB.Where("video_id = ?", id).
+		First(&res).Error; err != nil {
+		return 0, err
+	}
 
-	return 1, nil
+	return res.FavoriteCount, nil
 }
 func GetCommentCountByID(id int64) (int64, error) {
+	res := &model.Video{}
+	if err := DB.Where("video_id = ?", id).
+		First(&res).Error; err != nil {
+		return 0, err
+	}
 
-	return 1, nil
+	return res.CommentCount, nil
 }
 
-func GetVideosByTime(LatestTime int64) ([]model.Video, error) {
-	res := make([]model.Video, 2)
-	result := DB.Where("publish_time<=?", LatestTime).Order("publish_time desc").Limit(2).Find(&res)
+func GetVideosByTime(LatestTime int64) ([]*model.Video, error) {
+	res := make([]*model.Video, 2)
+	result := DB.Where("publish_time<?", LatestTime).Order("publish_time desc").Limit(2).Find(&res)
 
 	return res, result.Error
 }

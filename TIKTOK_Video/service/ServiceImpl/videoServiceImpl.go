@@ -34,45 +34,46 @@ func (vsi *VideoServiceImpl) GetVideoInfosByLatestTime(latestTime int64, userId 
 	if len(videos) == 0 {
 		return videoInfos, nextTime, errors.New("video is empty")
 	}
-	videoInfos = make([]vo.VideoInfo, len(videos))
-	videoInfos, err = bindVideoInfo(videoInfos, videos, userId)
 
+	videoInfos, err = bindVideoInfo(videos, userId)
 	nextTime = videos[len(videos)-1].PublishTime
+
 	return videoInfos, nextTime, err
 }
 
-func bindVideoInfo(videoInfos []vo.VideoInfo, videos []model.Video, userId int64) ([]vo.VideoInfo, error) {
+func bindVideoInfo(videos []*model.Video, userId int64) ([]vo.VideoInfo, error) {
+	videoInfos := make([]vo.VideoInfo, len(videos))
+	Ids := make([]int64, len(videos))
+
 	for i, video := range videos {
-		var err error
+		Ids[i] = video.UserId
+	}
+	// 远程调用，获取user/author的个人信息
+	authors, _ := getUserInfoByIds(Ids, userId)
+
+	for i, video := range videos {
 		videoId := video.VideoId
 
-		favoriteCount, err := mysql.GetFavoriteCountByID(videoId)
-		if err != nil {
-			return videoInfos, err
-		}
-		commentCount, err := mysql.GetCommentCountByID(videoId)
-		if err != nil {
-			return videoInfos, err
-		}
+		favoriteCount, _ := mysql.GetFavoriteCountByID(videoId)
+
+		commentCount, _ := mysql.GetCommentCountByID(videoId)
+
 		// 需要与user通信，应定义到service层
 		var favorite bool
 		if userId >= 0 {
-			favorite, err = isFavorite(videoId, userId)
-			if err != nil {
-				return videoInfos, err
-			}
+			favorite, _ = isFavorite(videoId, userId)
 		}
 
-		videoInfos[i].Id = videoId
-		videoInfos[i].Author = vo.DemoUser
-		//videoInfos[i].Author.Id = video.AuthorId
-		videoInfos[i].PlayUrl = video.PlayUrl
-		videoInfos[i].CoverUrl = video.CoverUrl
-		videoInfos[i].FavoriteCount = favoriteCount
-		videoInfos[i].CommentCount = commentCount
-		videoInfos[i].IsFavorite = favorite
-		videoInfos[i].Title = video.Title
-
+		videoInfos[i] = vo.VideoInfo{
+			Id:            videoId,
+			Author:        *authors[Ids[i]],
+			PlayUrl:       video.PlayUrl,
+			CoverUrl:      video.CoverUrl,
+			FavoriteCount: favoriteCount,
+			CommentCount:  commentCount,
+			IsFavorite:    favorite,
+			Title:         video.Title,
+		}
 	}
 
 	return videoInfos, nil
@@ -92,7 +93,7 @@ func (vsi *VideoServiceImpl) PublishVideo(userId int64, fileHeader *multipart.Fi
 		return err
 	}
 	// 远程调用video接口，并存入vms_publish_video
-	videoId, err := CreateVideoCall(userId, buf.Bytes(), videoTitle)
+	videoId, err := createVideoCall(userId, buf.Bytes(), videoTitle)
 	if err != nil {
 		return err
 	}
@@ -108,7 +109,7 @@ remoteVideoCall
 发起远程调用视频模块，存储video，返回videoId
 @ return videoId
 */
-func CreateVideoCall(userId int64, videoData []byte, videoTitle string) (int64, error) {
+func createVideoCall(userId int64, videoData []byte, videoTitle string) (int64, error) {
 	//使用minio作为文件服务器
 	fileReader := bytes.NewReader(videoData)
 	// 随机生成文件名
@@ -167,7 +168,7 @@ func readFrameAsJpeg(filePath string) ([]byte, error) {
 }
 
 /*
-远程调用Video模块，获取每个Video的具体信息
+远程调用User模块，将发布关系存入ums_publish_video表
 */
 func remoteCreatePublishVideo(UserId, VideoId int64) error {
 	// TODO : impl
