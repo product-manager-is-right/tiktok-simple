@@ -3,7 +3,6 @@ package main
 import (
 	"GoProject/api/router"
 	"GoProject/dal"
-	"GoProject/mw"
 	"github.com/cloudwego/hertz/pkg/app/server"
 )
 
@@ -23,5 +22,5 @@ func initDeps() {
 	dal.Init()
 
 	// 初始化Jwt
-	mw.InitJwt()
+	//mw.InitJwt()
 }

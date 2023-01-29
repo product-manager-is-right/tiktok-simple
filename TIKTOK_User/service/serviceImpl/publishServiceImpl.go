@@ -4,6 +4,7 @@ import (
 	"GoProject/dal/mysql"
 	"GoProject/model/vo"
 	"errors"
+	"fmt"
 )
 
 type PublishServiceImpl struct {
@@ -42,6 +43,7 @@ func (psi *PublishServiceImpl) GetVideoList(userIdTar int64, userIdSrc int64) ([
 func getVideoInfosByVideoIds(videoIds []int64, userId int64, mode string) ([]vo.VideoInfo, error) {
 	videoInfos, err := remoteGetVideoInfoCall(videoIds)
 	if err != nil {
+		fmt.Print("远程调用视频信息失败")
 		return videoInfos, err
 	}
 
@@ -63,9 +65,9 @@ func getVideoInfosByVideoIds(videoIds []int64, userId int64, mode string) ([]vo.
 			user, _ := usi.GetUserInfoById(videoInfo.Author.Id, userId)
 			videoInfos[i].Author = user
 
-			if isFavorite, _ := mysql.GetIsFavorite(userId, videoInfo.Id); isFavorite {
-				videoInfos[i].IsFavorite = true
-			}
+			//if isFavorite, _ := mysql.GetIsFavorite(userId, videoInfo.Id); isFavorite {
+			videoInfos[i].IsFavorite = true
+			//}
 		}
 	}
 
@@ -77,5 +79,9 @@ func getVideoInfosByVideoIds(videoIds []int64, userId int64, mode string) ([]vo.
 */
 func remoteGetVideoInfoCall(videoIds []int64) ([]vo.VideoInfo, error) {
 	// TODO : impl
-	return []vo.VideoInfo{}, nil
+	res := make([]vo.VideoInfo, 0)
+	for i := range videoIds {
+		res = append(res, vo.VideoInfo{Id: videoIds[i]})
+	}
+	return res, nil
 }
