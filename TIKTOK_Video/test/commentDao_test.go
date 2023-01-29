@@ -1,6 +1,7 @@
 package test
 
 import (
+	"TIKTOK_Video/configs"
 	"TIKTOK_Video/dal/mysql"
 	"fmt"
 	"github.com/cloudwego/hertz/pkg/common/test/assert"
@@ -19,13 +20,15 @@ func TestGetCommentByVideoIds(t *testing.T) {
 }
 
 func TestGetCommentByCommentId(t *testing.T) {
-	comment, err := mysql.GetCommentByID(1)
+	comment, err := mysql.GetCommentByID(48)
 	assert.Nil(t, err)
 	fmt.Printf("%#v", *comment)
 
 }
 
 func TestMain(m *testing.M) {
+	configs.ReadConfig(configs.TEST)
+
 	mysql.Init()
 	code := m.Run()
 

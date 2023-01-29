@@ -1,0 +1,15 @@
+port: 8081
+
+nacos:
+  serviceName: tiktok.simple.user
+  addr: 101.42.50.112
+  port: 8848
+  username: nacos
+  password: nacos
+
+minio:
+  AccessKeyId: "minioadmin"
+  SecretAccessKey: "minioadmin"
+
+mysql:
+  dsn: root1:root1234@tcp(120.25.2.146:3306)/tiktok_vms?charset=utf8&parseTime=True&loc=Local

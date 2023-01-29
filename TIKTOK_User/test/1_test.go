@@ -1,6 +1,7 @@
 package test
 
 import (
+	"TIKTOK_User/configs"
 	"TIKTOK_User/dal/mysql"
 	"fmt"
 	"github.com/cloudwego/hertz/pkg/common/test/assert"
@@ -11,6 +12,8 @@ import (
 )
 
 func TestMain(m *testing.M) {
+	configs.ReadConfig(configs.TEST)
+
 	mysql.Init()
 	code := m.Run()
 

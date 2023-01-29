@@ -1,9 +1,34 @@
 package configs
 
-// VideoCount 一次刷新获取的视频数量
-const VideoCount = 30
+import (
+	"github.com/spf13/viper"
+	"log"
+)
 
-// info for minio server
+const (
+	DEV  = "dev"
+	TEST = "test"
+)
 
-const AccessKeyId = "minioadmin"
-const SecretAccessKey = "minioadmin"
+func ReadConfig(mode string) {
+	if mode == DEV {
+		viper.SetConfigFile("./configs/config.yaml")
+	} else if mode == TEST {
+		viper.SetConfigFile("../configs/config.yaml")
+	}
+
+	if err := viper.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			log.Fatal("配置文件未找到")
+		} else {
+			println(err.Error())
+			log.Fatal("配置文件找到了，但有其他错误")
+		}
+	}
+
+	validation()
+}
+
+func validation() {
+	return
+}

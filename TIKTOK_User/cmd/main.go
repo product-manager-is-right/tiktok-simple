@@ -2,6 +2,7 @@ package main
 
 import (
 	"TIKTOK_User/api/router"
+	"TIKTOK_User/configs"
 	"TIKTOK_User/dal"
 	"TIKTOK_User/mw"
 	"github.com/cloudwego/hertz/pkg/app/server"
@@ -11,19 +12,36 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/clients"
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
+	"github.com/spf13/viper"
 )
 
 func main() {
+	// 读取配置文件
+	configs.ReadConfig(configs.DEV)
+
+	// 初始化工具
 	initDeps()
 
+	// 启动服务
+	startServer()
+}
+
+func initDeps() {
+	// 初始化数据库
+	dal.Init()
+
+	// 初始化Jwt
+	mw.InitJwt()
+}
+
+func startServer() {
 	cc := &constant.ClientConfig{
-		AppName:  "test",
-		Username: "nacos",
-		Password: "nacos",
+		Username: viper.GetString("nacos.username"),
+		Password: viper.GetString("nacos.password"),
 	}
 	sc := []constant.ServerConfig{{
-		IpAddr: "101.42.50.112",
-		Port:   8848,
+		IpAddr: viper.GetString("nacos.addr"),
+		Port:   viper.GetUint64("nacos.port"),
 	},
 	}
 	cli, _ := clients.NewNamingClient(
@@ -35,11 +53,12 @@ func main() {
 
 	r := nacos.NewNacosRegistry(cli)
 
+	addr := ":" + viper.GetString("port")
 	h := server.Default(
-		server.WithHostPorts("127.0.0.1:8080"),
+		server.WithHostPorts(addr),
 		server.WithRegistry(r, &registry.Info{
-			ServiceName: "tiktok.simple.user",
-			Addr:        utils.NewNetAddr("tcp", "127.0.0.1:8080"),
+			ServiceName: viper.GetString("nacos.serviceName"),
+			Addr:        utils.NewNetAddr("tcp", addr),
 			Weight:      10,
 			Tags:        nil,
 		}))
@@ -48,12 +67,4 @@ func main() {
 	router.GeneratedRegister(h)
 
 	h.Spin()
-}
-
-func initDeps() {
-	// 初始化数据库
-	dal.Init()
-
-	// 初始化Jwt
-	mw.InitJwt()
 }

@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -9,11 +10,10 @@ import (
 	"time"
 )
 
-var dsn = "root1:root1234@tcp(120.25.2.146:3306)/tiktok_vms?charset=utf8&parseTime=True&loc=Local"
-
 var DB *gorm.DB
 
 func Init() {
+	var dsn = viper.GetString("mysql.dsn")
 	// gorm日志打印
 	newLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags),
