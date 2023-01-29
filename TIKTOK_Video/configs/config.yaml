@@ -1,7 +1,7 @@
 port: 8081
 
 nacos:
-  serviceName: tiktok.simple.user
+  serviceName: tiktok.simple.video
   addr: 101.42.50.112
   port: 8848
   username: nacos
