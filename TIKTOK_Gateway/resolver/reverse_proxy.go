@@ -11,7 +11,7 @@ func CreateProxy(myConfig *configs.Config) map[string]*reverseproxy.ReverseProxy
 	ret := make(map[string]*reverseproxy.ReverseProxy)
 
 	// 创建服务发现cli
-	cli := CreateDiscoveryClient()
+	cli := CreateDiscoveryClient(myConfig)
 
 	for _, route := range myConfig.Routes {
 		if _, exist := ret[route.ServiceName]; !exist {

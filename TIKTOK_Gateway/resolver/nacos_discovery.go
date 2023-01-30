@@ -1,6 +1,7 @@
 package resolver
 
 import (
+	"TIKTOK_Gateway/configs"
 	"github.com/cloudwego/hertz/pkg/app/client"
 	"github.com/cloudwego/hertz/pkg/app/middlewares/client/sd"
 	"github.com/hertz-contrib/registry/nacos"
@@ -10,13 +11,13 @@ import (
 	"log"
 )
 
-func CreateDiscoveryClient() *client.Client {
+func CreateDiscoveryClient(myConfig *configs.Config) *client.Client {
 	cli, err := client.NewClient()
 	if err != nil {
 		log.Fatal("创建服务发现客户端失败 : ", err.Error())
 	}
 	sc := []constant.ServerConfig{
-		*constant.NewServerConfig("101.42.50.112", 8845),
+		*constant.NewServerConfig(myConfig.Nacos.Addr, myConfig.Nacos.Port),
 	}
 	cc := constant.ClientConfig{
 		NamespaceId:         "public",
