@@ -24,7 +24,7 @@ func GeneratedRegister(r *server.Hertz) {
 	// favorite路由组
 	favoriteRouter := r.Group("/douyin/favorite")
 
-	favoriteRouter.Use(mw.JwtMiddleware.MiddlewareFunc())
+	//favoriteRouter.Use(mw.JwtMiddleware.MiddlewareFunc())
 
 	favoriteRouter.POST("/action/", handler.FavoriteAction)
 	favoriteRouter.GET("/list/", handler.FavoriteList)
@@ -32,7 +32,7 @@ func GeneratedRegister(r *server.Hertz) {
 	// relation路由组
 	relationRouter := r.Group("/douyin/relation")
 
-	//elationRouter.Use(mw.JwtMiddleware.MiddlewareFunc())
+	relationRouter.Use(mw.JwtMiddleware.MiddlewareFunc())
 
 	relationRouter.POST("/action/", handler.RelationAction)
 	relationRouter.GET("/follow/list/", handler.FollowList)

@@ -3,6 +3,7 @@ package serviceImpl
 import (
 	"GoProject/dal/mysql"
 	"GoProject/model/vo"
+	"gorm.io/gorm"
 )
 
 type FollowServiceImpl struct {
@@ -11,41 +12,37 @@ type FollowServiceImpl struct {
 func (fsi *FollowServiceImpl) GetFollowListById(userId int64) ([]vo.UserInfo, error) {
 	//获取关注对象的id数组
 	ids, err := mysql.GetFollowingIds(userId)
-	if nil != err {
-		return nil, err
+	if err != nil {
+		return []vo.UserInfo{}, err
 	}
 	// 没得关注者
-	if nil == ids {
-		return nil, nil
+	if len(ids) == 0 {
+		return []vo.UserInfo{}, nil
 	}
 	// 根据每个id来查询用户信息。
-	len := len(ids)
-	users := make([]vo.UserInfo, len)
-	for i := 0; i < len; i++ {
-		userInfo := vo.UserInfo{}
-		queryUser, err := mysql.GetUserByUserId(ids[i])
-		userId = queryUser.Id
-		if err != nil {
-			return users, err
+	users := make([]vo.UserInfo, 0, len(ids))
+	for i := 0; i < len(ids); i++ {
+		isFollow, _ := mysql.GetIsFollow(userId, ids[i])
+		if !isFollow {
+			continue
 		}
-		followCnt, err := mysql.GetFollowCntByUserId(userId)
-		if err != nil {
-			return users, err
+		user, err := mysql.GetUserByUserId(ids[i])
+		if err == gorm.ErrRecordNotFound {
+			continue
 		}
-		followerCnt, err := mysql.GetFollowerCntByUserId(userId)
-		if err != nil {
-			return users, err
+
+		followCnt, _ := mysql.GetFollowCntByUserId(user.Id)
+
+		followerCnt, _ := mysql.GetFollowerCntByUserId(user.Id)
+		u := &vo.UserInfo{
+			Id: user.Id,
 		}
-		isFollow, err := mysql.GetIsFollow(userId, ids[i])
-		if err != nil {
-			return users, err
-		}
-		userInfo.Id = queryUser.Id
-		userInfo.Name = queryUser.Username
+		userInfo.Id = user.Id
+		userInfo.Name = user.Username
 		userInfo.FollowerCount = followerCnt
 		userInfo.FollowCount = followCnt
 		userInfo.IsFollow = isFollow
-		users[i] = userInfo
+		users = append(users, u)
 	}
 	return users, nil
 }

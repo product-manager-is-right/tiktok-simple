@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"GoProject/model"
+	"gorm.io/gorm"
 	"log"
 )
 
@@ -14,7 +15,18 @@ GetFollowCntByUserId
 */
 func GetFollowCntByUserId(userId int64) (int64, error) {
 	// TODO : impl
-	return 1, nil
+	//return 1, nil
+	var cnt int64 = 10
+
+	if err := DB.Model(model.Follow{}).
+		Where("user_id_from = ?", userId).
+		Where("cancel = ?", 0).
+		Count(&cnt).Error; err != nil {
+		log.Println(err.Error())
+		return 0, err
+	}
+
+	return cnt, nil
 }
 
 /*
@@ -23,7 +35,18 @@ GetFollowerCntByUserId
 */
 func GetFollowerCntByUserId(userId int64) (int64, error) {
 	// TODO : impl
-	return 1, nil
+	//return 1, nil
+	var cnt int64
+
+	if err := DB.Model(model.Follow{}).
+		Where("user_id_to = ?", userId).
+		Where("cancel = ?", 0).
+		Count(&cnt).Error; err != nil {
+		log.Println(err.Error())
+		return 0, err
+	}
+
+	return cnt, nil
 }
 
 /*
@@ -32,7 +55,20 @@ GetIsFollow
 */
 func GetIsFollow(userIdDst, userIdSrc int64) (bool, error) {
 	// TODO : impl
-	return false, nil
+	//return false, nil
+	follow := model.Follow{}
+
+	if err := DB.Where("user_id_from = ?", userIdSrc).
+		Where("user_id_to = ?", userIdDst).
+		Where("cancel = ?", 0).
+		Take(&follow).Error; err == gorm.ErrRecordNotFound {
+		return false, nil
+	} else if err != nil {
+		return false, err
+	}
+
+	return true, nil
+
 }
 
 /*
@@ -65,5 +101,24 @@ func GetFollowerIds(userId int64) ([]int64, error) {
 		log.Println(err.Error())
 		return nil, err
 	}
+	return ids, nil
+}
+
+/*
+GetFriendsIds
+给定用户id，查询他好友的id。
+*/
+func GetFriendsIds(userId int64) ([]int64, error) {
+	var ids []int64
+	if err := DB.Model(model.Follow{}).Where("user_id_from = ?", userId).
+		Where("cancel = ?", 0).Pluck("user_id_to", &ids).Error; nil != err {
+		if "record not found" == err.Error() {
+			return nil, nil
+		}
+		// 查询出错。
+		log.Println(err.Error())
+		return nil, err
+	}
+	// 查询成功。
 	return ids, nil
 }

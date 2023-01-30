@@ -9,3 +9,8 @@ type FollowerResponse struct {
 	Response
 	UserInfoList []UserInfo `json:"user_list"`
 }
+
+type RelationResponse struct {
+	Response
+	UserInfoList []UserInfo `json:"user_list"`
+}
