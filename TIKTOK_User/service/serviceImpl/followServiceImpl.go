@@ -9,6 +9,20 @@ import (
 type FollowServiceImpl struct {
 }
 
+func (fsi *FollowServiceImpl) CreateNewRelation(userId int64) (int64, error) {
+	//favorites, err := mysql.GetFavorite(userId, videoId)
+	//if err != nil {
+	//	return -1, err
+	//}
+	//if len(favorites) > 0 {
+	//	return -1, errors.New("the user has already favored the video")
+	//}
+	//favoriteId, err := mysql.CreateNewFavorite(userId, videoId)
+	//if err != nil {
+	//	return -1, err
+	//}
+	return 0, nil
+}
 func (fsi *FollowServiceImpl) GetFollowListById(userId int64) ([]vo.UserInfo, error) {
 	//获取关注对象的id数组
 	ids, err := mysql.GetFollowingIds(userId)

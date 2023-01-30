@@ -2,7 +2,6 @@ package router
 
 import (
 	"GoProject/api/handler"
-	"GoProject/mw"
 	"github.com/cloudwego/hertz/pkg/app/server"
 )
 
@@ -10,15 +9,15 @@ import (
 // 注册路由
 func GeneratedRegister(r *server.Hertz) {
 	// user路由组
-	userRouter := r.Group("/douyin/user")
-	userRouter.GET("/", mw.JwtMiddleware.MiddlewareFunc(), handler.UserInfo)
-	userRouter.POST("/register/", handler.Register, mw.JwtMiddleware.LoginHandler)
-	userRouter.POST("/login/", mw.JwtMiddleware.LoginHandler)
+	//userRouter := r.Group("/douyin/user")
+	//userRouter.GET("/", mw.JwtMiddleware.MiddlewareFunc(), handler.UserInfo)
+	//userRouter.POST("/register/", handler.Register, mw.JwtMiddleware.LoginHandler)
+	//userRouter.POST("/login/", mw.JwtMiddleware.LoginHandler)
 
 	// publish路由组
 	publishRouter := r.Group("/douyin/publish")
 
-	publishRouter.Use(mw.JwtMiddleware.MiddlewareFunc())
+	//publishRouter.Use(mw.JwtMiddleware.MiddlewareFunc())
 	publishRouter.GET("/list/", handler.PublishList)
 
 	// favorite路由组

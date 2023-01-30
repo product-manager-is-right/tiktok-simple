@@ -7,8 +7,6 @@ import (
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
-	"log"
-	"net/http"
 	"strconv"
 )
 
@@ -17,42 +15,27 @@ import (
 	登录用户对其他用户进行关注或取关
 */
 func RelationAction(ctx context.Context, c *app.RequestContext) {
-	c.JSON(consts.StatusOK, utils.H{
-		"message": "ok",
-	})
-
-	//// 查询对象的userId和其他用户的id
-	//userId, err1 := strconv.ParseInt(c.GetString("user_id_from"), 10, 64)
-	//toUserId, err2 := strconv.ParseInt(c.Query("user_id_to"), 10, 64)
-	//actionType, err3 := strconv.ParseInt(c.Query("cancel"), 10, 64)
-	//fmt.Println(userId, toUserId, actionType)
-	//// 传入参数格式有问题。
-	//if nil != err1 || nil != err2 || nil != err3 || actionType < 1 || actionType > 2 {
-	//	fmt.Printf("fail")
-	//	c.JSON(http.StatusOK, vo.FollowerResponse{
-	//		Response: vo.Response{StatusCode: ResponseSuccess},
-	//		//UserInfoList: "id type error",
+	////url获取的对方用户id、视频id
+	//userId := c.Query("to_user_id")
+	////actionType := c.Query("action_type")
+	//// 通过token获取到的登录用户名
+	////user, _ := c.Get(mw.IdentityKey)
+	//userid, _ := strconv.ParseInt(userId, 10, 64)
+	////关注服务
+	//fsi := serviceImpl.FollowServiceImpl{}
+	////关注方法
+	//res, err := fsi.CreateNewRelation(userid)
+	//if res != -1 && err == nil {
+	//	//返回格式
+	//	c.JSON(consts.StatusOK, vo.FollowActionResponse{
+	//		Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "关注成功"},
 	//	})
-	//	return
+	//} else {
+	//	c.JSON(consts.StatusOK, vo.FollowActionResponse{
+	//		Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "关注失败"},
+	//	})
+	//}
 }
-
-// 正常处理，实例化对象
-//	fsi := serviceImpl.GetFollowerListById(userId)
-//	switch {
-//	// 关注
-//	case 1 == actionType:
-//		go fsi.AddFollowRelation(userId, toUserId)
-//	// 取关
-//	case 2 == actionType:
-//		go fsi.DeleteFollowRelation(userId, toUserId)
-//	}
-//	log.Println("关注、取关成功。")
-//	c.JSON(http.StatusOK, RelationActionResp{
-//		Response{
-//			StatusCode: 0,
-//			StatusMsg:  "OK",
-//		},
-//	})
 
 // FollowList
 /*
