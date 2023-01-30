@@ -36,6 +36,7 @@ func (fsi *FollowServiceImpl) GetFollowListById(userId int64) ([]vo.UserInfo, er
 	// 根据每个id来查询用户信息。
 	users := make([]vo.UserInfo, 0, len(ids))
 	for i := 0; i < len(ids); i++ {
+		userInfo := vo.UserInfo{}
 		isFollow, _ := mysql.GetIsFollow(userId, ids[i])
 		if !isFollow {
 			continue
@@ -48,15 +49,21 @@ func (fsi *FollowServiceImpl) GetFollowListById(userId int64) ([]vo.UserInfo, er
 		followCnt, _ := mysql.GetFollowCntByUserId(user.Id)
 
 		followerCnt, _ := mysql.GetFollowerCntByUserId(user.Id)
-		u := &vo.UserInfo{
-			Id: user.Id,
-		}
+
+		//u := &vo.UserInfo{
+		//	Id:            user.Id,
+		//	Name:          user.Username,
+		//	FollowerCount: followerCnt,
+		//	FollowCount:   followCnt,
+		//	IsFollow:      isFollow,
+		//}
 		userInfo.Id = user.Id
 		userInfo.Name = user.Username
 		userInfo.FollowerCount = followerCnt
 		userInfo.FollowCount = followCnt
 		userInfo.IsFollow = isFollow
-		users = append(users, u)
+		users = append(users, userInfo)
+
 	}
 	return users, nil
 }
