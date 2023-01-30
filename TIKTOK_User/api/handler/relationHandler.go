@@ -5,8 +5,10 @@ import (
 	"GoProject/service/serviceImpl"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/cloudwego/hertz/pkg/common/utils"
+	_ "github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
+	"log"
+	"net/http"
 	"strconv"
 )
 
