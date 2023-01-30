@@ -1,0 +1,33 @@
+port: 8070
+
+routes:
+  - serviceName: http://tiktok.simple.user
+    method: GET
+    apis:
+      - /douyin/user/
+      - /douyin/publish/list/
+      - /douyin/favorite/list/
+      - /douyin/relation/follow/list/
+      - /douyin/relation/follower/list/
+      - /douyin/relation/friend/list/
+
+  - serviceName: http://tiktok.simple.user
+    method: POST
+    apis:
+      - /douyin/user/register/
+      - /douyin/user/login/
+      - /douyin/favorite/action/
+      - /douyin/relation/action/
+
+  - serviceName: http://tiktok.simple.video
+    method: GET
+    apis:
+      - /douyin/feed/
+      - /douyin/comment/list/
+
+
+  - serviceName: http://tiktok.simple.video
+    method: POST
+    apis:
+      - /douyin/comment/action/
+      - /douyin/publish/action/
