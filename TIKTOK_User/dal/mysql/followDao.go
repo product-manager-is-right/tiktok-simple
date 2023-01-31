@@ -53,13 +53,13 @@ func GetFollowerCntByUserId(userId int64) (int64, error) {
 GetIsFollow
 判断userIdSrc 是否 关注 userIdDst
 */
-func GetIsFollow(userIdDst, userIdSrc int64) (bool, error) {
+func GetIsFollow(usertoid, userfromid int64) (bool, error) {
 	// TODO : impl
 	//return false, nil
 	follow := model.Follow{}
 
-	if err := DB.Where("user_id_from = ?", userIdSrc).
-		Where("user_id_to = ?", userIdDst).
+	if err := DB.Where("user_id_from = ?", userfromid).
+		Where("user_id_to = ?", usertoid).
 		Where("cancel = ?", 0).
 		Take(&follow).Error; err == gorm.ErrRecordNotFound {
 		return false, nil
@@ -69,6 +69,21 @@ func GetIsFollow(userIdDst, userIdSrc int64) (bool, error) {
 
 	return true, nil
 
+}
+
+func CreateNewrelation(usertoid, userfromid, Cancel int64) (int64, error) {
+	Follow := model.Follow{UserIdTo: usertoid, UserIdFrom: userfromid, Cancel: 0}
+	result := DB.Create(&Follow)
+	return Follow.Id, result.Error
+}
+
+func Getrelation(usertoid, userfromid int64) ([]*model.Follow, error) {
+	res := make([]*model.Follow, 0)
+	if err := DB.Where("user_id_to = ?", usertoid).Where("user_id_from = ?", userfromid).
+		Find(&res).Error; err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 /*

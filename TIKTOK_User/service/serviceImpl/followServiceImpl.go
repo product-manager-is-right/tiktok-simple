@@ -3,25 +3,31 @@ package serviceImpl
 import (
 	"GoProject/dal/mysql"
 	"GoProject/model/vo"
+	"errors"
 	"gorm.io/gorm"
+	//"fmt"
 )
 
 type FollowServiceImpl struct {
 }
 
-func (fsi *FollowServiceImpl) CreateNewRelation(userId int64) (int64, error) {
-	//favorites, err := mysql.GetFavorite(userId, videoId)
-	//if err != nil {
-	//	return -1, err
-	//}
-	//if len(favorites) > 0 {
-	//	return -1, errors.New("the user has already favored the video")
-	//}
-	//favoriteId, err := mysql.CreateNewFavorite(userId, videoId)
-	//if err != nil {
-	//	return -1, err
-	//}
-	return 0, nil
+// , relationactType
+func (fsi *FollowServiceImpl) CreateNewRelation(userfromid int64, usertoid int64) (int64, error) {
+	//var relations []*model.Follow = mysql.Getrelation(usertoid, userfromid)
+	relations, err := mysql.Getrelation(usertoid, userfromid)
+	if err != nil {
+		return -1, err
+	}
+	if len(relations) > 0 {
+		return -1, errors.New("the userfromid has already followed the usertoid")
+	}
+	var Cancel int64
+	Cancel = 0
+	relationId, err := mysql.CreateNewrelation(usertoid, userfromid, Cancel)
+	if err != nil {
+		return -1, err
+	}
+	return relationId, nil
 }
 func (fsi *FollowServiceImpl) GetFollowListById(userId int64) ([]vo.UserInfo, error) {
 	//获取关注对象的id数组

@@ -17,26 +17,28 @@ import (
 	登录用户对其他用户进行关注或取关
 */
 func RelationAction(ctx context.Context, c *app.RequestContext) {
-	////url获取的对方用户id、视频id
-	//userId := c.Query("to_user_id")
-	////actionType := c.Query("action_type")
-	//// 通过token获取到的登录用户名
-	////user, _ := c.Get(mw.IdentityKey)
-	//userid, _ := strconv.ParseInt(userId, 10, 64)
-	////关注服务
-	//fsi := serviceImpl.FollowServiceImpl{}
-	////关注方法
-	//res, err := fsi.CreateNewRelation(userid)
-	//if res != -1 && err == nil {
-	//	//返回格式
-	//	c.JSON(consts.StatusOK, vo.FollowActionResponse{
-	//		Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "关注成功"},
-	//	})
-	//} else {
-	//	c.JSON(consts.StatusOK, vo.FollowActionResponse{
-	//		Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "关注失败"},
-	//	})
-	//}
+	//url获取的对方用户id、视频id
+	userfromId := c.Query("user_id_from")
+	usertoId := c.Query("user_id_to")
+	//relationactType := c.Query("cancel")
+	// 通过token获取到的登录用户名
+	//user, _ := c.Get(mw.IdentityKey)
+	userfromid, _ := strconv.ParseInt(userfromId, 10, 64)
+	usertoid, _ := strconv.ParseInt(usertoId, 10, 64)
+	//关注服务
+	fsi := serviceImpl.FollowServiceImpl{}
+	//关注方法
+	res, err := fsi.CreateNewRelation(userfromid, usertoid)
+	if res != -1 && err == nil {
+		//返回格式
+		c.JSON(consts.StatusOK, vo.FollowActionResponse{
+			Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "关注成功"},
+		})
+	} else {
+		c.JSON(consts.StatusOK, vo.FollowActionResponse{
+			Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "关注失败"},
+		})
+	}
 }
 
 // FollowList
