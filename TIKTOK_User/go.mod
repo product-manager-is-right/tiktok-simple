@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/cloudwego/hertz v0.5.1
-	github.com/hertz-contrib/jwt v1.0.1
+	github.com/hertz-contrib/jwt v1.0.2
 	gorm.io/driver/mysql v1.4.5
 	gorm.io/gorm v1.24.3
 )
