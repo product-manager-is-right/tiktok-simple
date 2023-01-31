@@ -12,7 +12,7 @@ type FollowServiceImpl struct {
 }
 
 // , relationactType
-func (fsi *FollowServiceImpl) CreateNewRelation(userfromid int64, usertoid int64) (int64, error) {
+func (fsi *FollowServiceImpl) CreateNewRelation(userfromid, usertoid int64) (int64, error) {
 	//var relations []*model.Follow = mysql.Getrelation(usertoid, userfromid)
 	relations, err := mysql.Getrelation(usertoid, userfromid)
 	if err != nil {

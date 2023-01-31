@@ -2,7 +2,7 @@ package handler
 
 import (
 	"GoProject/model/vo"
-	"GoProject/service/serviceImpl"
+	"GoProject/service"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
 	_ "github.com/cloudwego/hertz/pkg/common/utils"
@@ -26,7 +26,7 @@ func RelationAction(ctx context.Context, c *app.RequestContext) {
 	userfromid, _ := strconv.ParseInt(userfromId, 10, 64)
 	usertoid, _ := strconv.ParseInt(usertoId, 10, 64)
 	//关注服务
-	fsi := serviceImpl.FollowServiceImpl{}
+	fsi := service.NewCommentServiceInstance()
 	//关注方法
 	res, err := fsi.CreateNewRelation(userfromid, usertoid)
 	if res != -1 && err == nil {
@@ -48,7 +48,7 @@ func RelationAction(ctx context.Context, c *app.RequestContext) {
 func FollowList(ctx context.Context, c *app.RequestContext) {
 	userId := c.Query("user_id")
 	id, _ := strconv.ParseInt(userId, 10, 64)
-	fsi := serviceImpl.FollowServiceImpl{}
+	fsi := service.NewCommentServiceInstance()
 	if UserInfoList, err := fsi.GetFollowListById(id); err == nil {
 		c.JSON(consts.StatusOK, vo.FollowResponse{
 			Response:     vo.Response{StatusCode: ResponseSuccess, StatusMsg: "Query UserInfo success"},
@@ -68,7 +68,7 @@ func FollowList(ctx context.Context, c *app.RequestContext) {
 func FollowerList(ctx context.Context, c *app.RequestContext) {
 	userId := c.Query("user_id")
 	id, _ := strconv.ParseInt(userId, 10, 64)
-	fsi := serviceImpl.FollowerServiceImpl{}
+	fsi := service.NewCommentServiceInstance2()
 	if UserInfoList, err := fsi.GetFollowerListById(id); err == nil {
 		c.JSON(consts.StatusOK, vo.FollowResponse{
 			Response:     vo.Response{StatusCode: ResponseSuccess, StatusMsg: "Query UserInfo success"},
@@ -104,7 +104,7 @@ func FriendList(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	// 正常获取好友列表
-	fsi := serviceImpl.FollowServiceImpl{}
+	fsi := service.NewCommentServiceInstance()
 	users, err := fsi.GetFollowListById(userId)
 	// 获取关注列表时出错。
 	if err != nil {
