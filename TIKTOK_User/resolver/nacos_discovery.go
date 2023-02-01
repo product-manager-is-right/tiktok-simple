@@ -26,7 +26,7 @@ func CreateDiscoveryServer() {
 	if err != nil {
 		panic(err)
 	}
-	myConfig, err := configs.ReadConfig("DEV")
+	myConfig, err := configs.ReadConfig(configs.DEV)
 	if err != nil {
 		log.Fatal("文件读取"+
 			"失败:", err.Error())

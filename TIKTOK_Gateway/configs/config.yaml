@@ -1,8 +1,8 @@
 port: 8070
 
 nacos:
-  addr: 101.42.50.112
-  port: 8845
+  addr: 101.43.5.142
+  port: 8848
 
 routes:
   - serviceName: http://tiktok.simple.user

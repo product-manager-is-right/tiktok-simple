@@ -14,15 +14,11 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
 	"github.com/spf13/viper"
-	"log"
 )
 
 func main() {
 	// 读取配置文件
-	_, err := configs.ReadConfig(configs.DEV)
-	if err != nil {
-		log.Print("读取配置文件失败")
-	}
+	configs.ReadConfig(configs.DEV)
 
 	// 初始化工具
 	initDeps()

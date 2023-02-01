@@ -2,8 +2,8 @@ port: 8080
 
 nacos:
   serviceName: tiktok.simple.user
-  addr: 101.42.50.112
-  port: 8845
+  addr: 101.43.5.142
+  port: 8848
   username: nacos
   password: nacos
 
