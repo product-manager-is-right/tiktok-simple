@@ -9,6 +9,7 @@ import (
 // GeneratedRegister
 // 注册路由
 func GeneratedRegister(r *server.Hertz) {
+
 	// user路由组
 	userRouter := r.Group("/douyin/user")
 	userRouter.GET("/", mw.JwtMiddleware.MiddlewareFunc(), handler.UserInfo)

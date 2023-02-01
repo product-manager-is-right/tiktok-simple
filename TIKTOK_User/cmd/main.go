@@ -5,6 +5,7 @@ import (
 	"TIKTOK_User/configs"
 	"TIKTOK_User/dal"
 	"TIKTOK_User/mw"
+	"TIKTOK_User/resolver"
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/cloudwego/hertz/pkg/app/server/registry"
 	"github.com/cloudwego/hertz/pkg/common/utils"
@@ -13,11 +14,15 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
 	"github.com/spf13/viper"
+	"log"
 )
 
 func main() {
 	// 读取配置文件
-	configs.ReadConfig(configs.DEV)
+	_, err := configs.ReadConfig(configs.DEV)
+	if err != nil {
+		log.Print("读取配置文件失败")
+	}
 
 	// 初始化工具
 	initDeps()
@@ -62,8 +67,8 @@ func startServer() {
 			Weight:      10,
 			Tags:        nil,
 		}))
-
 	// 注册路由
+	resolver.CreateDiscoveryServer()
 	router.GeneratedRegister(h)
 
 	h.Spin()
