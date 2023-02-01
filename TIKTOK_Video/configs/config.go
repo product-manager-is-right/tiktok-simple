@@ -2,33 +2,15 @@ package configs
 
 import (
 	"github.com/spf13/viper"
-	"gopkg.in/yaml.v3"
 	"log"
-	"os"
 )
-
-type Config struct {
-	Port   int      `yaml:"port"`
-	Nacos  *Nacos   `yaml:"nacos"`
-	Routes []*Route `yaml:"routes"`
-}
-type Route struct {
-	ServiceName string   `yaml:"serviceName"`
-	Method      string   `yaml:"method"`
-	Apis        []string `yaml:"apis"`
-}
-
-type Nacos struct {
-	Addr string `yaml:"addr"`
-	Port uint64 `yaml:"port"`
-}
 
 const (
 	DEV  = "dev"
 	TEST = "test"
 )
 
-func ReadConfig(mode string) (*Config, error) {
+func ReadConfig(mode string) {
 	var path = ""
 	if mode == DEV {
 		path = "./configs/config.yaml"
@@ -45,15 +27,4 @@ func ReadConfig(mode string) (*Config, error) {
 			log.Fatal("配置文件找到了，但有其他错误")
 		}
 	}
-	// read the config
-	in, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-	var config Config
-	err = yaml.Unmarshal(in, &config)
-	if err != nil {
-		return nil, err
-	}
-	return &config, nil
 }
