@@ -17,8 +17,8 @@ GetIsFavorite
 func GetIsFavorite(userid, videoid int64) (bool, error) {
 	favorite := model.Favorite{}
 
-	if err := DB.Where("UserId = ?", userid).
-		Where("VideoId = ?", videoid).
+	if err := DB.Where("user_id = ?", userid).
+		Where("video_id = ?", videoid).
 		Take(&favorite).Error; err == gorm.ErrRecordNotFound {
 		return false, nil
 	} else if err != nil {
