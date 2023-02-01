@@ -26,3 +26,8 @@ func FavoriteList(ctx context.Context, c *app.RequestContext) {
 		"message": "ok",
 	})
 }
+func IsFavorite(ctx context.Context, c *app.RequestContext) {
+	c.JSON(consts.StatusOK, utils.H{
+		"message": "ok",
+	})
+}

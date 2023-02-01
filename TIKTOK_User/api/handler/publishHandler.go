@@ -43,3 +43,24 @@ func PublishList(ctx context.Context, c *app.RequestContext) {
 		VideoList: videoList,
 	})
 }
+func PublishVideo(ctx context.Context, c *app.RequestContext) {
+	userid := c.Query("userid")
+	videoid := c.Query("videoid")
+	if userid == "" || videoid == "" {
+		c.JSON(consts.StatusOK, vo.RegisterResponse{
+			Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "query userid or videoid empty"},
+		})
+	}
+	/*
+		usi := serviceImpl.UserServiceImpl{}
+		if _, err := usi.CreateUserByNameAndPassword(username, password); err != nil {
+			c.JSON(consts.StatusOK, vo.RegisterResponse{
+				Response: vo.Response{
+					StatusCode: ResponseFail,
+					StatusMsg:  "error :" + err.Error()},
+			})
+			c.Abort()
+		}
+	*/
+
+}

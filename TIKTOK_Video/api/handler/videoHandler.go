@@ -80,14 +80,14 @@ func Feed(ctx context.Context, c *app.RequestContext) {
 */
 func PublishAction(ctx context.Context, c *app.RequestContext) {
 	// get the basic info from meta
-	//user, _ := c.Get(mw.IdentityKey)
+	userId, _ := c.Get(mw.IdentityKey)
 	videoTitle := c.PostForm("title")
 	videoData, err := c.Request.FormFile("data")
 	if err != nil {
 		log.Print("can not get this filestream")
 	}
 	vsi := ServiceImpl.VideoServiceImpl{}
-	if err := vsi.PublishVideo(24, videoData, videoTitle); err != nil {
+	if err := vsi.PublishVideo(userId.(int64), videoData, videoTitle); err != nil {
 		c.JSON(consts.StatusOK, vo.Response{
 			StatusCode: ResponseFail,
 			StatusMsg:  err.Error(),
