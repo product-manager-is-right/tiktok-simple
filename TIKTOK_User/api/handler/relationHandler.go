@@ -108,7 +108,7 @@ func FollowerList(ctx context.Context, c *app.RequestContext) {
 func FriendList(ctx context.Context, c *app.RequestContext) {
 	u := c.Query("user_id")
 	if u == "" {
-		c.JSON(http.StatusOK, vo.FollowerResponse{
+		c.JSON(http.StatusOK, vo.RelationResponse{
 			Response:     vo.Response{StatusCode: ResponseFail, StatusMsg: "query user id empty"},
 			UserInfoList: nil,
 		})
@@ -117,7 +117,7 @@ func FriendList(ctx context.Context, c *app.RequestContext) {
 	userId, err := strconv.ParseInt(u, 10, 64)
 	// 用户id解析出错。
 	if nil != err {
-		c.JSON(http.StatusOK, vo.FollowerResponse{
+		c.JSON(http.StatusOK, vo.RelationResponse{
 			Response:     vo.Response{StatusCode: ResponseSuccess, StatusMsg: "用户id格式错误"},
 			UserInfoList: nil,
 		})
@@ -128,7 +128,7 @@ func FriendList(ctx context.Context, c *app.RequestContext) {
 	users, err := fsi.GetFollowListById(userId)
 	// 获取关注列表时出错。
 	if err != nil {
-		c.JSON(http.StatusOK, vo.FollowerResponse{
+		c.JSON(http.StatusOK, vo.RelationResponse{
 			Response:     vo.Response{StatusCode: ResponseSuccess, StatusMsg: "获取好友列表时出错:" + err.Error()},
 			UserInfoList: nil,
 		})
@@ -136,7 +136,7 @@ func FriendList(ctx context.Context, c *app.RequestContext) {
 	}
 	// 成功获取到粉丝列表。
 	log.Println("获取粉丝列表成功。")
-	c.JSON(http.StatusOK, vo.FollowerResponse{
+	c.JSON(http.StatusOK, vo.RelationResponse{
 		Response:     vo.Response{StatusCode: ResponseSuccess, StatusMsg: "Query UserInfo success"},
 		UserInfoList: users,
 	})
