@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"GoProject/model"
+	"errors"
 	"gorm.io/gorm"
 	"log"
 )
@@ -84,6 +85,20 @@ func Getrelation(usertoid, userfromid int64) ([]*model.Follow, error) {
 		return nil, err
 	}
 	return res, nil
+}
+
+func Deleterelation(usertoid, userfromid int64) error {
+	Follow := model.Follow{UserIdTo: usertoid, UserIdFrom: userfromid, Cancel: 0}
+
+	result := DB.Where("user_id_from = ?", userfromid).Where("user_id_to = ?", usertoid).
+		Delete(&Follow)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return errors.New("删除失败")
+	}
+	return nil
 }
 
 /*

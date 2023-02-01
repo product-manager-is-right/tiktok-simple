@@ -8,6 +8,7 @@ import (
 
 type followService interface {
 	CreateNewRelation(userfromid, usertoid int64) (int64, error)
+	DeleteRelation(userfromid, usertoid int64) error
 	GetFollowListById(userId int64) ([]vo.UserInfo, error)
 }
 

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"GoProject/dal/mysql"
 	"GoProject/model/vo"
 	"GoProject/service"
 	"context"
@@ -28,17 +29,36 @@ func RelationAction(ctx context.Context, c *app.RequestContext) {
 	//关注服务
 	fsi := service.NewCommentServiceInstance()
 	//关注方法
-	res, err := fsi.CreateNewRelation(userfromid, usertoid)
-	if res != -1 && err == nil {
-		//返回格式
-		c.JSON(consts.StatusOK, vo.FollowActionResponse{
-			Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "关注成功"},
-		})
-	} else {
-		c.JSON(consts.StatusOK, vo.FollowActionResponse{
-			Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "关注失败"},
-		})
+	isFollow, err := mysql.GetIsFollow(usertoid, userfromid)
+	if err != nil {
+		return
 	}
+	if isFollow == false {
+		res, err := fsi.CreateNewRelation(userfromid, usertoid)
+		if res != -1 && err == nil {
+			//返回格式
+			c.JSON(consts.StatusOK, vo.FollowActionResponse{
+				Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "关注成功"},
+			})
+		} else {
+			c.JSON(consts.StatusOK, vo.FollowActionResponse{
+				Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "关注失败"},
+			})
+		}
+	} else {
+		err := fsi.DeleteRelation(userfromid, usertoid)
+		if err == nil {
+			//返回格式
+			c.JSON(consts.StatusOK, vo.FollowActionResponse{
+				Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "取关成功"},
+			})
+		} else {
+			c.JSON(consts.StatusOK, vo.FollowActionResponse{
+				Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "取关失败"},
+			})
+		}
+	}
+
 }
 
 // FollowList

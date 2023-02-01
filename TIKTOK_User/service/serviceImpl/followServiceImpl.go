@@ -29,6 +29,13 @@ func (fsi *FollowServiceImpl) CreateNewRelation(userfromid, usertoid int64) (int
 	}
 	return relationId, nil
 }
+func (fsi *FollowServiceImpl) DeleteRelation(userfromid, usertoid int64) error {
+	if err := mysql.Deleterelation(usertoid, userfromid); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (fsi *FollowServiceImpl) GetFollowListById(userId int64) ([]vo.UserInfo, error) {
 	//获取关注对象的id数组
 	ids, err := mysql.GetFollowingIds(userId)
