@@ -20,7 +20,7 @@ func CreateDiscoveryClient(myConfig *configs.Config) *client.Client {
 		*constant.NewServerConfig(myConfig.Nacos.Addr, myConfig.Nacos.Port),
 	}
 	cc := constant.ClientConfig{
-		NamespaceId:         "public",
+		NamespaceId:         "user",
 		TimeoutMs:           5000,
 		NotLoadCacheAtStart: true,
 		LogLevel:            "info",

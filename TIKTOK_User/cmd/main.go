@@ -67,8 +67,9 @@ func startServer() {
 			Weight:      10,
 			Tags:        nil,
 		}))
-	// 注册路由
+	//服务发现
 	resolver.CreateDiscoveryServer()
+	// 注册路由
 	router.GeneratedRegister(h)
 
 	h.Spin()
