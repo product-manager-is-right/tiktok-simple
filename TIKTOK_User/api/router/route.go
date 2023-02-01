@@ -39,4 +39,7 @@ func GeneratedRegister(r *server.Hertz) {
 	relationRouter.GET("/follow/list/", handler.FollowList)
 	relationRouter.GET("/follower/list/", handler.FollowerList)
 	relationRouter.GET("/friend/list/", handler.FriendList)
+
+	//添加一个由微服务之间调用的请求路径,获取用户信息列表,额外开一个是为了不走JWT认证
+	r.POST("douyin/user/get", handler.UserInfoList)
 }

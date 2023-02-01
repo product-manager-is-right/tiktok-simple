@@ -49,7 +49,10 @@ func bindVideoInfo(videos []*model.Video, userId int64) ([]vo.VideoInfo, error) 
 		Ids[i] = video.UserId
 	}
 	// 远程调用，获取user/author的个人信息
-	authors, _ := getUserInfoByIds(Ids, userId)
+	authors, err := getUserInfoByIds(Ids, userId)
+	if err != nil {
+		return nil, err
+	}
 
 	for i, video := range videos {
 		videoId := video.VideoId

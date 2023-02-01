@@ -5,8 +5,6 @@ import (
 	"TIKTOK_Video/model"
 	"TIKTOK_Video/model/vo"
 	"errors"
-	"math/rand"
-	"strconv"
 	"time"
 )
 
@@ -32,16 +30,21 @@ func (csi *CommentServiceImpl) GetCommentListByVideoId(videoId, userId int64) ([
 
 func bindCommentInfo(comments []*model.Comment, userId int64) ([]*vo.CommentInfo, error) {
 	ret := make([]*vo.CommentInfo, len(comments))
+	//将需要查询的id拿出来
+	userIds := make([]int64, len(comments))
+	for i, comment := range comments {
+		userIds[i] = comment.UserId
+	}
+	userInfo, err := getUserInfoByIds(userIds, userId)
+	if err != nil {
+		return nil, err
+	}
 	for idx, comment := range comments {
-		info, err := getUserInfoById(comment.UserId, userId)
-		if err != nil {
-			return nil, err
-		}
 		ret[idx] = &vo.CommentInfo{
 			Id:         comment.Id,
-			User:       *info,
+			User:       *userInfo[comment.UserId],
 			Content:    comment.Comment,
-			CreateDate: time.Unix(comment.CreateDate, 0).Format("01-02"),
+			CreateDate: time.Unix(comment.CreateDate, 0).Format("01-02 15:04"),
 		}
 	}
 	return ret, nil
@@ -126,19 +129,21 @@ ownerId: 发起查询评论的ID，用于判断是否是followed
 
 */
 func getUserInfoById(userId int64, ownerId int64) (*vo.UserInfo, error) {
-	//TODO 远程调用获取User信息
-	//先手动实现一下
-	rand.Seed(time.Now().Unix())
-	ret := &vo.UserInfo{
-		Id:            userId,
-		Name:          "user" + strconv.FormatInt(userId, 10),
-		FollowCount:   rand.Int63() % 10000,
-		FollowerCount: rand.Int63() % 10000,
-		IsFollow:      userId%73 == 0,
-	}
-	return ret, nil
-	// TODO : impl
-	//return nil, nil
+	serviceImpl := UserServiceImpl{}
+	return serviceImpl.GetUserInfoById(userId, userId)
+	////TODO 远程调用获取User信息
+	////先手动实现一下
+	//rand.Seed(time.Now().Unix())
+	//ret := &vo.UserInfo{
+	//	Id:            userId,
+	//	Name:          "user" + strconv.FormatInt(userId, 10),
+	//	FollowCount:   rand.Int63() % 10000,
+	//	FollowerCount: rand.Int63() % 10000,
+	//	IsFollow:      userId%73 == 0,
+	//}
+	//return ret, nil
+	//// TODO : impl
+	////return nil, nil
 }
 
 // 调用远程接口，根据userid数组获取具体的user的个人信息
@@ -150,19 +155,21 @@ ownerId: 发起查询评论的ID，用于判断是否是followed
 
 */
 func getUserInfoByIds(userIds []int64, ownerId int64) (map[int64]*vo.UserInfo, error) {
-	//先手动实现一下
-	mm := make(map[int64]*vo.UserInfo, len(userIds))
-	rand.Seed(time.Now().Unix())
-	for _, userId := range userIds {
-		mm[userId] = &vo.UserInfo{
-			Id:            userId,
-			Name:          "user" + strconv.FormatInt(userId, 10),
-			FollowCount:   rand.Int63() % 10000,
-			FollowerCount: rand.Int63() % 10000,
-			IsFollow:      userId%73 == 0,
-		}
-	}
-	return mm, nil
+	serviceImpl := UserServiceImpl{}
+	return serviceImpl.GetUsersInfoByIds(userIds, ownerId)
+	////先手动实现一下
+	//mm := make(map[int64]*vo.UserInfo, len(userIds))
+	//rand.Seed(time.Now().Unix())
+	//for _, userId := range userIds {
+	//	mm[userId] = &vo.UserInfo{
+	//		Id:            userId,
+	//		Name:          "user" + strconv.FormatInt(userId, 10),
+	//		FollowCount:   rand.Int63() % 10000,
+	//		FollowerCount: rand.Int63() % 10000,
+	//		IsFollow:      userId%73 == 0,
+	//	}
+	//}
+	//return mm, nil
 	// TODO : impl
 	//return nil, nil
 }

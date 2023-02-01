@@ -25,7 +25,8 @@ func GetInstance() *client.Client {
 }
 func CreateDiscoveryServer() {
 	once.Do(func() {
-		cli, err := client.NewClient()
+		var err error
+		cli, err = client.NewClient()
 		if err != nil {
 			panic(err)
 		}

@@ -3,6 +3,7 @@ package mysql
 import (
 	"TIKTOK_User/model"
 	"TIKTOK_User/util"
+	"errors"
 )
 
 // CreateUser
@@ -44,4 +45,14 @@ func GetUserByUserId(userId int64) (*model.User, error) {
 		return nil, err
 	}
 	return res, nil
+}
+
+func GetUserByIds(userIds []int64) ([]*model.User, error) {
+	users := make([]*model.User, 0)
+	result := DB.Find(&users, userIds)
+	if result.Error != nil || result.RowsAffected == 0 {
+		return nil, errors.New("find error")
+	}
+	return users, nil
+
 }

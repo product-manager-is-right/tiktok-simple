@@ -1,11 +1,9 @@
 package test
 
 import (
-	"TIKTOK_Video/configs"
 	"TIKTOK_Video/dal/mysql"
 	"fmt"
 	"github.com/cloudwego/hertz/pkg/common/test/assert"
-	"os"
 	"testing"
 )
 
@@ -26,11 +24,11 @@ func TestGetCommentByCommentId(t *testing.T) {
 
 }
 
-func TestMain(m *testing.M) {
-	configs.ReadConfig(configs.TEST)
-
-	mysql.Init()
-	code := m.Run()
-
-	os.Exit(code)
-}
+//func TestMain(m *testing.M) {
+//	configs.ReadConfig(configs.TEST)
+//
+//	mysql.Init()
+//	code := m.Run()
+//
+//	os.Exit(code)
+//}

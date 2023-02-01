@@ -7,6 +7,7 @@ import (
 	"TIKTOK_User/mw"
 	"TIKTOK_User/service/serviceImpl"
 	"context"
+	"encoding/json"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"strconv"
 
@@ -48,6 +49,58 @@ func UserInfo(ctx context.Context, c *app.RequestContext) {
 			Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "error :" + err.Error()},
 		})
 	}
+}
+
+func UserInfoList(ctx context.Context, c *app.RequestContext) {
+	// 查询对象的userIds,会以切片json的格式传过来,如[1,2,3,4]
+	//queryUserIds := c.Param("user_ids")
+	queryUserIds := c.PostForm("user_ids")
+	ids := make([]int64, 0)
+
+	if err := json.Unmarshal([]byte(queryUserIds), &ids); err != nil {
+		c.JSON(consts.StatusOK, vo.Response{
+			StatusCode: ResponseFail,
+			StatusMsg:  "error :" + err.Error(),
+		})
+		return
+	}
+	//可以传查询者的id,默认为0，即不传
+	userId := int64(0)
+	if str := c.Param("user_id"); str != "" {
+		t, err2 := strconv.ParseInt(str, 10, 64)
+		if err2 != nil {
+			c.JSON(consts.StatusOK, vo.Response{
+				StatusCode: ResponseFail,
+				StatusMsg:  "error :" + err2.Error(),
+			})
+			return
+		}
+		userId = t
+	}
+	//res := make([]*vo.UserInfo, len(ids))
+	// 查询昵称、关注数、粉丝数
+	usi := serviceImpl.UserServiceImpl{}
+	res, err := usi.GetUsersInfoByIds(ids, userId)
+	if err != nil {
+		c.JSON(consts.StatusOK, vo.Response{
+			StatusCode: ResponseFail,
+			StatusMsg:  "error :" + err.Error(),
+		})
+		return
+	}
+	bytes, err := json.Marshal(res)
+	if err != nil {
+		c.JSON(consts.StatusOK, vo.Response{
+			StatusCode: ResponseFail,
+			StatusMsg:  "error :" + err.Error(),
+		})
+		return
+	}
+	c.JSON(consts.StatusOK, vo.Response{
+		StatusCode: ResponseSuccess,
+		StatusMsg:  string(bytes),
+	})
+
 }
 
 // Register

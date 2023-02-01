@@ -51,3 +51,32 @@ func (usi *UserServiceImpl) GetUserInfoById(queryUserId int64, userId int64) (*v
 
 	return userInfo, nil
 }
+
+func (usi UserServiceImpl) GetUsersInfoByIds(queryUserId []int64, userId int64) ([]*vo.UserInfo, error) {
+	users, err := mysql.GetUserByIds(queryUserId)
+	if err != nil {
+		return nil, err
+	}
+	userInfo := make([]*vo.UserInfo, len(users))
+	for idx, user := range users {
+		if user == nil {
+			continue
+		}
+		info := &vo.UserInfo{}
+		// 调用dal层 ： 根据userId查询关注数和粉丝数，查询失败为0
+		followCnt, _ := mysql.GetFollowCntByUserId(user.Id)
+
+		followerCnt, _ := mysql.GetFollowerCntByUserId(user.Id)
+
+		//调用dal层 ： 判断主user 是否 关注 queryUser，查询失败为false
+		isFollow, _ := mysql.GetIsFollow(user.Id, userId)
+
+		info.Id = user.Id
+		info.Name = user.Username
+		info.FollowerCount = followerCnt
+		info.FollowCount = followCnt
+		info.IsFollow = isFollow
+		userInfo[idx] = info
+	}
+	return userInfo, nil
+}
