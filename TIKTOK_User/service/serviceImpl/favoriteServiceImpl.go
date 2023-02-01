@@ -10,20 +10,26 @@ import (
 type FavoriteServiceImpl struct {
 }
 
-func (fsi *FavoriteServiceImpl) CreateNewFavorite(userId, videoId int64) (int64, error) {
+func (fsi *FavoriteServiceImpl) CreateNewFavorite(userid, videoid int64) (int64, error) {
 
-	favorites, err := mysql.GetFavorite(userId, videoId)
+	favorites, err := mysql.GetFavorite(userid, videoid)
 	if err != nil {
 		return -1, err
 	}
 	if len(favorites) > 0 {
 		return -1, errors.New("the user has already favored the video")
 	}
-	favoriteId, err := mysql.CreateNewFavorite(userId, videoId)
+	favoriteId, err := mysql.CreateNewFavorite(userid, videoid)
 	if err != nil {
 		return -1, err
 	}
 	return favoriteId, nil
+}
+func (fsi *FavoriteServiceImpl) DeleteFavorite(userid, videoid int64) error {
+	if err := mysql.DeleteFavorite(userid, videoid); err != nil {
+		return err
+	}
+	return nil
 }
 func (fsi *FavoriteServiceImpl) GetFavoriteVideosListByUserId(userIdTar, userIdSrc int64) ([]vo.VideoInfo, error) {
 	var videoInfos []vo.VideoInfo

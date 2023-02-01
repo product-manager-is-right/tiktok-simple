@@ -13,7 +13,7 @@ type followService interface {
 }
 
 var (
-	service followService
+	followservice followService
 
 	followServiceOnce sync.Once
 )
@@ -22,9 +22,9 @@ var (
 func NewCommentServiceInstance() followService {
 	followServiceOnce.Do(
 		func() {
-			service = &serviceImpl.FollowServiceImpl{}
+			followservice = &serviceImpl.FollowServiceImpl{}
 		})
-	return service
+	return followservice
 }
 
 type followerService interface {

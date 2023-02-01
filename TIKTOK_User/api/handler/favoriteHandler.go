@@ -1,10 +1,13 @@
 package handler
 
 import (
+	"GoProject/dal/mysql"
 	"GoProject/model/vo"
+	"GoProject/service"
 	"GoProject/service/serviceImpl"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
+	_ "github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"strconv"
 )
@@ -21,17 +24,38 @@ func FavoriteAction(ctx context.Context, c *app.RequestContext) {
 	//user, _ := c.Get(mw.IdentityKey)
 	userid, _ := strconv.ParseInt(userId, 10, 64)
 	videoid, _ := strconv.ParseInt(videoId, 10, 64)
-	fsi := serviceImpl.FavoriteServiceImpl{}
-	res, err := fsi.CreateNewFavorite(userid, videoid)
-	if res != -1 && err == nil {
-		c.JSON(consts.StatusOK, vo.FavorVideoResponse{
-			Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "点赞成功"},
-		})
-	} else {
-		c.JSON(consts.StatusOK, vo.FavorVideoResponse{
-			Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "点赞失败"},
-		})
+
+	fsi := service.NewFavoriteServiceInstance()
+
+	isFavorite, err := mysql.GetIsFavorite(userid, videoid)
+	if err != nil {
+		return
 	}
+	if isFavorite == false {
+		fes, err := fsi.CreateNewFavorite(userid, videoid)
+		if fes != -1 && err == nil {
+			c.JSON(consts.StatusOK, vo.FavorVideoResponse{
+				Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "点赞成功"},
+			})
+		} else {
+			c.JSON(consts.StatusOK, vo.FavorVideoResponse{
+				Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "点赞失败"},
+			})
+		}
+	} else {
+		err := fsi.DeleteFavorite(userid, videoid)
+		if err == nil {
+			//返回格式
+			c.JSON(consts.StatusOK, vo.FavorVideoResponse{
+				Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "取消点赞成功"},
+			})
+		} else {
+			c.JSON(consts.StatusOK, vo.FavorVideoResponse{
+				Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "取消点赞失败"},
+			})
+		}
+	}
+
 }
 
 // FavoriteList

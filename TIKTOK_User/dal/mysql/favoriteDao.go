@@ -2,22 +2,50 @@ package mysql
 
 import (
 	"GoProject/model"
+	"errors"
 	"fmt"
+	"gorm.io/gorm"
 )
+
+type FavoriteDao struct {
+}
 
 /*
 GetIsFavorite
 根据userId 和 videoId 判断该用户是否喜欢
 */
-func GetIsFavorite(userId, videoId int64) (bool, error) {
-	// TODO : impl
+func GetIsFavorite(userid, videoid int64) (bool, error) {
+	favorite := model.Favorite{}
+
+	if err := DB.Where("UserId = ?", userid).
+		Where("VideoId = ?", videoid).
+		Take(&favorite).Error; err == gorm.ErrRecordNotFound {
+		return false, nil
+	} else if err != nil {
+		return false, err
+	}
 	return true, nil
 }
-func CreateNewFavorite(userId, videoId int64) (int64, error) {
-	favorite := model.Favorite{UserId: userId, VideoId: videoId}
+func CreateNewFavorite(userid, videoid int64) (int64, error) {
+	favorite := model.Favorite{UserId: userid, VideoId: videoid}
 	result := DB.Create(&favorite)
 	return favorite.Id, result.Error
 }
+
+func DeleteFavorite(userid, videoid int64) error {
+	Favorite := model.Favorite{UserId: userid, VideoId: videoid}
+
+	result := DB.Where("user_id = ?", userid).Where("video_id = ?", videoid).
+		Delete(&Favorite)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return errors.New("删除失败")
+	}
+	return nil
+}
+
 func GetFavoritesById(userId int64) ([]int64, error) {
 	var res []int64
 	err := DB.Model(model.Favorite{}).Where(map[string]interface{}{"user_id": userId}).Pluck("video_id", &res).Error
