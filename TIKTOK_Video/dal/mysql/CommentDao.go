@@ -32,7 +32,7 @@ func InsertComment(commentText string, videoId, userId int64) (*model.Comment, e
 		VideoId:    videoId,
 		UserId:     userId,
 		Comment:    commentText,
-		CreateDate: time.Now().UnixMilli(),
+		CreateDate: time.Now().Unix(),
 	}
 	result := DB.Create(&comment)
 	if result.Error != nil {

@@ -115,7 +115,7 @@ func (csi *CommentServiceImpl) InsertComment(commentText string, videoId, userId
 		Id:         comment.Id,
 		User:       *userInfo,
 		Content:    comment.Comment,
-		CreateDate: time.Unix(comment.CreateDate, 0).Format("01-02"),
+		CreateDate: time.Unix(comment.CreateDate, 0).Format("01-02 15:04"),
 	}
 	return commentInfo, nil
 }

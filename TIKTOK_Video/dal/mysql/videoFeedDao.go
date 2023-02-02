@@ -43,7 +43,7 @@ func GetVideosByTime(LatestTime int64) ([]*model.Video, error) {
 }
 func DecrementCommentCount(videoId int64) error {
 	video := model.Video{VideoId: videoId}
-	result := DB.Model(&video).Update("comment_count", gorm.Expr("comment_count - 1"))
+	result := DB.Model(&video).Where("video_id = ?", videoId).Update("comment_count", gorm.Expr("comment_count - 1"))
 	var err error
 	if err = result.Error; err != nil {
 		return err
