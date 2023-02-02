@@ -1,10 +1,10 @@
 package handler
 
 import (
-	"GoProject/dal/mysql"
-	"GoProject/model/vo"
-	"GoProject/service"
-	"GoProject/service/serviceImpl"
+	"TIKTOK_User/dal/mysql"
+	"TIKTOK_User/model/vo"
+	"TIKTOK_User/service"
+	"TIKTOK_User/service/serviceImpl"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
 	_ "github.com/cloudwego/hertz/pkg/common/utils"

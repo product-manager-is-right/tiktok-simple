@@ -1,8 +1,8 @@
 package service
 
 import (
-	"GoProject/model/vo"
-	"GoProject/service/serviceImpl"
+	"TIKTOK_User/model/vo"
+	"TIKTOK_User/service/serviceImpl"
 	"sync"
 )
 

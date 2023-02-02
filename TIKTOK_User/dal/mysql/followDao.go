@@ -24,19 +24,6 @@ func GetFollowCntByUserId(userId int64) (int64, error) {
 	}
 
 	return cnt, nil
-	// TODO : impl
-	//return 1, nil
-	var cnt int64 = 10
-
-	if err := DB.Model(model.Follow{}).
-		Where("user_id_from = ?", userId).
-		Where("cancel = ?", 0).
-		Count(&cnt).Error; err != nil {
-		log.Println(err.Error())
-		return 0, err
-	}
-
-	return cnt, nil
 }
 
 /*

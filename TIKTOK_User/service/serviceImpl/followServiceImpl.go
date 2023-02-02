@@ -1,8 +1,8 @@
 package serviceImpl
 
 import (
-	"GoProject/dal/mysql"
-	"GoProject/model/vo"
+	"TIKTOK_User/dal/mysql"
+	"TIKTOK_User/model/vo"
 	"errors"
 	"gorm.io/gorm"
 	//"fmt"
