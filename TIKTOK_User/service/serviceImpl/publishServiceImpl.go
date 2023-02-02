@@ -3,12 +3,23 @@ package serviceImpl
 import (
 	"TIKTOK_User/dal/mysql"
 	"TIKTOK_User/model/vo"
+	"TIKTOK_User/resolver"
+	"context"
+	"encoding/json"
+	"errors"
+	"github.com/cloudwego/hertz/pkg/common/config"
+	"github.com/cloudwego/hertz/pkg/protocol"
+	"log"
 	"math/rand"
 	"time"
 )
 
 type PublishServiceImpl struct {
 }
+
+// ErrGetVideosInfo
+// 错误返回值
+var ErrGetVideosInfo = errors.New("can not get the VideoInfo")
 
 /*
 GetVideoList
@@ -82,16 +93,64 @@ func remoteGetVideoInfoCall(videoIds []int64) ([]vo.VideoInfo, error) {
 	// TODO : remote impl
 	vs := make([]vo.VideoInfo, len(videoIds))
 	rand.Seed(time.Now().Unix())
-	for i, videoId := range videoIds {
-		vs[i] = vo.VideoInfo{
-			Id:            videoId,
-			PlayUrl:       "http://120.25.2.146:9000/tiktok/videos/test.mp4",
-			CoverUrl:      "http://120.25.2.146:9000/tiktok/picture/testP.jpg",
-			FavoriteCount: rand.Int63() % 10000,
-			CommentCount:  rand.Int63() % 10000,
-			IsFavorite:    videoId%73 == 0,
-			Title:         "Test",
+	client := resolver.GetInstance()
+	args := &protocol.Args{}
+	bytes, err := json.Marshal(videoIds)
+	if err != nil {
+		log.Print("failed to change videoIds to json")
+	}
+	//用 bytes的方式存储videos的id
+	args.Add("video", string(bytes))
+	status, body, err := client.Post(context.Background(), nil, "http://tiktok.simple.video/douyin/publish/GetVideos", args, config.WithSD(true))
+	if status == 200 {
+		res := vo.Response{}
+		if err = json.Unmarshal(body, &res); err != nil {
+			return nil, ErrGetVideosInfo
+		}
+		videos := make([]*vo.VideoInfo, len(videoIds))
+		if err = json.Unmarshal([]byte(res.StatusMsg), &videos); err != nil {
+			return nil, ErrGetVideosInfo
+		}
+		for index, video := range videos {
+			vs[index] = vo.VideoInfo{
+				Id:            video.Id,
+				PlayUrl:       video.PlayUrl,
+				CoverUrl:      video.CoverUrl,
+				FavoriteCount: video.FavoriteCount,
+				CommentCount:  video.CommentCount,
+				IsFavorite:    video.IsFavorite,
+				Title:         "Test",
+			}
+
 		}
 	}
 	return vs, nil
+	/*
+		for i, videoId := range videoIds {
+				vs[i] = vo.VideoInfo{
+					Id:            videoId,
+					PlayUrl:       "http://120.25.2.146:9000/tiktok/videos/test.mp4",
+					CoverUrl:      "http://120.25.2.146:9000/tiktok/picture/testP.jpg",
+					FavoriteCount: rand.Int63() % 10000,
+					CommentCount:  rand.Int63() % 10000,
+					IsFavorite:    videoId%73 == 0,
+					Title:         "Test",
+				}
+			}
+	*/
+}
+
+// PublishVideoInfo /*
+// 检查是否存在用户id并存储该videoId 和 UserId 到 ums数据库
+func (psi *PublishServiceImpl) PublishVideoInfo(userId, videoId int64) error {
+	//检查是否有该userid
+	_, err := mysql.GetUserByUserId(userId)
+	if err != nil {
+		return err
+	}
+	//创建video和user进入数据库
+	if err := mysql.CreatePublishVideo(userId, videoId); err != nil {
+		return err
+	}
+	return nil
 }

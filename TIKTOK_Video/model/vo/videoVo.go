@@ -38,11 +38,7 @@ type FeedResponse struct {
 	VideoList []VideoInfo `json:"video_list"`
 	NextTime  int64       `json:"next_time"`
 }
-
-var DemoUser = UserInfo{
-	Id:            1,
-	Name:          "TestUser",
-	FollowCount:   1,
-	FollowerCount: 1,
-	IsFollow:      false,
+type VideoInfoResponse struct {
+	Response
+	VideoList []VideoInfo `json:"video_list,omitempty"`
 }

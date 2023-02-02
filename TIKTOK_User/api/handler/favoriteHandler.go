@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"TIKTOK_User/model/vo"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/utils"
@@ -26,7 +27,17 @@ func FavoriteList(ctx context.Context, c *app.RequestContext) {
 		"message": "ok",
 	})
 }
+
+// IsFavorite
+// 判断是否为喜欢接口
 func IsFavorite(ctx context.Context, c *app.RequestContext) {
+	userIdInfo := c.Query("userId")
+	videoIdInfo := c.Query("videoId")
+	if userIdInfo == "" || videoIdInfo == "" {
+		c.JSON(consts.StatusOK, vo.RegisterResponse{
+			Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "query userid or videoId empty"},
+		})
+	}
 	c.JSON(consts.StatusOK, utils.H{
 		"message": "ok",
 	})
