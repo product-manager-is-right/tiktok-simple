@@ -42,7 +42,7 @@ func GetUserByUserId(userId int64) (*model.User, error) {
 	res := &model.User{}
 	if err := DB.Where("id = ?", userId).
 		First(&res).Error; err != nil {
-		return nil, err
+		return res, err
 	}
 	return res, nil
 }
