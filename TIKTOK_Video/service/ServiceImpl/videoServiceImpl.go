@@ -5,9 +5,12 @@ import (
 	"TIKTOK_Video/model"
 	"TIKTOK_Video/model/vo"
 	"TIKTOK_Video/mw"
+	"TIKTOK_Video/resolver"
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
+	"github.com/cloudwego/hertz/pkg/common/config"
 	uuid "github.com/satori/go.uuid"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 	"image"
@@ -16,12 +19,17 @@ import (
 	"log"
 	"mime/multipart"
 	"os"
+	"strconv"
 	"time"
 )
 
 type VideoServiceImpl struct {
 }
 
+// GetVideoInfosByLatestTime /*
+/*
+根据最后传入的时间获取对应的视频
+*/
 func (vsi *VideoServiceImpl) GetVideoInfosByLatestTime(latestTime int64, userId int64) ([]vo.VideoInfo, int64, error) {
 	var videoInfos []vo.VideoInfo
 	nextTime := time.Now().UnixMilli()
@@ -41,6 +49,9 @@ func (vsi *VideoServiceImpl) GetVideoInfosByLatestTime(latestTime int64, userId 
 	return videoInfos, nextTime, err
 }
 
+/*
+根据对应的video和userid返回video视频的list
+*/
 func bindVideoInfo(videos []*model.Video, userId int64) ([]vo.VideoInfo, error) {
 	videoInfos := make([]vo.VideoInfo, len(videos))
 	Ids := make([]int64, len(videos))
@@ -82,12 +93,8 @@ func bindVideoInfo(videos []*model.Video, userId int64) ([]vo.VideoInfo, error) 
 	return videoInfos, nil
 }
 
-// 调用远程接口，判断userId是否喜欢videoId视频
-func isFavorite(videoId int64, userId int64) (bool, error) {
-	// TODO : impl
-	return false, nil
-}
-
+// PublishVideo /*
+// 将视频存储到minio文件服务器
 func (vsi *VideoServiceImpl) PublishVideo(userId int64, fileHeader *multipart.FileHeader, videoTitle string) error {
 	// 处理multipart.FileHeader文件为byte[]
 	file, err := fileHeader.Open()
@@ -105,6 +112,60 @@ func (vsi *VideoServiceImpl) PublishVideo(userId int64, fileHeader *multipart.Fi
 		return err
 	}
 	return nil
+}
+
+// GetVideoInfosByIds /*
+// 根据视频id获取videoInfo
+func (vsi *VideoServiceImpl) GetVideoInfosByIds(Ids []int64) ([]vo.VideoInfo, error) {
+	Video := make([]*model.Video, len(Ids))
+	for index, id := range Ids {
+		video, err := mysql.GetVideoByID(id)
+		if err != nil {
+			log.Fatal("Get Video failed")
+		}
+		Video[index] = video
+	}
+	VideoInfo, err := TransVideoInfo(Video)
+	if err != nil {
+		return nil, err
+	}
+	return VideoInfo, nil
+
+}
+
+// TransVideoInfo /*
+// 将视频转换成Users模块需要的信息
+func TransVideoInfo(videos []*model.Video) ([]vo.VideoInfo, error) {
+	videoInfos := make([]vo.VideoInfo, len(videos))
+	Ids := make([]int64, len(videos))
+
+	for i, video := range videos {
+		Ids[i] = video.UserId
+	}
+	// 远程调用，获取user/author的个人信息
+
+	for i, video := range videos {
+		videoId := video.VideoId
+
+		favoriteCount, _ := mysql.GetFavoriteCountByID(videoId)
+
+		commentCount, _ := mysql.GetCommentCountByID(videoId)
+
+		// 需要与user通信，应定义到service层
+		var favorite bool
+
+		videoInfos[i] = vo.VideoInfo{
+			Id:            videoId,
+			PlayUrl:       video.PlayUrl,
+			CoverUrl:      video.CoverUrl,
+			FavoriteCount: favoriteCount,
+			CommentCount:  commentCount,
+			IsFavorite:    favorite,
+			Title:         video.Title,
+		}
+	}
+
+	return videoInfos, nil
 }
 
 /*
@@ -146,6 +207,9 @@ func createVideoCall(userId int64, videoData []byte, videoTitle string) (int64, 
 	return videoId, nil
 }
 
+/*
+视频切帧
+*/
 func readFrameAsJpeg(filePath string) ([]byte, error) {
 	reader := bytes.NewBuffer(nil)
 	//根据对应的url切帧
@@ -174,6 +238,32 @@ func readFrameAsJpeg(filePath string) ([]byte, error) {
 远程调用User模块，将发布关系存入ums_publish_video表
 */
 func remoteCreatePublishVideo(UserId, VideoId int64) error {
+	url := "http://tiktok.simple.user/douyin/publish/UserVideo/?userId=" + strconv.FormatInt(UserId, 10) + "&videoId=" + strconv.FormatInt(VideoId, 10)
+	client := resolver.GetInstance()
+	state, _, err := client.Post(context.Background(), nil, url, nil, config.WithSD(true))
+	if err != nil {
+		log.Fatal("请求User模块失败")
+		return err
+
+	}
+	log.Fatal(state)
 	// TODO : impl
 	return nil
+}
+
+// 调用远程接口，判断userId是否喜欢videoId视频
+func isFavorite(videoId int64, userId int64) (bool, error) {
+	//创建请求
+	url := "http://tiktok.simple.user/douyin/action/IsFavor/?userId=" + strconv.FormatInt(userId, 10) + "&videoId=" + strconv.FormatInt(videoId, 10)
+	client := resolver.GetInstance()
+	state, body, err := client.Post(context.Background(), nil, url, nil, config.WithSD(true))
+	log.Println(state)
+	if err != nil {
+		log.Fatal("请求User模块失败")
+	}
+	// TODO: 判断响应结果
+	if string(body) != "true" {
+		return false, err
+	}
+	return true, err
 }

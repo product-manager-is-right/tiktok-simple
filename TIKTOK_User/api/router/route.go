@@ -18,15 +18,16 @@ func GeneratedRegister(r *server.Hertz) {
 
 	// publish路由组
 	publishRouter := r.Group("/douyin/publish")
-
+	//微服务
+	publishRouter.POST("/UserVideo/", handler.PublishVideo)
 	publishRouter.Use(mw.JwtMiddleware.MiddlewareFunc())
 	publishRouter.GET("/list/", handler.PublishList)
 
 	// favorite路由组
 	favoriteRouter := r.Group("/douyin/favorite")
-
+	//微服务接口
+	favoriteRouter.GET("/IsFavor/", handler.IsFavorite)
 	favoriteRouter.Use(mw.JwtMiddleware.MiddlewareFunc())
-
 	favoriteRouter.POST("/action/", handler.FavoriteAction)
 	favoriteRouter.GET("/list/", handler.FavoriteList)
 
@@ -42,4 +43,5 @@ func GeneratedRegister(r *server.Hertz) {
 
 	//添加一个由微服务之间调用的请求路径,获取用户信息列表,额外开一个是为了不走JWT认证
 	r.POST("douyin/user/get", handler.UserInfoList)
+
 }

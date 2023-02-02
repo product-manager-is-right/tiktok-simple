@@ -7,6 +7,7 @@ import (
 	"TIKTOK_Video/mw"
 	"TIKTOK_Video/service/ServiceImpl"
 	"context"
+	"encoding/json"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"log"
@@ -80,14 +81,14 @@ func Feed(ctx context.Context, c *app.RequestContext) {
 */
 func PublishAction(ctx context.Context, c *app.RequestContext) {
 	// get the basic info from meta
-	//user, _ := c.Get(mw.IdentityKey)
+	userId, _ := c.Get(mw.IdentityKey)
 	videoTitle := c.PostForm("title")
 	videoData, err := c.Request.FormFile("data")
 	if err != nil {
 		log.Print("can not get this filestream")
 	}
 	vsi := ServiceImpl.VideoServiceImpl{}
-	if err := vsi.PublishVideo(24, videoData, videoTitle); err != nil {
+	if err := vsi.PublishVideo(userId.(int64), videoData, videoTitle); err != nil {
 		c.JSON(consts.StatusOK, vo.Response{
 			StatusCode: ResponseFail,
 			StatusMsg:  err.Error(),
@@ -98,6 +99,35 @@ func PublishAction(ctx context.Context, c *app.RequestContext) {
 	c.JSON(consts.StatusOK, vo.Response{
 		StatusCode: ResponseSuccess,
 		StatusMsg:  "publish success!",
+	})
+
+}
+
+// GetVideosByIds /*
+// GetVideos 对应函数，该函数为远端接口的函数
+func GetVideosByIds(ctx context.Context, c *app.RequestContext) {
+	VideoIdsInfo := c.PostForm("videoIds")
+	VideoIds := make([]int64, 0)
+	//将get的userId转换为int64[]
+	if err := json.Unmarshal([]byte(VideoIdsInfo), &VideoIds); err != nil {
+		c.JSON(consts.StatusOK, vo.Response{
+			StatusCode: ResponseFail,
+			StatusMsg:  "error :" + err.Error(),
+		})
+		return
+	}
+	vsi := ServiceImpl.VideoServiceImpl{}
+	videoList, err := vsi.GetVideoInfosByIds(VideoIds)
+	if err != nil {
+		c.JSON(consts.StatusOK, vo.Response{
+			StatusCode: ResponseFail,
+			StatusMsg:  err.Error(),
+		})
+		return
+	}
+	c.JSON(consts.StatusOK, vo.VideoInfoResponse{
+		Response:  vo.Response{StatusCode: ResponseSuccess},
+		VideoList: videoList,
 	})
 
 }
