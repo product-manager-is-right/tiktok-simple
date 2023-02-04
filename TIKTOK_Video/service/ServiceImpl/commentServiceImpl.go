@@ -35,7 +35,8 @@ func bindCommentInfo(comments []*model.Comment, userId int64) ([]*vo.CommentInfo
 	for i, comment := range comments {
 		userIds[i] = comment.UserId
 	}
-	userInfo, err := getUserInfoByIds(userIds, userId)
+	serviceImpl := UserServiceImpl{}
+	userInfo, err := serviceImpl.GetUsersInfoByIds(userIds, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -93,12 +94,12 @@ func (csi *CommentServiceImpl) DeleteCommentByCommentId(commentId, userId int64)
 
 func (csi *CommentServiceImpl) InsertComment(commentText string, videoId, userId int64) (commentInfo *vo.CommentInfo, err error) {
 	//由于没有外键约束，手动检查是否存在这个videoId和是不是userID对得上
-	userInfo, err := getUserInfoById(userId, userId)
+	_, err = mysql.GetVideoByID(videoId)
 	if err != nil {
 		return nil, err
 	}
-
-	_, err = mysql.GetVideoByID(videoId)
+	serviceImpl := UserServiceImpl{}
+	userInfo, err := serviceImpl.GetUserInfoById(userId, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -118,58 +119,4 @@ func (csi *CommentServiceImpl) InsertComment(commentText string, videoId, userId
 		CreateDate: time.Unix(comment.CreateDate, 0).Format("01-02 15:04"),
 	}
 	return commentInfo, nil
-}
-
-// 调用远程接口，根据userid获取具体的user的个人信息
-/**
-userId：要查询的userId
-ownerId: 发起查询评论的ID，用于判断是否是followed
-@return map 键为userId，值为用户信息的map
-@return error 错误信息，没有错误就返回nil
-
-*/
-func getUserInfoById(userId int64, ownerId int64) (*vo.UserInfo, error) {
-	serviceImpl := UserServiceImpl{}
-	return serviceImpl.GetUserInfoById(userId, userId)
-	////TODO 远程调用获取User信息
-	////先手动实现一下
-	//rand.Seed(time.Now().Unix())
-	//ret := &vo.UserInfo{
-	//	Id:            userId,
-	//	Name:          "user" + strconv.FormatInt(userId, 10),
-	//	FollowCount:   rand.Int63() % 10000,
-	//	FollowerCount: rand.Int63() % 10000,
-	//	IsFollow:      userId%73 == 0,
-	//}
-	//return ret, nil
-	//// TODO : impl
-	////return nil, nil
-}
-
-// 调用远程接口，根据userid数组获取具体的user的个人信息
-/**
-userIds：要查询的userIds
-ownerId: 发起查询评论的ID，用于判断是否是followed
-@return map 键为userId，值为用户信息的map
-@return error 错误信息，没有错误就返回nil
-
-*/
-func getUserInfoByIds(userIds []int64, ownerId int64) (map[int64]*vo.UserInfo, error) {
-	serviceImpl := UserServiceImpl{}
-	return serviceImpl.GetUsersInfoByIds(userIds, ownerId)
-	////先手动实现一下
-	//mm := make(map[int64]*vo.UserInfo, len(userIds))
-	//rand.Seed(time.Now().Unix())
-	//for _, userId := range userIds {
-	//	mm[userId] = &vo.UserInfo{
-	//		Id:            userId,
-	//		Name:          "user" + strconv.FormatInt(userId, 10),
-	//		FollowCount:   rand.Int63() % 10000,
-	//		FollowerCount: rand.Int63() % 10000,
-	//		IsFollow:      userId%73 == 0,
-	//	}
-	//}
-	//return mm, nil
-	// TODO : impl
-	//return nil, nil
 }

@@ -14,5 +14,5 @@ type FavoriteListResponse struct {
 }
 type FavoriteInfoResponse struct {
 	Response
-	FavoriteInfo FavoriteInfo `json:"favorite"`
+	IsFavorite bool
 }

@@ -51,6 +51,16 @@ func (fsi *FavoriteServiceImpl) GetFavoriteVideosListByUserId(userIdTar, userIdS
 
 }
 
+// IsFavorite 断是否为喜欢接口,假如userId点赞了videoId，返回true,没有返回false
+func (fsi *FavoriteServiceImpl) IsFavorite(userId, videoId int64) (bool, error) {
+	isFavorite, err := mysql.GetIsFavorite(userId, videoId)
+	if err != nil {
+		log.Print("获取视频信息列表失败:", err.Error())
+		return false, err
+	}
+	return isFavorite, nil
+}
+
 //func (fsi *FavoriteServiceImpl) GetFavoriteByUserAndVideo(userId, videoId int64) (vo.FavoriteInfo, error) {
 //	favoriteInfo := vo.FavoriteInfo{}
 //	favorite, err := mysql.GetFavoriteInfo(1, 25)

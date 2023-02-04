@@ -58,9 +58,12 @@ func UserInfoList(ctx context.Context, c *app.RequestContext) {
 	ids := make([]int64, 0)
 
 	if err := json.Unmarshal([]byte(queryUserIds), &ids); err != nil {
-		c.JSON(consts.StatusOK, vo.Response{
-			StatusCode: ResponseFail,
-			StatusMsg:  "error :" + err.Error(),
+		c.JSON(consts.StatusOK, vo.UserInfosResponse{
+			Response: vo.Response{
+				StatusCode: ResponseFail,
+				StatusMsg:  "error :" + err.Error(),
+			},
+			UserInfo: nil,
 		})
 		return
 	}
@@ -69,9 +72,11 @@ func UserInfoList(ctx context.Context, c *app.RequestContext) {
 	if str := c.Param("user_id"); str != "" {
 		t, err2 := strconv.ParseInt(str, 10, 64)
 		if err2 != nil {
-			c.JSON(consts.StatusOK, vo.Response{
-				StatusCode: ResponseFail,
-				StatusMsg:  "error :" + err2.Error(),
+			c.JSON(consts.StatusOK, vo.UserInfosResponse{
+				Response: vo.Response{
+					StatusCode: ResponseFail,
+					StatusMsg:  "error :" + err2.Error(),
+				},
 			})
 			return
 		}
@@ -82,23 +87,20 @@ func UserInfoList(ctx context.Context, c *app.RequestContext) {
 	usi := serviceImpl.UserServiceImpl{}
 	res, err := usi.GetUsersInfoByIds(ids, userId)
 	if err != nil {
-		c.JSON(consts.StatusOK, vo.Response{
-			StatusCode: ResponseFail,
-			StatusMsg:  "error :" + err.Error(),
+		c.JSON(consts.StatusOK, vo.UserInfosResponse{
+			Response: vo.Response{
+				StatusCode: ResponseFail,
+				StatusMsg:  "error :" + err.Error(),
+			},
 		})
 		return
 	}
-	bytes, err := json.Marshal(res)
-	if err != nil {
-		c.JSON(consts.StatusOK, vo.Response{
-			StatusCode: ResponseFail,
-			StatusMsg:  "error :" + err.Error(),
-		})
-		return
-	}
-	c.JSON(consts.StatusOK, vo.Response{
-		StatusCode: ResponseSuccess,
-		StatusMsg:  string(bytes),
+	c.JSON(consts.StatusOK, vo.UserInfosResponse{
+		Response: vo.Response{
+			StatusCode: ResponseSuccess,
+			StatusMsg:  "query Success",
+		},
+		UserInfo: res,
 	})
 
 }

@@ -60,11 +60,17 @@ func bindVideoInfo(videos []*model.Video, userId int64) ([]vo.VideoInfo, error) 
 		Ids[i] = video.UserId
 	}
 	// 远程调用，获取user/author的个人信息
-	authors, err := getUserInfoByIds(Ids, userId)
+	serviceImpl := UserServiceImpl{}
+	authors, err := serviceImpl.GetUsersInfoByIds(Ids, userId)
 	if err != nil {
 		return nil, err
 	}
 
+	// 调用远程接口，判断userId是否喜欢videoId视频,但是调用时就和调用本地service一样，实现方式不一样
+	// 需要与user通信，应定义到service层
+	//service.NewFavoriteServiceInstance()
+	fsi := FavoriteServiceImpl{}
+	var isFavorite bool
 	for i, video := range videos {
 		videoId := video.VideoId
 
@@ -72,10 +78,10 @@ func bindVideoInfo(videos []*model.Video, userId int64) ([]vo.VideoInfo, error) 
 
 		commentCount, _ := mysql.GetCommentCountByID(videoId)
 
-		// 需要与user通信，应定义到service层
-		var favorite bool
 		if userId >= 0 {
-			favorite, _ = isFavorite(videoId, userId)
+			isFavorite, _ = fsi.IsFavorite(userId, videoId)
+		} else {
+			isFavorite = false
 		}
 
 		videoInfos[i] = vo.VideoInfo{
@@ -85,7 +91,7 @@ func bindVideoInfo(videos []*model.Video, userId int64) ([]vo.VideoInfo, error) 
 			CoverUrl:      video.CoverUrl,
 			FavoriteCount: favoriteCount,
 			CommentCount:  commentCount,
-			IsFavorite:    favorite,
+			IsFavorite:    isFavorite,
 			Title:         video.Title,
 		}
 	}
@@ -254,21 +260,4 @@ func remoteCreatePublishVideo(UserId, VideoId int64) error {
 	log.Fatal(state)
 	// TODO : impl
 	return nil
-}
-
-// 调用远程接口，判断userId是否喜欢videoId视频
-func isFavorite(videoId int64, userId int64) (bool, error) {
-	//创建请求
-	url := "http://tiktok.simple.user/douyin/action/IsFavor/?userId=" + strconv.FormatInt(userId, 10) + "&videoId=" + strconv.FormatInt(videoId, 10)
-	client := resolver.GetInstance()
-	state, body, err := client.Post(context.Background(), nil, url, nil, config.WithSD(true))
-	log.Println(state)
-	if err != nil {
-		log.Fatal("请求User模块失败")
-	}
-	// TODO: 判断响应结果
-	if string(body) != "true" {
-		return false, err
-	}
-	return true, err
 }

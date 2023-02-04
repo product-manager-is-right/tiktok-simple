@@ -7,7 +7,6 @@ import (
 	"TIKTOK_User/service/serviceImpl"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"strconv"
 )
@@ -86,16 +85,44 @@ func FavoriteList(ctx context.Context, c *app.RequestContext) {
 }
 
 // IsFavorite
-// 判断是否为喜欢接口
+// 判断是否为喜欢接口,返回FavoriteInfoResponse对象
 func IsFavorite(ctx context.Context, c *app.RequestContext) {
 	userIdInfo := c.Query("userId")
 	videoIdInfo := c.Query("videoId")
 	if userIdInfo == "" || videoIdInfo == "" {
-		c.JSON(consts.StatusOK, vo.RegisterResponse{
+		c.JSON(consts.StatusOK, vo.FavoriteInfoResponse{
 			Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "query userid or videoId empty"},
 		})
+		return
 	}
-	c.JSON(consts.StatusOK, utils.H{
-		"message": "ok",
+	var userId, videoId int64
+	var err error
+	if userId, err = strconv.ParseInt(userIdInfo, 10, 64); err != nil {
+		c.JSON(consts.StatusOK, vo.FavoriteInfoResponse{
+			Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "query userid not a number"},
+		})
+		return
+	}
+	if videoId, err = strconv.ParseInt(videoIdInfo, 10, 64); err != nil {
+		c.JSON(consts.StatusOK, vo.FavoriteInfoResponse{
+			Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "query videoId not a number"},
+		})
+		return
+	}
+	fsi := service.NewFavoriteServiceInstance()
+	var favorite bool
+	if favorite, err = fsi.IsFavorite(userId, videoId); err != nil {
+		c.JSON(consts.StatusOK, vo.FavoriteInfoResponse{
+			Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "error happened"},
+		})
+		return
+	}
+	c.JSON(consts.StatusOK, vo.FavoriteInfoResponse{
+		Response: vo.Response{
+			StatusCode: ResponseSuccess,
+			StatusMsg:  "query success",
+		},
+		IsFavorite: favorite,
 	})
+
 }

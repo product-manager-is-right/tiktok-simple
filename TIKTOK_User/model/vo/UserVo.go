@@ -24,6 +24,12 @@ type UserInfoResponse struct {
 	UserInfo *UserInfo `json:"user,omitempty"`
 }
 
+// UserInfosResponse 注意和上面UserInfoResponse的区别，这里是返回UserInfo数组
+type UserInfosResponse struct {
+	Response
+	UserInfo []*UserInfo `json:"users,omitempty"`
+}
+
 type RegisterResponse struct {
 	Response
 	UserId int64  `json:"user_id"`
