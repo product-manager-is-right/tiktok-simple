@@ -27,11 +27,9 @@ func InitJwt() {
 	JwtMiddleware, err = jwt.New(&jwt.HertzJWTMiddleware{
 		Realm:       "tiktok",
 		Key:         []byte("jwt sign key"),
-		SendCookie:  true,
-		CookieName:  "jwt-cookie",
-		Timeout:     time.Hour,
-		MaxRefresh:  time.Hour,
-		TokenLookup: "query: token, cookie: jwt",
+		Timeout:     time.Hour * 24,
+		MaxRefresh:  time.Hour * 24,
+		TokenLookup: "query: token, form: token",
 		IdentityKey: IdentityKey,
 		IdentityHandler: func(ctx context.Context, c *app.RequestContext) interface{} {
 			claims := jwt.ExtractClaims(ctx, c)

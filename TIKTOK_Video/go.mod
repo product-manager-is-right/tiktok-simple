@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/cloudwego/hertz v0.5.1
-	github.com/hertz-contrib/jwt v1.0.1
+	github.com/hertz-contrib/jwt v1.0.2
 	github.com/hertz-contrib/registry/nacos v0.0.0-20221226122036-3c451682dc72
 	github.com/minio/minio-go/v7 v7.0.47
 	github.com/nacos-group/nacos-sdk-go v1.1.2

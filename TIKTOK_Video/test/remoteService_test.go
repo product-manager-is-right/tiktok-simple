@@ -3,7 +3,6 @@ package test
 import (
 	"TIKTOK_Video/configs"
 	vo2 "TIKTOK_Video/model/vo"
-	"TIKTOK_Video/resolver"
 	"TIKTOK_Video/service"
 	"context"
 	"encoding/json"
@@ -88,8 +87,7 @@ func TestIsFavorite(t *testing.T) {
 		{26, 11, true},
 	}
 	configs.ReadConfig(configs.TEST)
-	//服务发现
-	resolver.CreateDiscoveryServer()
+
 	fsi := service.NewFavoriteServiceInstance()
 
 	for _, test := range tests {

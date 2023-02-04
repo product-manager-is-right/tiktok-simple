@@ -52,7 +52,7 @@ func (usi *UserServiceImpl) GetUserInfoById(queryUserId int64, userId int64) (*v
 	return userInfo, nil
 }
 
-func (usi UserServiceImpl) GetUsersInfoByIds(queryUserId []int64, userId int64) ([]*vo.UserInfo, error) {
+func (usi *UserServiceImpl) GetUsersInfoByIds(queryUserId []int64, userId int64) ([]*vo.UserInfo, error) {
 	users, err := mysql.GetUserByIds(queryUserId)
 	if err != nil {
 		return nil, err

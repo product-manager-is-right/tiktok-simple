@@ -17,7 +17,7 @@ type UserServiceImpl struct {
 var ErrGetUserInfo = errors.New("can not get the userInfo")
 
 func (usi *UserServiceImpl) CreateUserByNameAndPassword(username, password string) (int64, error) {
-	return 0, errors.New("CreateUserByNameAndPassword is un unsupported method")
+	return 0, errors.New("CreateUserByNameAndPassword is an unsupported method")
 }
 
 // GetUserInfoById 调用远程接口，根据userid获取具体的user的个人信息
@@ -50,7 +50,7 @@ ownerId: 发起查询评论的ID，用于判断是否是followed
 */
 func (usi *UserServiceImpl) GetUsersInfoByIds(queryUserId []int64, userId int64) (map[int64]*vo.UserInfo, error) {
 	//获得与注册中心同步的客户端对象
-	cli := resolver.GetInstance()
+	cli := resolver.GetNacosDiscoveryCli()
 	if cli == nil {
 		return nil, ErrGetUserInfo
 	}

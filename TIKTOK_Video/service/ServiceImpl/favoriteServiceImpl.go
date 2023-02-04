@@ -23,7 +23,7 @@ func (fsi *FavoriteServiceImpl) IsFavorite(userId, videoId int64) (bool, error) 
 	//创建请求
 	// 判断是否为喜欢接口
 	url := "http://tiktok.simple.user//douyin/favorite/IsFavor/?userId=" + strconv.FormatInt(userId, 10) + "&videoId=" + strconv.FormatInt(videoId, 10)
-	client := resolver.GetInstance()
+	client := resolver.GetNacosDiscoveryCli()
 	state, body, err := client.Get(context.Background(), nil, url, config.WithSD(true))
 	if err != nil || state != 200 {
 		log.Fatal("请求User模块失败", err.Error())

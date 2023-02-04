@@ -4,11 +4,11 @@ go 1.19
 
 require (
 	github.com/cloudwego/hertz v0.5.1
-	github.com/hertz-contrib/jwt v1.0.1
+	github.com/go-errors/errors v1.0.1
+	github.com/hertz-contrib/jwt v1.0.2
 	github.com/hertz-contrib/registry/nacos v0.0.0-20221226122036-3c451682dc72
 	github.com/nacos-group/nacos-sdk-go v1.1.2
 	github.com/spf13/viper v1.15.0
-	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/mysql v1.4.5
 	gorm.io/gorm v1.24.3
 )
@@ -22,7 +22,6 @@ require (
 	github.com/chenzhuoyu/base64x v0.0.0-20211019084208-fb5309c8db06 // indirect
 	github.com/cloudwego/netpoll v0.3.1 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
-	github.com/go-errors/errors v1.0.1 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/golang-jwt/jwt/v4 v4.4.1 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
@@ -60,4 +59,5 @@ require (
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

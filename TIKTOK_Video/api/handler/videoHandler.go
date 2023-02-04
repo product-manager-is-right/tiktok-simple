@@ -3,6 +3,7 @@
 package handler
 
 import (
+	"TIKTOK_Video/dal/mysql"
 	"TIKTOK_Video/model/vo"
 	"TIKTOK_Video/mw"
 	"TIKTOK_Video/service/ServiceImpl"
@@ -130,4 +131,30 @@ func GetVideosByIds(ctx context.Context, c *app.RequestContext) {
 		VideoList: videoList,
 	})
 
+}
+
+// FavoriteAction 远程接口，修改video的点赞数
+func FavoriteAction(ctx context.Context, c *app.RequestContext) {
+	var err error
+	video_id := c.PostForm("video_id")
+	videoId, _ := strconv.ParseInt(video_id, 10, 64)
+
+	actionType := c.PostForm("action_type")
+
+	if actionType == "0" {
+		err = mysql.IncrementFavoriteCount(videoId)
+	} else {
+		err = mysql.DecrementFavoriteCount(videoId)
+	}
+	if err != nil {
+		c.JSON(consts.StatusOK, vo.Response{
+			StatusCode: ResponseFail,
+			StatusMsg:  "操作失败",
+		})
+		return
+	}
+	c.JSON(consts.StatusOK, vo.Response{
+		StatusCode: ResponseSuccess,
+		StatusMsg:  "操作成功",
+	})
 }

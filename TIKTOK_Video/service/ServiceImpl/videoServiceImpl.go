@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/cloudwego/hertz/pkg/common/config"
+	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	uuid "github.com/satori/go.uuid"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 	"image"
@@ -68,7 +69,6 @@ func bindVideoInfo(videos []*model.Video, userId int64) ([]vo.VideoInfo, error) 
 
 	// 调用远程接口，判断userId是否喜欢videoId视频,但是调用时就和调用本地service一样，实现方式不一样
 	// 需要与user通信，应定义到service层
-	//service.NewFavoriteServiceInstance()
 	fsi := FavoriteServiceImpl{}
 	var isFavorite bool
 	for i, video := range videos {
@@ -108,34 +108,33 @@ func (vsi *VideoServiceImpl) PublishVideo(userId int64, fileHeader *multipart.Fi
 	if _, err := io.Copy(buf, file); err != nil {
 		return err
 	}
-	// 远程调用video接口，并存入vms_publish_video
+
 	videoId, err := createVideoCall(userId, buf.Bytes(), videoTitle)
 	if err != nil {
 		return err
 	}
 	// 调用Dao层，存入ums_publish_video
-	if err = remoteCreatePublishVideo(userId, videoId); err != nil {
-		return err
-	}
+	go remoteCreatePublishVideo(userId, videoId)
+
 	return nil
 }
 
 // GetVideoInfosByIds /*
 // 根据视频id获取videoInfo
 func (vsi *VideoServiceImpl) GetVideoInfosByIds(Ids []int64) ([]vo.VideoInfo, error) {
-	Video := make([]*model.Video, len(Ids))
-	for index, id := range Ids {
-		video, err := mysql.GetVideoByID(id)
+	videos := make([]*model.Video, 0, len(Ids))
+	for _, id := range Ids {
+		v, err := mysql.GetVideoByID(id)
 		if err != nil {
-			log.Fatal("Get Video failed")
+			continue
 		}
-		Video[index] = video
+		videos = append(videos, v)
 	}
-	VideoInfo, err := TransVideoInfo(Video)
+	VideoInfos, err := TransVideoInfo(videos)
 	if err != nil {
 		return nil, err
 	}
-	return VideoInfo, nil
+	return VideoInfos, nil
 
 }
 
@@ -243,21 +242,12 @@ func readFrameAsJpeg(filePath string) ([]byte, error) {
 /*
 远程调用User模块，将发布关系存入ums_publish_video表
 */
-func remoteCreatePublishVideo(UserId, VideoId int64) error {
+func remoteCreatePublishVideo(UserId, VideoId int64) {
 	url := "http://tiktok.simple.user/douyin/publish/UserVideo/?userId=" + strconv.FormatInt(UserId, 10) + "&videoId=" + strconv.FormatInt(VideoId, 10)
-	client := resolver.GetInstance()
-	state, body, err := client.Post(context.Background(), nil, url, nil, config.WithSD(true))
+	client := resolver.GetNacosDiscoveryCli()
+	state, _, err := client.Post(context.Background(), nil, url, nil, config.WithSD(true))
 	// check if the result is successful
-	if state != 200 {
-		log.Print("failed to connect simple.user")
+	if state != consts.StatusOK || err != nil {
+		log.Println("远程调用失败:" + err.Error())
 	}
-	log.Println(string(body))
-	if err != nil {
-		log.Fatal("请求User模块失败")
-		return err
-
-	}
-	log.Fatal(state)
-	// TODO : impl
-	return nil
 }

@@ -69,7 +69,7 @@ func UserInfoList(ctx context.Context, c *app.RequestContext) {
 	}
 	//可以传查询者的id,默认为0，即不传
 	userId := int64(0)
-	if str := c.Param("user_id"); str != "" {
+	if str := c.PostForm("user_id"); str != "" {
 		t, err2 := strconv.ParseInt(str, 10, 64)
 		if err2 != nil {
 			c.JSON(consts.StatusOK, vo.UserInfosResponse{

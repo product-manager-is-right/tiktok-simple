@@ -5,7 +5,6 @@ import (
 	"TIKTOK_User/configs"
 	"TIKTOK_User/dal"
 	"TIKTOK_User/mw"
-	"TIKTOK_User/resolver"
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/cloudwego/hertz/pkg/app/server/registry"
 	"github.com/cloudwego/hertz/pkg/common/utils"
@@ -63,8 +62,7 @@ func startServer() {
 			Weight:      10,
 			Tags:        nil,
 		}))
-	//服务发现
-	resolver.CreateDiscoveryServer()
+
 	// 注册路由
 	router.GeneratedRegister(h)
 

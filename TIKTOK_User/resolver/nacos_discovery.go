@@ -14,27 +14,13 @@ import (
 )
 
 var cli *client.Client
-var once sync.Once = sync.Once{}
+var once = sync.Once{}
 
-func GetInstance() *client.Client {
-	if cli != nil {
-		return cli
-	}
-	log.Println("服务发现失败，服务为空")
-	return nil
-}
-func CreateDiscoveryServer() {
+func GetNacosDiscoveryCli() *client.Client {
 	once.Do(func() {
 		var err error
-		cli, err = client.NewClient()
-		if err != nil {
-			panic(err)
-		}
-		//myConfig, err := configs.ReadConfig(configs.DEV)
-		if err != nil {
-			log.Fatal("文件读取"+
-				"失败:", err.Error())
-		}
+		cli, _ = client.NewClient()
+
 		sc := []constant.ServerConfig{
 			*constant.NewServerConfig(viper.GetString("nacos.addr"), viper.GetUint64("nacos.port")),
 		}
@@ -49,21 +35,12 @@ func CreateDiscoveryServer() {
 				ClientConfig:  &cc,
 				ServerConfigs: sc,
 			})
-		r := nacos.NewNacosResolver(nacosCli)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err.Error())
 		}
+		r := nacos.NewNacosResolver(nacosCli)
+
 		cli.Use(sd.Discovery(r))
 	})
-
+	return cli
 }
-
-/*
-	for i := 0; i < 10; i++ {
-		status, body, err := cli.Get(context.Background(), nil, "http://hertz.test.demo/ping", config.WithSD(true))
-		if err != nil {
-			hlog.Fatal(err)
-		}
-		hlog.Infof("code=%d,body=%s\n", status, string(body))
-	}
-*/

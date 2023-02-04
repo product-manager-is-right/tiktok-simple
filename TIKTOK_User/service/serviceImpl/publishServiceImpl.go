@@ -9,9 +9,8 @@ import (
 	"errors"
 	"github.com/cloudwego/hertz/pkg/common/config"
 	"github.com/cloudwego/hertz/pkg/protocol"
+	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"log"
-	"math/rand"
-	"time"
 )
 
 type PublishServiceImpl struct {
@@ -88,13 +87,11 @@ func getVideoInfosByVideoIds(videoIds []int64, userId int64, mode string) ([]vo.
 }
 
 /*
-远程调用Video模块，获取每个Video的具体信息
+RemoteGetVideoInfoCall 远程调用Video模块，获取每个Video的具体信息
 */
 func RemoteGetVideoInfoCall(videoIds []int64) ([]vo.VideoInfo, error) {
-	// TODO : remote impl
 	vs := make([]vo.VideoInfo, len(videoIds))
-	rand.Seed(time.Now().Unix())
-	client := resolver.GetInstance()
+	client := resolver.GetNacosDiscoveryCli()
 	args := &protocol.Args{}
 	bytes, err := json.Marshal(videoIds)
 	if err != nil {
@@ -103,7 +100,7 @@ func RemoteGetVideoInfoCall(videoIds []int64) ([]vo.VideoInfo, error) {
 	//用 bytes的方式存储videos的id
 	args.Add("videoIds", string(bytes))
 	status, body, err := client.Post(context.Background(), nil, "http://tiktok.simple.video/douyin/publish/GetVideos", args, config.WithSD(true))
-	if status == 200 {
+	if status == consts.StatusOK {
 		res := vo.VideoInfoResponse{}
 		if err = json.Unmarshal(body, &res); err != nil {
 			return nil, ErrGetVideosInfo
@@ -127,19 +124,6 @@ func RemoteGetVideoInfoCall(videoIds []int64) ([]vo.VideoInfo, error) {
 		}
 	}
 	return vs, nil
-	/*
-		for i, videoId := range videoIds {
-				vs[i] = vo.VideoInfo{
-					Id:            videoId,
-					PlayUrl:       "http://120.25.2.146:9000/tiktok/videos/test.mp4",
-					CoverUrl:      "http://120.25.2.146:9000/tiktok/picture/testP.jpg",
-					FavoriteCount: rand.Int63() % 10000,
-					CommentCount:  rand.Int63() % 10000,
-					IsFavorite:    videoId%73 == 0,
-					Title:         "Test",
-				}
-			}
-	*/
 }
 
 // PublishVideoInfo /*

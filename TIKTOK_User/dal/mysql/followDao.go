@@ -2,7 +2,7 @@ package mysql
 
 import (
 	"TIKTOK_User/model"
-	"errors"
+	"github.com/go-errors/errors"
 	"gorm.io/gorm"
 	"log"
 )
@@ -15,7 +15,7 @@ GetFollowCntByUserId
 根据UserId查询该用户的关注数
 */
 func GetFollowCntByUserId(userId int64) (int64, error) {
-	var cnt int64 = 10
+	var cnt int64 = 0
 
 	if err := DB.Model(model.Follow{}).Where("user_id_from = ?", userId).Where("cancel = ?", 0).
 		Count(&cnt).Error; err != nil {
@@ -31,8 +31,6 @@ GetFollowerCntByUserId
 根据UserId查询该用户的粉丝数/被关注数
 */
 func GetFollowerCntByUserId(userId int64) (int64, error) {
-	// TODO : impl
-	//return 1, nil
 	var cnt int64
 
 	if err := DB.Model(model.Follow{}).
@@ -51,8 +49,6 @@ GetIsFollow
 判断userIdSrc 是否 关注 userIdDst
 */
 func GetIsFollow(userTo, userFrom int64) (bool, error) {
-	// TODO : impl
-	//return false, nil
 	follow := model.Follow{}
 
 	if err := DB.Where("user_id_from = ?", userFrom).
@@ -68,31 +64,25 @@ func GetIsFollow(userTo, userFrom int64) (bool, error) {
 
 }
 
-func CreateNewRelation(userToId, userFromId, Cancel int64) (int64, error) {
+func CreateNewRelation(userToId, userFromId int64) error {
 	Follow := model.Follow{UserIdTo: userToId, UserIdFrom: userFromId, Cancel: 0}
 	result := DB.Create(&Follow)
-	return Follow.Id, result.Error
+	return result.Error
 }
 
-func GetRelation(userToId, userFromId int64) ([]*model.Follow, error) {
-	res := make([]*model.Follow, 0)
+func GetRelation(userToId, userFromId int64) (*model.Follow, error) {
+	var res *model.Follow
 	if err := DB.Where("user_id_to = ?", userToId).Where("user_id_from = ?", userFromId).
-		Find(&res).Error; err != nil {
+		Take(&res).Error; err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func DeleteRelation(userToId, userFromId int64) error {
-	Follow := model.Follow{UserIdTo: userToId, UserIdFrom: userFromId, Cancel: 0}
-
-	result := DB.Where("user_id_from = ?", userFromId).Where("user_id_to = ?", userToId).
-		Delete(&Follow)
-	if result.Error != nil {
-		return result.Error
-	}
-	if result.RowsAffected == 0 {
-		return errors.New("删除失败")
+func UpdateRelation(userToId, userFromId, cancel int64) error {
+	if err := DB.Model(&model.Follow{}).Where("user_id_to = ?", userToId).Where("user_id_from = ?", userFromId).
+		Update("cancel", cancel).Error; err != nil {
+		return errors.New("关系更新失败")
 	}
 	return nil
 }
@@ -104,45 +94,18 @@ GetFollowingIds
 func GetFollowingIds(userId int64) ([]int64, error) {
 	var ids []int64
 	if err := DB.Model(model.Follow{}).Where("user_id_from = ?", userId).
-		Where("cancel = ?", 0).Pluck("user_id_to", &ids).Error; nil != err {
-		if "record not found" == err.Error() {
-			return nil, nil
-		}
-		// 查询出错。
-		log.Println(err.Error())
+		Where("cancel = ?", 0).Pluck("user_id_to", &ids).Error; err != nil {
 		return nil, err
 	}
 	// 查询成功。
 	return ids, nil
 }
 
+// GetFollowerIds 给定用户id，查询他的粉丝id列表
 func GetFollowerIds(userId int64) ([]int64, error) {
 	var ids []int64
-	if err := DB.Model(model.Follower{}).Where("user_id_from = ?", userId).
-		Where("cancel = ?", 0).Pluck("user_id_to", &ids).Error; nil != err {
-		if "record not found" == err.Error() {
-			return nil, nil
-		}
-		// 查询出错。
-		log.Println(err.Error())
-		return nil, err
-	}
-	return ids, nil
-}
-
-/*
-GetFriendsIds
-给定用户id，查询他好友的id。
-*/
-func GetFriendsIds(userId int64) ([]int64, error) {
-	var ids []int64
-	if err := DB.Model(model.Follow{}).Where("user_id_from = ?", userId).
-		Where("cancel = ?", 0).Pluck("user_id_to", &ids).Error; nil != err {
-		if "record not found" == err.Error() {
-			return nil, nil
-		}
-		// 查询出错。
-		log.Println(err.Error())
+	if err := DB.Model(model.Follow{}).Where("user_id_to = ?", userId).
+		Where("cancel = ?", 0).Pluck("user_id_from", &ids).Error; err != nil {
 		return nil, err
 	}
 	// 查询成功。
