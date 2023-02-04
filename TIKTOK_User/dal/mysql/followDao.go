@@ -50,13 +50,13 @@ func GetFollowerCntByUserId(userId int64) (int64, error) {
 GetIsFollow
 判断userIdSrc 是否 关注 userIdDst
 */
-func GetIsFollow(usertoid, userfromid int64) (bool, error) {
+func GetIsFollow(userTo, userFrom int64) (bool, error) {
 	// TODO : impl
 	//return false, nil
 	follow := model.Follow{}
 
-	if err := DB.Where("user_id_from = ?", userfromid).
-		Where("user_id_to = ?", usertoid).
+	if err := DB.Where("user_id_from = ?", userFrom).
+		Where("user_id_to = ?", userTo).
 		Where("cancel = ?", 0).
 		Take(&follow).Error; err == gorm.ErrRecordNotFound {
 		return false, nil
@@ -68,25 +68,25 @@ func GetIsFollow(usertoid, userfromid int64) (bool, error) {
 
 }
 
-func CreateNewRelation(usertoid, userfromid, Cancel int64) (int64, error) {
-	Follow := model.Follow{UserIdTo: usertoid, UserIdFrom: userfromid, Cancel: 0}
+func CreateNewRelation(userToId, userFromId, Cancel int64) (int64, error) {
+	Follow := model.Follow{UserIdTo: userToId, UserIdFrom: userFromId, Cancel: 0}
 	result := DB.Create(&Follow)
 	return Follow.Id, result.Error
 }
 
-func GetRelation(usertoid, userfromid int64) ([]*model.Follow, error) {
+func GetRelation(userToId, userFromId int64) ([]*model.Follow, error) {
 	res := make([]*model.Follow, 0)
-	if err := DB.Where("user_id_to = ?", usertoid).Where("user_id_from = ?", userfromid).
+	if err := DB.Where("user_id_to = ?", userToId).Where("user_id_from = ?", userFromId).
 		Find(&res).Error; err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func Deleterelation(usertoid, userfromid int64) error {
-	Follow := model.Follow{UserIdTo: usertoid, UserIdFrom: userfromid, Cancel: 0}
+func DeleteRelation(userToId, userFromId int64) error {
+	Follow := model.Follow{UserIdTo: userToId, UserIdFrom: userFromId, Cancel: 0}
 
-	result := DB.Where("user_id_from = ?", userfromid).Where("user_id_to = ?", usertoid).
+	result := DB.Where("user_id_from = ?", userFromId).Where("user_id_to = ?", userToId).
 		Delete(&Follow)
 	if result.Error != nil {
 		return result.Error
