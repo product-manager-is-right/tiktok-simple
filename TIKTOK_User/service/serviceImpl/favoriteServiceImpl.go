@@ -10,6 +10,10 @@ import (
 type FavoriteServiceImpl struct {
 }
 
+// CreateNewFavorite
+/*
+创建了一个favor对应关系
+*/
 func (fsi *FavoriteServiceImpl) CreateNewFavorite(userid, videoid int64) (int64, error) {
 
 	favorites, err := mysql.GetFavorite(userid, videoid)

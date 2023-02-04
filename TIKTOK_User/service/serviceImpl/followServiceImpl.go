@@ -5,32 +5,32 @@ import (
 	"TIKTOK_User/model/vo"
 	"errors"
 	"gorm.io/gorm"
+	"log"
 	//"fmt"
 )
 
 type FollowServiceImpl struct {
 }
 
-// , relationactType
-func (fsi *FollowServiceImpl) CreateNewRelation(userfromid, usertoid int64) (int64, error) {
+func (fsi *FollowServiceImpl) CreateNewRelation(userFromId, userToId int64) (int64, error) {
 	//var relations []*model.Follow = mysql.Getrelation(usertoid, userfromid)
-	relations, err := mysql.GetRelation(usertoid, userfromid)
+	relations, err := mysql.GetRelation(userToId, userFromId)
 	if err != nil {
 		return -1, err
 	}
 	if len(relations) > 0 {
-		return -1, errors.New("the userfromid has already followed the usertoid")
+		return -1, errors.New("the user from id has already followed the usertoid")
 	}
 	var Cancel int64
 	Cancel = 0
-	relationId, err := mysql.CreateNewRelation(usertoid, userfromid, Cancel)
+	relationId, err := mysql.CreateNewRelation(userToId, userFromId, Cancel)
 	if err != nil {
 		return -1, err
 	}
 	return relationId, nil
 }
-func (fsi *FollowServiceImpl) DeleteRelation(userfromid, usertoid int64) error {
-	if err := mysql.Deleterelation(usertoid, userfromid); err != nil {
+func (fsi *FollowServiceImpl) DeleteRelation(userFromId, userToId int64) error {
+	if err := mysql.DeleteRelation(userToId, userFromId); err != nil {
 		return err
 	}
 	return nil
@@ -48,15 +48,18 @@ func (fsi *FollowServiceImpl) GetFollowListById(userId int64) ([]vo.UserInfo, er
 	}
 	// 根据每个id来查询用户信息。
 	users := make([]vo.UserInfo, 0, len(ids))
-	for i := 0; i < len(ids); i++ {
+	for _, id := range ids {
 		userInfo := vo.UserInfo{}
-		isFollow, _ := mysql.GetIsFollow(userId, ids[i])
+		isFollow, _ := mysql.GetIsFollow(userId, id)
 		if !isFollow {
 			continue
 		}
-		user, err := mysql.GetUserByUserId(ids[i])
-		if err == gorm.ErrRecordNotFound {
-			continue
+		user, err := mysql.GetUserByUserId(id)
+		if err != nil {
+			if err == gorm.ErrRecordNotFound {
+				continue
+			}
+			log.Print(err)
 		}
 
 		followCnt, _ := mysql.GetFollowCntByUserId(user.Id)
@@ -76,8 +79,8 @@ func (fsi *FollowServiceImpl) GetFollowListById(userId int64) ([]vo.UserInfo, er
 		userInfo.FollowCount = followCnt
 		userInfo.IsFollow = isFollow
 		users = append(users, userInfo)
-
 	}
+
 	return users, nil
 }
 
@@ -95,11 +98,10 @@ func (fsi *FollowerServiceImpl) GetFollowerListById(userId int64) ([]vo.UserInfo
 		return nil, nil
 	}
 	// 根据每个id来查询用户信息
-	len := len(ids)
-	users := make([]vo.UserInfo, len)
-	for i := 0; i < len; i++ {
+	users := make([]vo.UserInfo, len(ids))
+	for index, id := range ids {
 		userInfo := vo.UserInfo{}
-		queryUser, err := mysql.GetUserByUserId(ids[i])
+		queryUser, err := mysql.GetUserByUserId(id)
 		userId = queryUser.Id
 		if err != nil {
 			return users, err
@@ -112,7 +114,7 @@ func (fsi *FollowerServiceImpl) GetFollowerListById(userId int64) ([]vo.UserInfo
 		if err != nil {
 			return users, err
 		}
-		isFollow, err := mysql.GetIsFollow(userId, ids[i])
+		isFollow, err := mysql.GetIsFollow(userId, id)
 		if err != nil {
 			return users, err
 		}
@@ -121,7 +123,7 @@ func (fsi *FollowerServiceImpl) GetFollowerListById(userId int64) ([]vo.UserInfo
 		userInfo.FollowerCount = followerCnt
 		userInfo.FollowCount = followCnt
 		userInfo.IsFollow = isFollow
-		users[i] = userInfo
+		users[index] = userInfo
 	}
 	return users, nil
 }

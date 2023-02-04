@@ -4,6 +4,7 @@ import (
 	"TIKTOK_User/dal/mysql"
 	"TIKTOK_User/model/vo"
 	"TIKTOK_User/service"
+	"TIKTOK_User/service/serviceImpl"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
 	_ "github.com/cloudwego/hertz/pkg/common/utils"
@@ -19,44 +20,45 @@ import (
 */
 func RelationAction(ctx context.Context, c *app.RequestContext) {
 	//url获取的对方用户id、视频id
-	userfromId := c.Query("user_id_from")
-	usertoId := c.Query("user_id_to")
+	userFromId := c.Query("user_id_from")
+	userToId := c.Query("user_id_to")
 	//relationactType := c.Query("cancel")
 	// 通过token获取到的登录用户名
 	//user, _ := c.Get(mw.IdentityKey)
-	userfromid, _ := strconv.ParseInt(userfromId, 10, 64)
-	usertoid, _ := strconv.ParseInt(usertoId, 10, 64)
+	userFrom, _ := strconv.ParseInt(userFromId, 10, 64)
+	userTo, _ := strconv.ParseInt(userToId, 10, 64)
 	//关注服务
-	fsi := service.NewCommentServiceInstance()
+	fsi := service.NewFollowServiceInstance()
 	//关注方法
-	isFollow, err := mysql.GetIsFollow(usertoid, userfromid)
+	isFollow, err := mysql.GetIsFollow(userTo, userFrom)
 	if err != nil {
-		return
+		log.Print("关注失败")
+		c.JSON(consts.StatusOK, vo.FollowActionResponse{
+			Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "关注失败"},
+		})
 	}
 	if isFollow == false {
-		res, err := fsi.CreateNewRelation(userfromid, usertoid)
-		if res != -1 && err == nil {
+		res, err := fsi.CreateNewRelation(userFrom, userTo)
+		if res == -1 && err != nil {
 			//返回格式
-			c.JSON(consts.StatusOK, vo.FollowActionResponse{
-				Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "关注成功"},
-			})
-		} else {
 			c.JSON(consts.StatusOK, vo.FollowActionResponse{
 				Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "关注失败"},
 			})
 		}
+		c.JSON(consts.StatusOK, vo.FollowActionResponse{
+			Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "关注成功"},
+		})
 	} else {
-		err := fsi.DeleteRelation(userfromid, usertoid)
-		if err == nil {
-			//返回格式
-			c.JSON(consts.StatusOK, vo.FollowActionResponse{
-				Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "取关成功"},
-			})
-		} else {
+		err := fsi.DeleteRelation(userFrom, userTo)
+		if err != nil {
 			c.JSON(consts.StatusOK, vo.FollowActionResponse{
 				Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "取关失败"},
 			})
 		}
+		//返回格式
+		c.JSON(consts.StatusOK, vo.FollowActionResponse{
+			Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "取关成功"},
+		})
 	}
 
 }
@@ -68,17 +70,17 @@ func RelationAction(ctx context.Context, c *app.RequestContext) {
 func FollowList(ctx context.Context, c *app.RequestContext) {
 	userId := c.Query("user_id")
 	id, _ := strconv.ParseInt(userId, 10, 64)
-	fsi := service.NewCommentServiceInstance()
-	if UserInfoList, err := fsi.GetFollowListById(id); err == nil {
-		c.JSON(consts.StatusOK, vo.FollowResponse{
-			Response:     vo.Response{StatusCode: ResponseSuccess, StatusMsg: "Query UserInfo success"},
-			UserInfoList: UserInfoList,
-		})
-	} else {
+	fsi := service.NewFollowServiceInstance()
+	UserInfoList, err := fsi.GetFollowListById(id)
+	if err != nil {
 		c.JSON(consts.StatusOK, vo.FollowResponse{
 			Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "Query UserInfo error"},
 		})
 	}
+	c.JSON(consts.StatusOK, vo.FollowResponse{
+		Response:     vo.Response{StatusCode: ResponseSuccess, StatusMsg: "Query UserInfo success"},
+		UserInfoList: UserInfoList,
+	})
 }
 
 // FollowerList
@@ -88,7 +90,7 @@ func FollowList(ctx context.Context, c *app.RequestContext) {
 func FollowerList(ctx context.Context, c *app.RequestContext) {
 	userId := c.Query("user_id")
 	id, _ := strconv.ParseInt(userId, 10, 64)
-	fsi := service.NewCommentServiceInstance2()
+	fsi := &serviceImpl.FollowerServiceImpl{}
 	if UserInfoList, err := fsi.GetFollowerListById(id); err == nil {
 		c.JSON(consts.StatusOK, vo.FollowResponse{
 			Response:     vo.Response{StatusCode: ResponseSuccess, StatusMsg: "Query UserInfo success"},
@@ -106,15 +108,15 @@ func FollowerList(ctx context.Context, c *app.RequestContext) {
 	所有登录用户的好友列表
 */
 func FriendList(ctx context.Context, c *app.RequestContext) {
-	u := c.Query("user_id")
-	if u == "" {
+	userIdVar := c.Query("user_id")
+	if userIdVar == "" {
 		c.JSON(http.StatusOK, vo.RelationResponse{
 			Response:     vo.Response{StatusCode: ResponseFail, StatusMsg: "query user id empty"},
 			UserInfoList: nil,
 		})
-		return
+		log.Fatal("get useId failed ")
 	}
-	userId, err := strconv.ParseInt(u, 10, 64)
+	userId, err := strconv.ParseInt(userIdVar, 10, 64)
 	// 用户id解析出错。
 	if nil != err {
 		c.JSON(http.StatusOK, vo.RelationResponse{
@@ -124,7 +126,7 @@ func FriendList(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	// 正常获取好友列表
-	fsi := service.NewCommentServiceInstance()
+	fsi := service.NewFollowServiceInstance()
 	users, err := fsi.GetFollowListById(userId)
 	// 获取关注列表时出错。
 	if err != nil {

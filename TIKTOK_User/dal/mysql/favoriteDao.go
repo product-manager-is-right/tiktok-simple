@@ -56,7 +56,7 @@ func DeleteFavorite(userId, videoId int64) error {
 */
 func GetFavoritesById(userId int64) ([]int64, error) {
 	var res []int64
-	if err := DB.Model(model.Favorite{}).Where(map[string]interface{}{"user_id": userId}).Pluck("video_id", &res).Error; err != nil {
+	if err := DB.Model(model.Favorite{}).Where("user_id = ?", userId).Pluck("video_id", &res).Error; err != nil {
 		return nil, err
 	}
 	return res, nil
