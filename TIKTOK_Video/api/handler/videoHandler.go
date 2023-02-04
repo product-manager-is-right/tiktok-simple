@@ -83,6 +83,7 @@ func Feed(ctx context.Context, c *app.RequestContext) {
 func PublishAction(ctx context.Context, c *app.RequestContext) {
 	// get the basic info from meta
 	userId, _ := c.Get(mw.IdentityKey)
+
 	videoTitle := c.PostForm("title")
 	videoData, err := c.Request.FormFile("data")
 	if err != nil {

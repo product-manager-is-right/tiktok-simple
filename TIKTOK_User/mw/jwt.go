@@ -27,7 +27,7 @@ func InitJwt() {
 		Key:         []byte("jwt sign key"),
 		Timeout:     time.Hour * 24,
 		MaxRefresh:  time.Hour * 24,
-		TokenLookup: "query: token",
+		TokenLookup: "query: token, form: token",
 		Authenticator: func(ctx context.Context, c *app.RequestContext) (interface{}, error) {
 			username := c.Query("username")
 			password := c.Query("password")
