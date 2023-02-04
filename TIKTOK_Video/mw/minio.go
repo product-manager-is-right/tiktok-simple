@@ -1,10 +1,10 @@
 package mw
 
 import (
-	"TIKTOK_Video/configs"
 	"context"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	"github.com/spf13/viper"
 	"io"
 	"log"
 )
@@ -13,7 +13,7 @@ func UploadFile(BucketName string, objectName string, reader io.Reader, objectsi
 	ctx := context.Background()
 	// Minio 对象存储初始化
 	minioClient, err := minio.New("150.158.135.49:9000", &minio.Options{
-		Creds:  credentials.NewStaticV4(configs.AccessKeyId, configs.SecretAccessKey, ""),
+		Creds:  credentials.NewStaticV4(viper.GetString("minio.AccessKeyId"), viper.GetString("minio.SecretAccessKey"), ""),
 		Secure: false,
 	})
 	if err != nil {

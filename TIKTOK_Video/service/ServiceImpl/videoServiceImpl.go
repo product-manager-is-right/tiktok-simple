@@ -5,9 +5,13 @@ import (
 	"TIKTOK_Video/model"
 	"TIKTOK_Video/model/vo"
 	"TIKTOK_Video/mw"
+	"TIKTOK_Video/resolver"
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
+	"github.com/cloudwego/hertz/pkg/common/config"
+	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	uuid "github.com/satori/go.uuid"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 	"image"
@@ -16,12 +20,17 @@ import (
 	"log"
 	"mime/multipart"
 	"os"
+	"strconv"
 	"time"
 )
 
 type VideoServiceImpl struct {
 }
 
+// GetVideoInfosByLatestTime /*
+/*
+根据最后传入的时间获取对应的视频
+*/
 func (vsi *VideoServiceImpl) GetVideoInfosByLatestTime(latestTime int64, userId int64) ([]vo.VideoInfo, int64, error) {
 	var videoInfos []vo.VideoInfo
 	nextTime := time.Now().UnixMilli()
@@ -41,6 +50,9 @@ func (vsi *VideoServiceImpl) GetVideoInfosByLatestTime(latestTime int64, userId 
 	return videoInfos, nextTime, err
 }
 
+/*
+根据对应的video和userid返回video视频的list
+*/
 func bindVideoInfo(videos []*model.Video, userId int64) ([]vo.VideoInfo, error) {
 	videoInfos := make([]vo.VideoInfo, len(videos))
 	Ids := make([]int64, len(videos))
@@ -49,7 +61,93 @@ func bindVideoInfo(videos []*model.Video, userId int64) ([]vo.VideoInfo, error) 
 		Ids[i] = video.UserId
 	}
 	// 远程调用，获取user/author的个人信息
-	authors, _ := getUserInfoByIds(Ids, userId)
+	serviceImpl := UserServiceImpl{}
+	authors, err := serviceImpl.GetUsersInfoByIds(Ids, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	// 调用远程接口，判断userId是否喜欢videoId视频,但是调用时就和调用本地service一样，实现方式不一样
+	// 需要与user通信，应定义到service层
+	fsi := FavoriteServiceImpl{}
+	var isFavorite bool
+	for i, video := range videos {
+		videoId := video.VideoId
+
+		favoriteCount, _ := mysql.GetFavoriteCountByID(videoId)
+
+		commentCount, _ := mysql.GetCommentCountByID(videoId)
+
+		if userId >= 0 {
+			isFavorite, _ = fsi.IsFavorite(userId, videoId)
+		} else {
+			isFavorite = false
+		}
+
+		videoInfos[i] = vo.VideoInfo{
+			Id:            videoId,
+			Author:        *authors[Ids[i]],
+			PlayUrl:       video.PlayUrl,
+			CoverUrl:      video.CoverUrl,
+			FavoriteCount: favoriteCount,
+			CommentCount:  commentCount,
+			IsFavorite:    isFavorite,
+			Title:         video.Title,
+		}
+	}
+
+	return videoInfos, nil
+}
+
+// PublishVideo /*
+// 将视频存储到minio文件服务器
+func (vsi *VideoServiceImpl) PublishVideo(userId int64, fileHeader *multipart.FileHeader, videoTitle string) error {
+	// 处理multipart.FileHeader文件为byte[]
+	file, err := fileHeader.Open()
+	buf := bytes.NewBuffer(nil)
+	if _, err := io.Copy(buf, file); err != nil {
+		return err
+	}
+
+	videoId, err := createVideoCall(userId, buf.Bytes(), videoTitle)
+	if err != nil {
+		return err
+	}
+	// 调用Dao层，存入ums_publish_video
+	go remoteCreatePublishVideo(userId, videoId)
+
+	return nil
+}
+
+// GetVideoInfosByIds /*
+// 根据视频id获取videoInfo
+func (vsi *VideoServiceImpl) GetVideoInfosByIds(Ids []int64) ([]vo.VideoInfo, error) {
+	videos := make([]*model.Video, 0, len(Ids))
+	for _, id := range Ids {
+		v, err := mysql.GetVideoByID(id)
+		if err != nil {
+			continue
+		}
+		videos = append(videos, v)
+	}
+	VideoInfos, err := TransVideoInfo(videos)
+	if err != nil {
+		return nil, err
+	}
+	return VideoInfos, nil
+
+}
+
+// TransVideoInfo /*
+// 将视频转换成Users模块需要的信息
+func TransVideoInfo(videos []*model.Video) ([]vo.VideoInfo, error) {
+	videoInfos := make([]vo.VideoInfo, len(videos))
+	Ids := make([]int64, len(videos))
+
+	for i, video := range videos {
+		Ids[i] = video.UserId
+	}
+	// 远程调用，获取user/author的个人信息
 
 	for i, video := range videos {
 		videoId := video.VideoId
@@ -60,13 +158,9 @@ func bindVideoInfo(videos []*model.Video, userId int64) ([]vo.VideoInfo, error) 
 
 		// 需要与user通信，应定义到service层
 		var favorite bool
-		if userId >= 0 {
-			favorite, _ = isFavorite(videoId, userId)
-		}
 
 		videoInfos[i] = vo.VideoInfo{
 			Id:            videoId,
-			Author:        *authors[Ids[i]],
 			PlayUrl:       video.PlayUrl,
 			CoverUrl:      video.CoverUrl,
 			FavoriteCount: favoriteCount,
@@ -77,31 +171,6 @@ func bindVideoInfo(videos []*model.Video, userId int64) ([]vo.VideoInfo, error) 
 	}
 
 	return videoInfos, nil
-}
-
-// 调用远程接口，判断userId是否喜欢videoId视频
-func isFavorite(videoId int64, userId int64) (bool, error) {
-	// TODO : impl
-	return false, nil
-}
-
-func (vsi *VideoServiceImpl) PublishVideo(userId int64, fileHeader *multipart.FileHeader, videoTitle string) error {
-	// 处理multipart.FileHeader文件为byte[]
-	file, err := fileHeader.Open()
-	buf := bytes.NewBuffer(nil)
-	if _, err := io.Copy(buf, file); err != nil {
-		return err
-	}
-	// 远程调用video接口，并存入vms_publish_video
-	videoId, err := createVideoCall(userId, buf.Bytes(), videoTitle)
-	if err != nil {
-		return err
-	}
-	// 调用Dao层，存入ums_publish_video
-	if err = remoteCreatePublishVideo(userId, videoId); err != nil {
-		return err
-	}
-	return nil
 }
 
 /*
@@ -143,6 +212,9 @@ func createVideoCall(userId int64, videoData []byte, videoTitle string) (int64, 
 	return videoId, nil
 }
 
+/*
+视频切帧
+*/
 func readFrameAsJpeg(filePath string) ([]byte, error) {
 	reader := bytes.NewBuffer(nil)
 	//根据对应的url切帧
@@ -170,7 +242,12 @@ func readFrameAsJpeg(filePath string) ([]byte, error) {
 /*
 远程调用User模块，将发布关系存入ums_publish_video表
 */
-func remoteCreatePublishVideo(UserId, VideoId int64) error {
-	// TODO : impl
-	return nil
+func remoteCreatePublishVideo(UserId, VideoId int64) {
+	url := "http://tiktok.simple.user/douyin/publish/UserVideo/?userId=" + strconv.FormatInt(UserId, 10) + "&videoId=" + strconv.FormatInt(VideoId, 10)
+	client := resolver.GetNacosDiscoveryCli()
+	state, _, err := client.Post(context.Background(), nil, url, nil, config.WithSD(true))
+	// check if the result is successful
+	if state != consts.StatusOK || err != nil {
+		log.Println("远程调用失败:" + err.Error())
+	}
 }

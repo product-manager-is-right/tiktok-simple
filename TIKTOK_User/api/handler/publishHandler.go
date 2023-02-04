@@ -7,6 +7,7 @@ import (
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
+	"log"
 	"strconv"
 )
 
@@ -42,4 +43,49 @@ func PublishList(ctx context.Context, c *app.RequestContext) {
 		Response:  vo.Response{StatusCode: ResponseSuccess},
 		VideoList: videoList,
 	})
+}
+
+// PublishVideo /*
+// 该接口为远端调用接口，将userId和videoId存储进ums数据库
+func PublishVideo(ctx context.Context, c *app.RequestContext) {
+	userIdInfo := c.Query("userId")
+	videoIdInfo := c.Query("videoId")
+	if userIdInfo == "" || videoIdInfo == "" {
+		c.JSON(consts.StatusOK, vo.RegisterResponse{
+			Response: vo.Response{StatusCode: ResponseFail, StatusMsg: "query userid or videoId empty"},
+		})
+	}
+
+	userId, err := strconv.ParseInt(userIdInfo, 10, 64)
+	if err != nil {
+		log.Print("can not change userId into int64")
+	}
+	videoId, err := strconv.ParseInt(videoIdInfo, 10, 64)
+	if err != nil {
+		log.Print("can not change videoId into int64")
+	}
+	vsi := serviceImpl.PublishServiceImpl{}
+	if err := vsi.PublishVideoInfo(userId, videoId); err != nil {
+		c.JSON(consts.StatusOK, vo.Response{
+			StatusCode: ResponseFail,
+			StatusMsg:  "error :" + err.Error(),
+		})
+		return
+	}
+	c.JSON(consts.StatusOK, vo.Response{
+		StatusCode: ResponseSuccess,
+		StatusMsg:  "upload info successful",
+	})
+	/*
+		usi := serviceImpl.UserServiceImpl{}
+		if _, err := usi.CreateUserByNameAndPassword(username, password); err != nil {
+			c.JSON(consts.StatusOK, vo.RegisterResponse{
+				Response: vo.Response{
+					StatusCode: ResponseFail,
+					StatusMsg:  "error :" + err.Error()},
+			})
+			c.Abort()
+		}
+	*/
+
 }

@@ -25,8 +25,8 @@ func InitJwt() {
 	JwtMiddleware, err = jwt.New(&jwt.HertzJWTMiddleware{
 		Realm:       "tiktok",
 		Key:         []byte("jwt sign key"),
-		Timeout:     time.Hour,
-		MaxRefresh:  time.Hour,
+		Timeout:     time.Hour * 24,
+		MaxRefresh:  time.Hour * 24,
 		TokenLookup: "query: token, form: token",
 		Authenticator: func(ctx context.Context, c *app.RequestContext) (interface{}, error) {
 			username := c.Query("username")

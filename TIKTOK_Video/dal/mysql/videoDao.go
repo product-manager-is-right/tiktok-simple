@@ -41,28 +41,29 @@ func GetVideosByTime(LatestTime int64) ([]*model.Video, error) {
 
 	return res, result.Error
 }
-func DecrementCommentCount(videoId int64) error {
+
+func DecrementFavoriteCount(videoId int64) error {
 	video := model.Video{VideoId: videoId}
-	result := DB.Model(&video).Update("comment_count", gorm.Expr("comment_count - 1"))
+	result := DB.Model(&video).Where("video_id = ?", videoId).Update("favorite_count", gorm.Expr("favorite_count - 1"))
 	var err error
 	if err = result.Error; err != nil {
 		return err
 	}
 	if result.RowsAffected == 0 {
-		return errors.New("减少评论数失败")
+		return errors.New("减少点赞数失败")
 	}
 	return nil
 }
 
-func IncrementCommentCount(videoId int64) error {
+func IncrementFavoriteCount(videoId int64) error {
 	video := model.Video{VideoId: videoId}
-	result := DB.Model(&video).Where("video_id = ?", videoId).Update("comment_count", gorm.Expr("comment_count + 1"))
+	result := DB.Model(&video).Where("video_id = ?", videoId).Update("favorite_count", gorm.Expr("favorite_count + 1"))
 	var err error
 	if err = result.Error; err != nil {
 		return err
 	}
 	if result.RowsAffected == 0 {
-		return errors.New("添加评论数失败")
+		return errors.New("添加点赞数失败")
 	}
 	return nil
 }
