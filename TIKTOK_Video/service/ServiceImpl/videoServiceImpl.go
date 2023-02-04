@@ -240,7 +240,12 @@ func readFrameAsJpeg(filePath string) ([]byte, error) {
 func remoteCreatePublishVideo(UserId, VideoId int64) error {
 	url := "http://tiktok.simple.user/douyin/publish/UserVideo/?userId=" + strconv.FormatInt(UserId, 10) + "&videoId=" + strconv.FormatInt(VideoId, 10)
 	client := resolver.GetInstance()
-	state, _, err := client.Post(context.Background(), nil, url, nil, config.WithSD(true))
+	state, body, err := client.Post(context.Background(), nil, url, nil, config.WithSD(true))
+	// check if the result is successful
+	if state != 200 {
+		log.Print("failed to connect simple.user")
+	}
+	log.Println(string(body))
 	if err != nil {
 		log.Fatal("请求User模块失败")
 		return err

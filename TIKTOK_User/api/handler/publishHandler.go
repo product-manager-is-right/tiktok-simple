@@ -72,6 +72,10 @@ func PublishVideo(ctx context.Context, c *app.RequestContext) {
 		})
 		return
 	}
+	c.JSON(consts.StatusOK, vo.Response{
+		StatusCode: ResponseSuccess,
+		StatusMsg:  "upload info successful",
+	})
 	/*
 		usi := serviceImpl.UserServiceImpl{}
 		if _, err := usi.CreateUserByNameAndPassword(username, password); err != nil {

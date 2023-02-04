@@ -14,6 +14,7 @@ routes:
       - /douyin/relation/follow/list/
       - /douyin/relation/follower/list/
       - /douyin/relation/friend/list/
+      - /douyin/favorite/IsFavor/
 
   - serviceName: http://tiktok.simple.user
     method: POST
@@ -22,6 +23,7 @@ routes:
       - /douyin/user/login/
       - /douyin/favorite/action/
       - /douyin/relation/action/
+      - /douyin/publish/UserVideo/
 
   - serviceName: http://tiktok.simple.video
     method: GET
@@ -35,3 +37,4 @@ routes:
     apis:
       - /douyin/comment/action/
       - /douyin/publish/action/
+      - /douyin/publish/GetVideos/

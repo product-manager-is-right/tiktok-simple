@@ -55,7 +55,7 @@ func (psi *PublishServiceImpl) GetVideoList(userIdTar int64, userIdSrc int64) ([
 	mode: "publish_mode" or "favorite_mode" 发布视频列表查询模式/喜欢列表查询模式
 */
 func getVideoInfosByVideoIds(videoIds []int64, userId int64, mode string) ([]vo.VideoInfo, error) {
-	videoInfos, err := remoteGetVideoInfoCall(videoIds)
+	videoInfos, err := RemoteGetVideoInfoCall(videoIds)
 	if err != nil {
 		log.Print("远程调用视频信息失败")
 		return videoInfos, err
@@ -90,7 +90,7 @@ func getVideoInfosByVideoIds(videoIds []int64, userId int64, mode string) ([]vo.
 /*
 远程调用Video模块，获取每个Video的具体信息
 */
-func remoteGetVideoInfoCall(videoIds []int64) ([]vo.VideoInfo, error) {
+func RemoteGetVideoInfoCall(videoIds []int64) ([]vo.VideoInfo, error) {
 	// TODO : remote impl
 	vs := make([]vo.VideoInfo, len(videoIds))
 	rand.Seed(time.Now().Unix())
@@ -101,17 +101,18 @@ func remoteGetVideoInfoCall(videoIds []int64) ([]vo.VideoInfo, error) {
 		log.Print("failed to change videoIds to json")
 	}
 	//用 bytes的方式存储videos的id
-	args.Add("video", string(bytes))
+	args.Add("videoIds", string(bytes))
 	status, body, err := client.Post(context.Background(), nil, "http://tiktok.simple.video/douyin/publish/GetVideos", args, config.WithSD(true))
 	if status == 200 {
-		res := vo.Response{}
+		res := vo.VideoInfoResponse{}
 		if err = json.Unmarshal(body, &res); err != nil {
 			return nil, ErrGetVideosInfo
 		}
-		videos := make([]*vo.VideoInfo, len(videoIds))
-		if err = json.Unmarshal([]byte(res.StatusMsg), &videos); err != nil {
-			return nil, ErrGetVideosInfo
+		videos := make([]vo.VideoInfo, len(videoIds))
+		if len(res.VideoList) != len(videoIds) {
+			log.Print("missing value of videoInfo")
 		}
+		videos = res.VideoList
 		for index, video := range videos {
 			vs[index] = vo.VideoInfo{
 				Id:            video.Id,

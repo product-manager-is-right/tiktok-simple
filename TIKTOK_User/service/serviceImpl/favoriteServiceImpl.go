@@ -4,7 +4,7 @@ import (
 	"TIKTOK_User/dal/mysql"
 	"TIKTOK_User/model/vo"
 	"errors"
-	"fmt"
+	"log"
 )
 
 type FavoriteServiceImpl struct {
@@ -35,17 +35,17 @@ func (fsi *FavoriteServiceImpl) GetFavoriteVideosListByUserId(userIdTar, userIdS
 	var videoInfos []vo.VideoInfo
 	videoIds, err := mysql.GetFavoritesById(userIdTar)
 	if err != nil {
-		fmt.Print("userIdTar=", userIdTar)
+		log.Print("userIdTar=", userIdTar)
 		//fmt.Print("获取视频id列表失败")
-		return videoInfos, err
+		return nil, err
 	}
 
 	if len(videoIds) == 0 {
-		return videoInfos, errors.New("获取视频id列表为空")
+		return nil, errors.New("获取视频id列表为空")
 	}
 	videoInfos, err = getVideoInfosByVideoIds(videoIds, userIdSrc, "favorite_query")
 	if err != nil {
-		fmt.Print("获取视频信息列表失败")
+		log.Print("获取视频信息列表失败")
 	}
 	return videoInfos, err
 

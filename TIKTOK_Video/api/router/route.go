@@ -18,5 +18,5 @@ func GeneratedRegister(r *server.Hertz) {
 	//publish action
 	apiRouter.POST("/publish/action/", mw.JwtMiddleware.MiddlewareFunc(), handler.PublishAction)
 	//远端文件传输接口
-	apiRouter.POST("publish/GetVideos", handler.GetVideosByIds)
+	apiRouter.POST("/publish/GetVideos/", handler.GetVideosByIds)
 }
