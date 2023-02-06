@@ -50,3 +50,19 @@ func (fsi *FriendServiceImpl) GetFriendListById(userId, ownerId int64) ([]vo.Use
 
 	return users, nil
 }
+
+func (fsi *FriendServiceImpl) IsFriend(userid1, userid2 int64) (bool, error) {
+	a, err := mysql.GetIsFollow(userid1, userid2)
+	if err != nil {
+		return false, err
+	}
+	if a == false {
+		return false, nil
+	}
+	b, err := mysql.GetIsFollow(userid2, userid1)
+	if err != nil {
+		return false, err
+	}
+
+	return b, err
+}

@@ -6,7 +6,7 @@ type MessageInfo struct {
 	CreateTime string `json:"create_time"` // 消息发送时间 yyyy-MM-dd HH:MM:ss
 }
 
-type ActionResponse struct {
+type MessageActionResponse struct {
 	Response
 }
 
