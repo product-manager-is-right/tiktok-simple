@@ -44,4 +44,10 @@ func GeneratedRegister(r *server.Hertz) {
 	relationRouter.GET("/follow/list/", handler.FollowList)
 	relationRouter.GET("/follower/list/", handler.FollowerList)
 	relationRouter.GET("/friend/list/", handler.FriendList)
+
+	// message路由组
+	messageRouter := r.Group("/douyin/message")
+	messageRouter.Use(mw.JwtMiddleware.MiddlewareFunc())
+	messageRouter.POST("/action/", handler.MessageAction)
+	messageRouter.GET("/chat/", handler.MessageChat)
 }
