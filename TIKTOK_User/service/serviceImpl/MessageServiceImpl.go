@@ -39,18 +39,26 @@ func (msi *MessageServiceImpl) GetMessage(toUserId int64, ownerId int64) ([]vo.M
 		return res, err
 	}
 	for _, message := range messageList {
-		var cur vo.MessageInfo
-		cur.ID = message.Id
-		//cur.CreateTime = strconv.FormatInt(message.CreateTime, 10)
-		cur.CreateTime = unixToStr(message.CreateTime, "2006-01-02 15:04:05")
-		cur.Content = message.Message
-		res = append(res, cur)
+		m := vo.MessageInfo{
+			ID:         message.Id,
+			ToUserId:   message.UserIdTo,
+			FromUserId: message.UserIdFrom,
+			Content:    message.Message,
+			CreateTime: time.Unix(message.CreateTime, 0).Format("2006-01-02 15:04:05"),
+		}
+
+		res = append(res, m)
 	}
 	return res, nil
 }
 
-// 时间戳转时间
-func unixToStr(timeUnix int64, layout string) string {
-	timeStr := time.Unix(timeUnix, 0).Format(layout)
-	return timeStr
+// GetLatestMessage 获取fromUser和toUser的最新的一条聊天记录
+// @param : message 消息
+// @param : msgType 消息类型 0 - toUser发送 1 - fromUser发送
+func (msi *MessageServiceImpl) GetLatestMessage(toUserId, fromUserId int64) (message string, msgType int64) {
+	m := mysql.GetLatestMessage(toUserId, fromUserId)
+	if m.UserIdFrom == fromUserId {
+		return m.Message, 1
+	}
+	return m.Message, 0
 }

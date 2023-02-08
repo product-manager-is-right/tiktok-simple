@@ -15,5 +15,5 @@ type FollowActionResponse struct {
 
 type RelationResponse struct {
 	Response
-	UserInfoList []UserInfo `json:"user_list"`
+	FriendUserInfoList []FriendUserInfo `json:"user_list"`
 }

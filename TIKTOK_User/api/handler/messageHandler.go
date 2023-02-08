@@ -6,7 +6,6 @@ import (
 	"TIKTOK_User/service/serviceImpl"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"strconv"
 )
@@ -62,7 +61,7 @@ func MessageChat(ctx context.Context, c *app.RequestContext) {
 	msi := serviceImpl.MessageServiceImpl{}
 	messageList, err := msi.GetMessage(toUserId, ownerId.(int64))
 	if err != nil {
-		c.JSON(consts.StatusOK, vo.MessageActionResponse{
+		c.JSON(consts.StatusOK, vo.ChatResponse{
 			Response: vo.Response{
 				StatusCode: ResponseFail,
 				StatusMsg:  "获取聊天列表错误" + err.Error(),
@@ -73,8 +72,5 @@ func MessageChat(ctx context.Context, c *app.RequestContext) {
 	c.JSON(consts.StatusOK, vo.ChatResponse{
 		Response:    vo.Response{StatusCode: ResponseSuccess, StatusMsg: "获取聊天列表成功"},
 		MessageList: messageList,
-	})
-	c.JSON(consts.StatusOK, utils.H{
-		"code": ResponseSuccess,
 	})
 }

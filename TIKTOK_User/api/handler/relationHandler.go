@@ -108,8 +108,8 @@ func FriendList(ctx context.Context, c *app.RequestContext) {
 
 	if userIdVar == "" {
 		c.JSON(http.StatusOK, vo.RelationResponse{
-			Response:     vo.Response{StatusCode: ResponseFail, StatusMsg: "query user id empty"},
-			UserInfoList: nil,
+			Response:           vo.Response{StatusCode: ResponseFail, StatusMsg: "query user id empty"},
+			FriendUserInfoList: nil,
 		})
 		log.Fatal("get useId failed ")
 	}
@@ -117,8 +117,8 @@ func FriendList(ctx context.Context, c *app.RequestContext) {
 	// 用户id解析出错。
 	if nil != err {
 		c.JSON(http.StatusOK, vo.RelationResponse{
-			Response:     vo.Response{StatusCode: ResponseSuccess, StatusMsg: "用户id格式错误"},
-			UserInfoList: nil,
+			Response:           vo.Response{StatusCode: ResponseSuccess, StatusMsg: "用户id格式错误"},
+			FriendUserInfoList: nil,
 		})
 		return
 	}
@@ -128,14 +128,14 @@ func FriendList(ctx context.Context, c *app.RequestContext) {
 
 	if err != nil {
 		c.JSON(http.StatusOK, vo.RelationResponse{
-			Response:     vo.Response{StatusCode: ResponseSuccess, StatusMsg: "获取好友列表时出错:" + err.Error()},
-			UserInfoList: nil,
+			Response:           vo.Response{StatusCode: ResponseSuccess, StatusMsg: "获取好友列表时出错:" + err.Error()},
+			FriendUserInfoList: nil,
 		})
 		return
 	}
 
 	c.JSON(http.StatusOK, vo.RelationResponse{
-		Response:     vo.Response{StatusCode: ResponseSuccess, StatusMsg: "获取好友列表成功"},
-		UserInfoList: users,
+		Response:           vo.Response{StatusCode: ResponseSuccess, StatusMsg: "获取好友列表成功"},
+		FriendUserInfoList: users,
 	})
 }

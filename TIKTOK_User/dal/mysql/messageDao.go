@@ -31,3 +31,18 @@ func GetMessage(toUserId int64, ownerId int64) ([]model.Message, error) {
 
 	return res1, nil
 }
+
+func GetLatestMessage(toUserId, fromUserId int64) model.Message {
+	var res1 model.Message
+	DB.Model(model.Message{}).Where("user_id_to = ?", toUserId).
+		Where("user_id_from = ?", fromUserId).Order("create_time desc").Limit(1).Take(&res1)
+
+	var res2 model.Message
+	DB.Model(model.Message{}).Where("user_id_to = ?", fromUserId).
+		Where("user_id_from = ?", toUserId).Order("create_time desc").Limit(1).Take(&res2)
+
+	if res1.CreateTime > res2.CreateTime {
+		return res1
+	}
+	return res2
+}
