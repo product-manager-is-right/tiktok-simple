@@ -2,7 +2,9 @@ package serviceImpl
 
 import (
 	"TIKTOK_User/dal/mysql"
+	"TIKTOK_User/model/vo"
 	"errors"
+	"time"
 )
 
 type MessageServiceImpl struct {
@@ -27,4 +29,28 @@ func (msi *MessageServiceImpl) SendMessage(toUserId int64, ownerId int64, conten
 	}
 
 	return nil
+}
+
+func (msi *MessageServiceImpl) GetMessage(toUserId int64, ownerId int64) ([]vo.MessageInfo, error) {
+	var res []vo.MessageInfo
+
+	messageList, err := mysql.GetMessage(toUserId, ownerId)
+	if err != nil {
+		return res, err
+	}
+	for _, message := range messageList {
+		var cur vo.MessageInfo
+		cur.ID = message.Id
+		//cur.CreateTime = strconv.FormatInt(message.CreateTime, 10)
+		cur.CreateTime = unixToStr(message.CreateTime, "2006-01-02 15:04:05")
+		cur.Content = message.Message
+		res = append(res, cur)
+	}
+	return res, nil
+}
+
+// 时间戳转时间
+func unixToStr(timeUnix int64, layout string) string {
+	timeStr := time.Unix(timeUnix, 0).Format(layout)
+	return timeStr
 }

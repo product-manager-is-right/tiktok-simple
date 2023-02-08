@@ -12,5 +12,5 @@ type MessageActionResponse struct {
 
 type ChatResponse struct {
 	Response
-	MessageList []*MessageInfo `json:"message_list"`
+	MessageList []MessageInfo `json:"message_list"`
 }

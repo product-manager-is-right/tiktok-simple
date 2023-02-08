@@ -47,6 +47,33 @@ func MessageAction(ctx context.Context, c *app.RequestContext) {
 
 // MessageChat 聊天记录api
 func MessageChat(ctx context.Context, c *app.RequestContext) {
+	ownerId, _ := c.Get(mw.IdentityKey)
+	t := c.Query("to_user_id")
+	toUserId, err := strconv.ParseInt(t, 10, 64)
+	if t == "" || err != nil {
+		c.JSON(consts.StatusOK, vo.MessageActionResponse{
+			Response: vo.Response{
+				StatusCode: ResponseFail,
+				StatusMsg:  "请求参数不正确",
+			},
+		})
+		return
+	}
+	msi := serviceImpl.MessageServiceImpl{}
+	messageList, err := msi.GetMessage(toUserId, ownerId.(int64))
+	if err != nil {
+		c.JSON(consts.StatusOK, vo.MessageActionResponse{
+			Response: vo.Response{
+				StatusCode: ResponseFail,
+				StatusMsg:  "获取聊天列表错误" + err.Error(),
+			},
+		})
+		return
+	}
+	c.JSON(consts.StatusOK, vo.ChatResponse{
+		Response:    vo.Response{StatusCode: ResponseSuccess, StatusMsg: "获取聊天列表成功"},
+		MessageList: messageList,
+	})
 	c.JSON(consts.StatusOK, utils.H{
 		"code": ResponseSuccess,
 	})
