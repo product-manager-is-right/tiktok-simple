@@ -9,18 +9,18 @@ type FriendServiceImpl struct {
 }
 
 // GetFriendListById 根据id获取好友列表
-func (fsi *FriendServiceImpl) GetFriendListById(userId, ownerId int64) ([]vo.UserInfo, error) {
+func (fsi *FriendServiceImpl) GetFriendListById(userId, ownerId int64) ([]vo.FriendUserInfo, error) {
 	//获取关注对象的id数组
 	ids, err := mysql.GetFollowingIds(userId)
 	if err != nil {
-		return []vo.UserInfo{}, err
+		return []vo.FriendUserInfo{}, err
 	}
 	// 没得关注者
 	if len(ids) == 0 {
-		return []vo.UserInfo{}, nil
+		return []vo.FriendUserInfo{}, nil
 	}
 	// 根据每个id来查询用户信息。
-	users := make([]vo.UserInfo, 0, len(ids))
+	friends := make([]vo.FriendUserInfo, 0, len(ids))
 	for _, id := range ids {
 		f, _ := mysql.GetIsFollow(userId, id)
 		if !f {
@@ -37,16 +37,39 @@ func (fsi *FriendServiceImpl) GetFriendListById(userId, ownerId int64) ([]vo.Use
 
 		isFollow, _ := mysql.GetIsFollow(id, ownerId)
 
-		u := vo.UserInfo{
-			Id:            user.Id,
-			Name:          user.Username,
-			FollowerCount: followerCnt,
-			FollowCount:   followCnt,
-			IsFollow:      isFollow,
+		msi := MessageServiceImpl{}
+		message, msgType := msi.GetLatestMessage(id, userId)
+
+		fu := vo.FriendUserInfo{
+			UserInfo: vo.UserInfo{
+				Id:            id,
+				Name:          user.Username,
+				FollowerCount: followerCnt,
+				FollowCount:   followCnt,
+				IsFollow:      isFollow,
+			},
+			Message: message,
+			MsgType: msgType,
 		}
 
-		users = append(users, u)
+		friends = append(friends, fu)
 	}
 
-	return users, nil
+	return friends, nil
+}
+
+func (fsi *FriendServiceImpl) IsFriend(userid1, userid2 int64) (bool, error) {
+	a, err := mysql.GetIsFollow(userid1, userid2)
+	if err != nil {
+		return false, err
+	}
+	if a == false {
+		return false, nil
+	}
+	b, err := mysql.GetIsFollow(userid2, userid1)
+	if err != nil {
+		return false, err
+	}
+
+	return b, err
 }

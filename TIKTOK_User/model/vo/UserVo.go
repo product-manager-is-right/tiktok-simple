@@ -11,6 +11,12 @@ type UserInfo struct {
 	IsFollow      bool   `json:"is_follow"`
 }
 
+type FriendUserInfo struct {
+	UserInfo
+	Message string `json:"message"`
+	MsgType int64  `json:"msgType"` // 0接受 or 1发送
+}
+
 /*
 Response Vo
 */
