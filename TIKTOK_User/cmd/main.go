@@ -5,6 +5,7 @@ import (
 	"TIKTOK_User/configs"
 	"TIKTOK_User/dal"
 	"TIKTOK_User/mw"
+	"TIKTOK_User/mw/rabbitMQ"
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/cloudwego/hertz/pkg/app/server/registry"
 	"github.com/cloudwego/hertz/pkg/common/utils"
@@ -65,6 +66,8 @@ func startServer() {
 
 	// 注册路由
 	router.GeneratedRegister(h)
+	rabbitMQ.InitRabbitMQ()
+	rabbitMQ.InitFollowRabbitMQ()
 
 	h.Spin()
 }

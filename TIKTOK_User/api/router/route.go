@@ -39,7 +39,7 @@ func GeneratedRegister(r *server.Hertz) {
 	// relation路由组
 	relationRouter := r.Group("/douyin/relation")
 	// 对外api
-	relationRouter.Use(mw.JwtMiddleware.MiddlewareFunc())
+	//relationRouter.Use(mw.JwtMiddleware.MiddlewareFunc())
 	relationRouter.POST("/action/", handler.RelationAction)
 	relationRouter.GET("/follow/list/", handler.FollowList)
 	relationRouter.GET("/follower/list/", handler.FollowerList)

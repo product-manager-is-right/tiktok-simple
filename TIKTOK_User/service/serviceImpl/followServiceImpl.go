@@ -3,8 +3,12 @@ package serviceImpl
 import (
 	"TIKTOK_User/dal/mysql"
 	"TIKTOK_User/model/vo"
+	"TIKTOK_User/mw/rabbitMQ"
 	"errors"
 	"gorm.io/gorm"
+	"log"
+	"strconv"
+	"strings"
 	//"fmt"
 )
 
@@ -18,8 +22,20 @@ func (fsi *FollowServiceImpl) CreateNewRelation(userFromId, userToId int64) erro
 	}
 	// 数据库没有这条记录，插入
 	if err == gorm.ErrRecordNotFound {
-		err := mysql.CreateNewRelation(userToId, userFromId)
+		//TODO：使用rabbitMQ
+		//使用rabbitMQ
+		err = CreateNewRelationByMQ(userToId, userFromId)
+		if err != nil {
+			log.Print("启动rabbitMQ失败，使用Mysql直接处理数据")
+			err = mysql.CreateNewRelation(userToId, userFromId)
+			return err
+		}
+		/*
+			err := mysql.CreateNewRelation(userToId, userFromId)
+		*/
+
 		return err
+
 	}
 
 	if relation.Cancel == 0 {
@@ -32,6 +48,19 @@ func (fsi *FollowServiceImpl) CreateNewRelation(userFromId, userToId int64) erro
 	}
 
 	return nil
+}
+func CreateNewRelationByMQ(userFromId, userToId int64) error {
+	//using rabbitMQ to store the info
+	sb := strings.Builder{}
+	sb.WriteString(strconv.Itoa(int(userFromId)))
+	sb.WriteString(" ")
+	sb.WriteString(strconv.Itoa(int(userToId)))
+	if err := rabbitMQ.RmqFollowAdd.Publish(sb.String()); err != nil {
+		log.Print(err)
+		return err
+	}
+	return nil
+
 }
 func (fsi *FollowServiceImpl) DeleteRelation(userFromId, userToId int64) error {
 	relation, err := mysql.GetRelation(userToId, userFromId)

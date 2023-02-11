@@ -2,6 +2,7 @@ package rabbitMQ
 
 import (
 	"TIKTOK_User/dal/mysql"
+	"TIKTOK_User/model"
 	"fmt"
 	"github.com/streadway/amqp"
 	"log"
@@ -26,12 +27,15 @@ func NewFollowRabbitMQ(queueName string) *FollowMQ {
 
 	cha, err := followMQ.conn.Channel()
 	followMQ.channel = cha
-	log.Fatal(err, "获取通道失败")
+	if err != nil {
+		log.Fatal(err, "获取通道失败")
+	}
+
 	return followMQ
 }
 
 // Publish 配置follower
-func (f *FollowMQ) Publish(message string) {
+func (f *FollowMQ) Publish(message string) error {
 	//创建队列
 	_, err := f.channel.QueueDeclare(
 		f.queueName,
@@ -47,8 +51,9 @@ func (f *FollowMQ) Publish(message string) {
 		nil,
 	)
 	if err != nil {
-		panic(err)
+		return err
 	}
+	messages := []byte(message)
 	err = f.channel.Publish(
 		f.exchange,  //交换机名称
 		f.queueName, //队列名称
@@ -56,11 +61,13 @@ func (f *FollowMQ) Publish(message string) {
 		false,
 		amqp.Publishing{
 			ContentType: "text/plain",
-			Body:        []byte(message),
+			Body:        messages,
 		})
 	if err != nil {
-		log.Fatal("publish message failed")
+		log.Print("publish message failed")
+		return err
 	}
+	return nil
 }
 func (f *FollowMQ) Consumer() {
 
@@ -98,7 +105,7 @@ func (f *FollowMQ) Consumer() {
 
 	}
 
-	log.Printf("[*] Waiting for messagees,To exit press CTRL+C")
+	log.Printf("Waiting for messagees,To exit press CTRL+C")
 
 	<-forever
 
@@ -112,12 +119,21 @@ func (f *FollowMQ) consumerFollowAdd(msgs <-chan amqp.Delivery) {
 		userId, _ := strconv.Atoi(params[0])
 		targetId, _ := strconv.Atoi(params[1])
 		// 日志记录。
-		sql := fmt.Sprintf("CALL addFollowRelation(%v,%v)", targetId, userId)
-		// 执行SQL，注必须scan，该SQL才能被执行。
-		if err := mysql.DB.Raw(sql).Scan(nil).Error; nil != err {
+
+		Follow := model.Follow{UserIdTo: int64(targetId), UserIdFrom: int64(userId), Cancel: 0}
+
+		if err := mysql.DB.Create(&Follow).Error; err != nil {
+			log.Println(err)
+		}
+		/*
+			sql := fmt.Sprintf("CALL CreateNewRelation(%v,%v)", targetId, userId)
+			if err := mysql.DB.Raw(sql).Scan(nil).Error; nil != err {
 			// 执行出错，打印日志。
 			log.Println(err.Error())
-		}
+			}
+		*/
+		// 执行SQL，注必须scan，该SQL才能被执行。
+
 	}
 }
 
@@ -129,13 +145,20 @@ func (f *FollowMQ) consumerFollowDel(msgs <-chan amqp.Delivery) {
 		userId, _ := strconv.Atoi(params[0])
 		targetId, _ := strconv.Atoi(params[1])
 		// 日志记录。
-		sql := fmt.Sprintf("CALL delFollowRelation(%v,%v)", targetId, userId)
-		//log.Printf("消费队列执行删除关系。SQL如下：%s", sql)
-		// 执行SQL，注必须scan，该SQL才能被执行。
-		if err := mysql.DB.Raw(sql).Scan(nil).Error; nil != err {
-			// 执行出错，打印日志。
-			log.Println(err.Error())
+		if err := mysql.DB.Model(&model.Follow{}).Where("user_id_to = ?", targetId).Where("user_id_from = ?", userId).
+			Update("cancel", 0).Error; err != nil {
+			log.Fatal("更新失败")
 		}
+		/*
+				sql := fmt.Sprintf("CALL UpdateRelation(%v,%v)", targetId, userId)
+			log.Printf("消费队列执行删除关系。SQL如下：%s", sql)
+			// 执行SQL，注必须scan，该SQL才能被执行。
+			if err := mysql.DB.Raw(sql).Scan(nil).Error; nil != err {
+				// 执行出错，打印日志。
+				log.Println(err.Error())
+			}
+		*/
+
 		// 再删Redis里的信息，防止脏数据，保证最终一致性。
 		//updateRedisWithDel(userId, targetId)
 	}
