@@ -71,7 +71,7 @@ func TestDeleteCommentByCommentIdWithMock(t *testing.T) {
 		//{6, 6, false, "zero row affected"},
 	}
 	instance := service.NewCommentServiceInstance()
-	// todo 本来想像这样子打桩的，但是好像都没有打桩成功
+	// todo 本来想像这样子打桩的，但是好像都没有打桩成功,可能是函数内联的原因，听说使用gomock好点
 	//monkey.Patch(instance.ReturnA, func() string {
 	//	return "b"
 	//})

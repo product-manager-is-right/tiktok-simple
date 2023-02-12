@@ -3,6 +3,7 @@ package serviceImpl
 import (
 	"TIKTOK_User/dal/mysql"
 	"TIKTOK_User/model/vo"
+	"TIKTOK_User/mw/rabbitMQ"
 	"TIKTOK_User/resolver"
 	"context"
 	"errors"
@@ -11,6 +12,7 @@ import (
 	"gorm.io/gorm"
 	"log"
 	"strconv"
+	"strings"
 )
 
 type FavoriteServiceImpl struct {
@@ -27,7 +29,12 @@ func (fsi *FavoriteServiceImpl) CreateNewFavorite(userId, videoId int64) error {
 	}
 	// 数据库没有这条记录，插入
 	if err == gorm.ErrRecordNotFound {
-		_, err = mysql.CreateNewFavorite(userId, videoId)
+		err = sendFavoriteMessage(userId, videoId, 2)
+		if err != nil {
+			log.Print("发送点赞操作消息队列失败，使用Mysql直接处理数据")
+			_, err = mysql.CreateNewFavorite(userId, videoId)
+			return err
+		}
 		// 通知vms 赞 +1
 		if err != nil {
 			return err
@@ -40,9 +47,15 @@ func (fsi *FavoriteServiceImpl) CreateNewFavorite(userId, videoId int64) error {
 		return errors.New("已经点赞过了")
 	}
 	// 数据库已经有这条记录，修改Cancel为0
-	if err := mysql.UpdateFavorite(userId, videoId, 0); err != nil {
-		return err
+	//先尝试发送消息队列
+	err = sendFavoriteMessage(userId, videoId, 0)
+	if err != nil {
+		log.Print("发送点赞操作消息队列失败，使用Mysql直接处理数据")
+		if err = mysql.UpdateFavorite(userId, videoId, 0); err != nil {
+			return err
+		}
 	}
+
 	// 启动协程，异步调用
 	go remoteUpdateFavoriteCnt(videoId, 0)
 	return nil
@@ -59,8 +72,11 @@ func (fsi *FavoriteServiceImpl) DeleteFavorite(userId, videoId int64) error {
 		return errors.New("已经取消点赞了")
 	}
 
-	if err := mysql.UpdateFavorite(userId, videoId, 1); err != nil {
-		return err
+	//先尝试发送到消息队列中
+	if err = sendFavoriteMessage(userId, videoId, 1); err != nil {
+		if err = mysql.UpdateFavorite(userId, videoId, 1); err != nil {
+			return err
+		}
 	}
 
 	go remoteUpdateFavoriteCnt(videoId, 1)
@@ -112,4 +128,22 @@ func (fsi *FavoriteServiceImpl) IsFavorite(userId, videoId int64) (bool, error) 
 		return false, err
 	}
 	return isFavorite, nil
+}
+
+// actionType为0时为将已有的数据库记录改为0，1改为1，2为创建新的数据行
+// 发送结构为 userId-videoId-type的消息到rabbit中
+func sendFavoriteMessage(userId int64, videoId int64, actionType int) error {
+	//using rabbitMQ to store the info
+	sb := strings.Builder{}
+	//使用最高的36，压缩一下
+	sb.WriteString(strconv.FormatInt(userId, 36))
+	sb.WriteString("-")
+	sb.WriteString(strconv.FormatInt(videoId, 36))
+	sb.WriteString("-")
+	sb.WriteString(strconv.Itoa(actionType))
+	if err := rabbitMQ.RmqFavorite.Publish(sb.String()); err != nil {
+		log.Print(err)
+		return err
+	}
+	return nil
 }

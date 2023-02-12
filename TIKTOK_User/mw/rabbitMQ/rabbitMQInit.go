@@ -8,7 +8,8 @@ import (
 const MqUrl = "amqp://guest:guest@120.25.2.146:5672/"
 
 type RabbitMQ struct {
-	conn  *amqp.Connection
+	conn *amqp.Connection
+	//连接信息
 	mqUrl string
 }
 

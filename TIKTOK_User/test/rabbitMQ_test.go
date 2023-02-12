@@ -7,6 +7,7 @@ import (
 	"github.com/cloudwego/hertz/pkg/common/test/assert"
 	"log"
 	"testing"
+	"time"
 )
 
 func Test(t *testing.T) {
@@ -22,6 +23,8 @@ func Test(t *testing.T) {
 	if err != nil {
 		log.Print("there are some errors")
 	}
+	//ageng: 我发现测试案例中mq好像还没有消费就断开了，适当睡眠一下观察终端的打印日志，不然会直接停掉所有协程
+	time.Sleep(time.Second * 2)
 	assert.Nil(t, err)
 
 }
