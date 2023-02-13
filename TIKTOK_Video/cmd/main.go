@@ -5,6 +5,8 @@ import (
 	"TIKTOK_Video/configs"
 	"TIKTOK_Video/dal"
 	"TIKTOK_Video/mw"
+	"TIKTOK_Video/mw/rabbitMQ"
+	"context"
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/cloudwego/hertz/pkg/app/server/registry"
 	"github.com/cloudwego/hertz/pkg/common/utils"
@@ -13,6 +15,7 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
 	"github.com/spf13/viper"
+	"time"
 )
 
 func main() {
@@ -61,10 +64,21 @@ func startServer() {
 			Addr:        utils.NewNetAddr("tcp", addr),
 			Weight:      10,
 			Tags:        nil,
-		}))
+		}),
+		// Maximum wait time before exit, if not specified the default is 3s
+		server.WithExitWaitTime(3*time.Second),
+	)
 
 	// 注册路由
 	router.GeneratedRegister(h)
+	rabbitMQ.InitRabbitMQ()
+	rabbitMQ.InitCommentRabbitMQ()
+
+	//优雅退出！！！哈哈哈
+	h.OnShutdown = append(h.OnShutdown, func(ctx context.Context) {
+		//对打开的连接和通道进行关闭
+		rabbitMQ.CloseConn()
+	})
 
 	h.Spin()
 }

@@ -36,3 +36,9 @@ func (r *RabbitMQ) destroy() {
 		return
 	}
 }
+
+func CloseConn() {
+	if Rmq != nil && !Rmq.conn.IsClosed() {
+		Rmq.destroy()
+	}
+}

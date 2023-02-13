@@ -8,7 +8,7 @@ import (
 
 //定义数据结构和通用的方法等
 
-//有普适性，对于favorite是一样的，我就改了名字了
+//有普适性，我就改了名字了
 
 type MyMessageQueue struct {
 	RabbitMQ

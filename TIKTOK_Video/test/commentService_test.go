@@ -63,11 +63,12 @@ func TestDeleteCommentByCommentIdWithMock(t *testing.T) {
 	var tests = []struct {
 		ownerId   int64
 		commentId int64
+		viderId   int64
 		expectNil bool
 		errorMsg  string
 	}{
 		//{3, 12, true, ""},
-		{3, 27, true, ""},
+		{3, 27, 3, true, ""},
 		//{6, 6, false, "zero row affected"},
 	}
 	instance := service.NewCommentServiceInstance()
@@ -86,7 +87,7 @@ func TestDeleteCommentByCommentIdWithMock(t *testing.T) {
 	//})
 	//defer monkey.Unpatch(instance.DeleteCommentByCommentId)
 	for _, test := range tests {
-		err := instance.DeleteCommentByCommentId(test.commentId, test.ownerId)
+		err := instance.DeleteCommentByCommentId(test.commentId, test.ownerId, test.viderId)
 		if test.expectNil {
 			assert.Nil(t, err)
 			//assert.DeepEqual(t,test.errorMsg,err.Error())

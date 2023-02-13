@@ -4,7 +4,11 @@ import (
 	"TIKTOK_Video/dal/mysql"
 	"TIKTOK_Video/model"
 	"TIKTOK_Video/model/vo"
+	"TIKTOK_Video/mw/rabbitMQ"
 	"errors"
+	"log"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -73,21 +77,28 @@ func (csi *CommentServiceImpl) ReturnA() string {
 	return "a"
 }
 
-func (csi *CommentServiceImpl) DeleteCommentByCommentId(commentId, userId int64) error {
+func (csi *CommentServiceImpl) DeleteCommentByCommentId(commentId, userId, videoId int64) error {
 	if commentId <= 0 {
 		return errors.New("wrong commentId")
 	}
-	comment, err := mysql.GetCommentByID(commentId)
-	if err != nil {
-		return err
+	//获取评论的具体信息，如果没有记录会返回err。2.13被阿耿删减，因为使用了mq进行异步处理了
+	//这一步好像没有什么用处了，如果没有这个评论或者videoId对不上的话在mq的处理中直接无视就好了
+	//comment, err := mysql.GetCommentByID(commentId)
+	//if err != nil {
+	//	return err
+	//}
+
+	//首先尝试发送处理到mq中
+	if err := sendDelMessage(commentId, userId, videoId); err != nil {
+		//发送失败。自动同步操作数据库
+		if err = mysql.DeleteCommentByCommentId(commentId, userId); err != nil {
+			return err
+		}
+		if err = mysql.DecrementCommentCount(videoId); err != nil {
+			return err
+		}
 	}
-	if err = mysql.DeleteCommentByCommentId(commentId, userId); err != nil {
-		return err
-	}
-	err = mysql.DecrementCommentCount(comment.VideoId)
-	if err != nil {
-		return err
-	}
+
 	return nil
 
 }
@@ -119,4 +130,23 @@ func (csi *CommentServiceImpl) InsertComment(commentText string, videoId, userId
 		CreateDate: time.Unix(comment.CreateDate, 0).Format("01-02 15:04"),
 	}
 	return commentInfo, nil
+}
+
+// 发送顺序为commentId, userId, videoId
+func sendDelMessage(id ...int64) error {
+	//使用最高的36，压缩一下
+	if id == nil || len(id) <= 0 {
+		return errors.New("cannot send empty message to rabbitmq")
+	}
+	sb := strings.Builder{}
+	sb.WriteString(strconv.FormatInt(id[0], 36))
+	for i := 1; i < len(id); i++ {
+		sb.WriteString("-")
+		sb.WriteString(strconv.FormatInt(id[i], 36))
+	}
+	if err := rabbitMQ.RmqComment.Publish(sb.String()); err != nil {
+		log.Print(err)
+		return err
+	}
+	return nil
 }

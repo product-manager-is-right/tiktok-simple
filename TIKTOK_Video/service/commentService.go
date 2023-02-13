@@ -12,7 +12,7 @@ type CommentService interface {
 	GetCommentByCommentId(commentId, userId int64) (comment *vo.CommentInfo, err error)
 	// InsertComment 插入新的评论内容，成功返回CommentInfo的指针
 	InsertComment(commentText string, videoId, userId int64) (comment *vo.CommentInfo, err error)
-	DeleteCommentByCommentId(commentId, userId int64) error
+	DeleteCommentByCommentId(commentId, userId, videoId int64) error
 	//ReturnA() string
 }
 
