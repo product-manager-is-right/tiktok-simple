@@ -10,6 +10,7 @@ import (
 )
 
 const favoriteQueueName = "favorite"
+const remoteFavorQueueName = "favorRemote"
 
 // 关注田添加或取消的消费方式。
 func consumerFavorite(msgs <-chan amqp.Delivery) {
@@ -55,11 +56,12 @@ func consumerFavorite(msgs <-chan amqp.Delivery) {
 }
 
 var RmqFavorite *MyMessageQueue
+var RmqRemoteFavorite *MyMessageQueue
 
 // InitFavoriteRabbitMQ 初始化rabbitMQ连接。
 func InitFavoriteRabbitMQ() {
 	RmqFavorite = NewRabbitMQSimple(favoriteQueueName)
-
-	RmqFavorite.Consume(consumerFavorite)
+	RmqRemoteFavorite = NewRabbitMQSimple(remoteFavorQueueName)
+	go RmqFavorite.Consume(consumerFavorite)
 
 }

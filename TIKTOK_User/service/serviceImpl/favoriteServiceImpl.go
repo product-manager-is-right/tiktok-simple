@@ -39,8 +39,9 @@ func (fsi *FavoriteServiceImpl) CreateNewFavorite(userId, videoId int64) error {
 		if err != nil {
 			return err
 		}
-
-		go remoteUpdateFavoriteCnt(videoId, 0)
+		if err = sendRemoteFavoriteMessage(videoId, 0); err != nil {
+			go remoteUpdateFavoriteCnt(videoId, 0)
+		}
 		return nil
 	}
 	if favorite.Cancel == 0 {
@@ -57,7 +58,9 @@ func (fsi *FavoriteServiceImpl) CreateNewFavorite(userId, videoId int64) error {
 	}
 
 	// 启动协程，异步调用
-	go remoteUpdateFavoriteCnt(videoId, 0)
+	if err = sendRemoteFavoriteMessage(videoId, 0); err != nil {
+		go remoteUpdateFavoriteCnt(videoId, 0)
+	}
 	return nil
 }
 
@@ -79,7 +82,9 @@ func (fsi *FavoriteServiceImpl) DeleteFavorite(userId, videoId int64) error {
 		}
 	}
 
-	go remoteUpdateFavoriteCnt(videoId, 1)
+	if err = sendRemoteFavoriteMessage(videoId, 1); err != nil {
+		go remoteUpdateFavoriteCnt(videoId, 1)
+	}
 	return nil
 }
 
@@ -142,6 +147,19 @@ func sendFavoriteMessage(userId int64, videoId int64, actionType int) error {
 	sb.WriteString("-")
 	sb.WriteString(strconv.Itoa(actionType))
 	if err := rabbitMQ.RmqFavorite.Publish(sb.String()); err != nil {
+		log.Print(err)
+		return err
+	}
+	return nil
+}
+func sendRemoteFavoriteMessage(videoId int64, actionType int) error {
+	//using rabbitMQ to store the info
+	sb := strings.Builder{}
+	//使用最高的36，压缩一下
+	sb.WriteString(strconv.FormatInt(videoId, 36))
+	sb.WriteString("-")
+	sb.WriteString(strconv.Itoa(actionType))
+	if err := rabbitMQ.RmqRemoteFavorite.Publish(sb.String()); err != nil {
 		log.Print(err)
 		return err
 	}
