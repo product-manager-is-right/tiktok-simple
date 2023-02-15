@@ -92,19 +92,7 @@ func (r *MyMessageQueue) PublishWithEx(message string) error {
 		nil,      // arguments
 	)
 	//申请队列，如果队列不存在会自动创建，存在则跳过创建
-	_, err = r.channel.QueueDeclare(
-		r.queueName,
-		//是否持久化
-		false,
-		//是否为自动删除
-		false,
-		//是否具有排他性
-		false,
-		//是否阻塞
-		false,
-		//额外属性
-		nil,
-	)
+
 	if err != nil {
 		return err
 	}
@@ -210,6 +198,9 @@ func (r *MyMessageQueue) ConsumeWithEx(consumeMethod func(msgs <-chan amqp.Deliv
 		false,
 		nil,
 	)
+	if err != nil {
+		log.Fatal("bind the queue with switch")
+	}
 	//2. 接收消息
 	msgs, err := r.channel.Consume(
 		r.queueName,
@@ -233,8 +224,5 @@ func (r *MyMessageQueue) ConsumeWithEx(consumeMethod func(msgs <-chan amqp.Deliv
 	//forever := make(chan bool)
 	//启用协程处理消息
 	go consumeMethod(msgs)
-
-	log.Printf("Waiting for messagees,To exit press CTRL+C")
-	//<-forever
 
 }

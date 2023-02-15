@@ -19,25 +19,25 @@ func consumerFavor(msgs <-chan amqp.Delivery) {
 	for d := range msgs {
 		// 参数解析。
 		params := strings.Split(fmt.Sprintf("%s", d.Body), "-")
-		if len(params) != 2 {
-			log.Println("remoteFavorite队列收到错误消息", err.Error())
+		if len(params) != 3 {
+			log.Println("favorite队列收到错误消息", err.Error())
 			continue
 		}
-		if videoId, err = strconv.ParseInt(params[0], 36, 64); err != nil {
-			log.Println("remoteFavorite队列收到错误消息", err.Error())
+		if videoId, err = strconv.ParseInt(params[1], 36, 64); err != nil {
+			log.Println("favorite队列收到错误消息", err.Error())
 			continue
 		}
-		if action, err = strconv.Atoi(params[1]); err != nil {
-			log.Println("remoteFavorite队列收到错误消息", err.Error())
+		if action, err = strconv.Atoi(params[2]); err != nil {
+			log.Println("favorite队列收到错误消息", err.Error())
 			continue
 		}
 		log.Println("remoteFavorite接收点赞操作消息：视频", videoId, "执行类型", action)
 		switch action {
-		case 0:
+		case 1:
 			if err = mysql.IncrementFavoriteCount(videoId); err != nil {
 				log.Println("remoteFavorite队列消费者+1失败:", err.Error())
 			}
-		case 1:
+		case 0:
 			if err = mysql.DecrementFavoriteCount(videoId); err != nil {
 				log.Println("favorite队列消费者操作-1失败", err.Error())
 			}
@@ -52,6 +52,6 @@ var RmqFavorite *MyMessageQueue
 func InitFavoriteRabbitMQ() {
 	RmqFavorite = NewRabbitMQSimple(remoteFavorQueueName)
 
-	go RmqFavorite.Consume(consumerFavor)
+	go RmqFavorite.ConsumeWithEx(consumerFavor)
 
 }
