@@ -54,7 +54,7 @@ func CreateNewRelationByMQ(userToId, userFromId int64) error {
 	sb.WriteString(strconv.Itoa(int(userFromId)))
 	sb.WriteString(" ")
 	sb.WriteString(strconv.Itoa(int(userToId)))
-	if err := rabbitMQ.RmqFollowAdd.Publish(sb.String()); err != nil {
+	if err := rabbitMQ.RmqFollowAdd.PublishWithEx(sb.String(), "follow"); err != nil {
 		log.Print(err)
 		return err
 	}

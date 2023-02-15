@@ -80,16 +80,16 @@ func (r *MyMessageQueue) Publish(message string) error {
 }
 
 // PublishWithEx 订阅直接模式队列生产
-func (r *MyMessageQueue) PublishWithEx(message string) error {
+func (r *MyMessageQueue) PublishWithEx(message string, exchangeName string) error {
 	//申请交换机
 	err := r.channel.ExchangeDeclare(
-		"favor",  // name
-		"fanout", // type
-		true,     // durable
-		false,    // auto-deleted
-		false,    // internal
-		false,    // no-wait
-		nil,      // arguments
+		exchangeName, // name
+		"fanout",     // type
+		true,         // durable
+		false,        // auto-deleted
+		false,        // internal
+		false,        // no-wait
+		nil,          // arguments
 	)
 	//申请队列，如果队列不存在会自动创建，存在则跳过创建
 
@@ -100,10 +100,10 @@ func (r *MyMessageQueue) PublishWithEx(message string) error {
 	messages := []byte(message)
 
 	err = r.channel.Publish(
-		"favor", //交换机名称
-		"",      //routing key
-		false,   //如果为true，根据自身exchange类型和routekey规则无法找到符合条件的队列会把消息返还给发送者
-		false,   //如果为true，当exchange发送消息到队列后发现队列上没有消费者，则会把消息返还给发送者
+		exchangeName, //交换机名称
+		"",           //routing key
+		false,        //如果为true，根据自身exchange类型和routekey规则无法找到符合条件的队列会把消息返还给发送者
+		false,        //如果为true，当exchange发送消息到队列后发现队列上没有消费者，则会把消息返还给发送者
 		amqp.Publishing{
 			ContentType: "text/plain",
 			Body:        messages,
@@ -163,16 +163,16 @@ func (r *MyMessageQueue) Consume(consumeMethod func(msgs <-chan amqp.Delivery)) 
 	//<-forever
 
 }
-func (r *MyMessageQueue) ConsumeWithEx(consumeMethod func(msgs <-chan amqp.Delivery)) {
+func (r *MyMessageQueue) ConsumeWithEx(consumeMethod func(msgs <-chan amqp.Delivery), exchangeName string) {
 	//申请交换机
 	err := r.channel.ExchangeDeclare(
-		"favor",  // name
-		"fanout", // type
-		true,     // durable
-		false,    // auto-deleted
-		false,    // internal
-		false,    // no-wait
-		nil,      // arguments
+		exchangeName, // name
+		"fanout",     // type
+		true,         // durable
+		false,        // auto-deleted
+		false,        // internal
+		false,        // no-wait
+		nil,          // arguments
 	)
 	//1.申请队列，如果队列不存在会自动创建，存在则跳过创建
 	_, err = r.channel.QueueDeclare(
@@ -192,9 +192,9 @@ func (r *MyMessageQueue) ConsumeWithEx(consumeMethod func(msgs <-chan amqp.Deliv
 		fmt.Println(err)
 	}
 	err = r.channel.QueueBind(
-		r.queueName, // queue name
-		"",          // routing key
-		"favor",     // exchange
+		r.queueName,  // queue name
+		"",           // routing key
+		exchangeName, // exchange
 		false,
 		nil,
 	)

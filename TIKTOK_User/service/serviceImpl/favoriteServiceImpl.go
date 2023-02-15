@@ -120,7 +120,7 @@ func sendFavoriteMessage(userId int64, videoId int64, actionType int) error {
 	sb.WriteString(strconv.FormatInt(videoId, 36))
 	sb.WriteString("-")
 	sb.WriteString(strconv.Itoa(actionType))
-	if err := rabbitMQ.RmqFavorite.PublishWithEx(sb.String()); err != nil {
+	if err := rabbitMQ.RmqFavorite.PublishWithEx(sb.String(), "favor"); err != nil {
 		log.Print(err)
 		return err
 	}

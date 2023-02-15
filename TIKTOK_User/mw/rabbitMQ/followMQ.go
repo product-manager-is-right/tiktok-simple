@@ -54,6 +54,7 @@ func consumerFollowDel(msgs <-chan amqp.Delivery) {
 		targetId, _ := strconv.Atoi(params[1])
 		// 日志记录。
 		follow := &model.Follow{}
+		log.Println("接受到取消关注消息：", userId, "关注", targetId)
 		if err := mysql.DB.Model(follow).Where("user_id_to = ?", targetId).Where("user_id_from = ?", userId).
 			Delete(follow).Error; err != nil {
 			log.Fatal("更新失败")
@@ -80,9 +81,9 @@ var RmqFollowDel *MyMessageQueue
 func InitFollowRabbitMQ() {
 	RmqFollowAdd = NewRabbitMQSimple("follow_add")
 	//RmqFollowAdd = NewFollowRabbitMQ("follow_add")
-	go RmqFollowAdd.Consume(consumerFollowAdd)
+	go RmqFollowAdd.ConsumeWithEx(consumerFollowAdd, "follow")
 
 	RmqFollowDel = NewRabbitMQSimple("follow_del")
 	//RmqFollowDel = NewFollowRabbitMQ("follow_del")
-	go RmqFollowDel.Consume(consumerFollowDel)
+	go RmqFollowDel.ConsumeWithEx(consumerFollowDel, "follow")
 }

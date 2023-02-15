@@ -57,6 +57,6 @@ var RmqFavorite *MyMessageQueue
 func InitFavoriteRabbitMQ() {
 	RmqFavorite = NewRabbitMQSimple(favoriteQueueName)
 
-	go RmqFavorite.ConsumeWithEx(consumerFavorite)
+	go RmqFavorite.ConsumeWithEx(consumerFavorite, "favor")
 
 }
