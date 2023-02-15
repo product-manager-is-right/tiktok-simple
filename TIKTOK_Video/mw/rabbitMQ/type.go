@@ -127,3 +127,66 @@ func (r *MyMessageQueue) Consume(consumeMethod func(msgs <-chan amqp.Delivery)) 
 	//<-forever
 
 }
+func (r *MyMessageQueue) ConsumeWithEx(consumeMethod func(msgs <-chan amqp.Delivery)) {
+	//申请交换机
+	err := r.channel.ExchangeDeclare(
+		"favor",  // name
+		"fanout", // type
+		true,     // durable
+		false,    // auto-deleted
+		false,    // internal
+		false,    // no-wait
+		nil,      // arguments
+	)
+	//1.申请队列，如果队列不存在会自动创建，存在则跳过创建
+	_, err = r.channel.QueueDeclare(
+		r.queueName,
+		//是否持久化
+		false,
+		//是否自动删除
+		false,
+		//是否具有排他性
+		false,
+		//是否阻塞处理
+		false,
+		//额外的属性
+		nil,
+	)
+	if err != nil {
+		fmt.Println(err)
+	}
+	err = r.channel.QueueBind(
+		r.queueName, // queue name
+		"",          // routing key
+		"favor",     // exchange
+		false,
+		nil,
+	)
+	//2. 接收消息
+	msgs, err := r.channel.Consume(
+		r.queueName,
+		//用来区分多个消费者
+		"",
+		//是否自动应答
+		true,
+		//是否具有排他性
+		false,
+		//如果设置为true，表示不能将同一个connection中发送的消息传递给这个connection中的消费者
+		false,
+		//消息队列是否阻塞
+		false,
+		nil,
+	)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	//不需要这个，这个是使用案例中为了让程序不停止的做法而已，web项目不需要
+	//forever := make(chan bool)
+	//启用协程处理消息
+	go consumeMethod(msgs)
+
+	log.Printf("Waiting for messagees,To exit press CTRL+C")
+	//<-forever
+
+}

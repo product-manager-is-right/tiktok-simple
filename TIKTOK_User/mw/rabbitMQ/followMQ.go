@@ -24,7 +24,7 @@ func consumerFollowAdd(msgs <-chan amqp.Delivery) {
 		// 日志记录。
 		log.Println("接受到添加关注消息：", userId, "关注", targetId)
 
-		Follow := model.Follow{UserIdTo: int64(targetId), UserIdFrom: int64(userId), Cancel: 0}
+		Follow := model.Follow{UserIdTo: int64(targetId), UserIdFrom: int64(userId)}
 
 		if err := mysql.DB.Create(&Follow).Error; err != nil {
 			log.Println(err)
@@ -53,8 +53,9 @@ func consumerFollowDel(msgs <-chan amqp.Delivery) {
 		userId, _ := strconv.Atoi(params[0])
 		targetId, _ := strconv.Atoi(params[1])
 		// 日志记录。
-		if err := mysql.DB.Model(&model.Follow{}).Where("user_id_to = ?", targetId).Where("user_id_from = ?", userId).
-			Update("cancel", 0).Error; err != nil {
+		follow := &model.Follow{}
+		if err := mysql.DB.Model(follow).Where("user_id_to = ?", targetId).Where("user_id_from = ?", userId).
+			Delete(follow).Error; err != nil {
 			log.Fatal("更新失败")
 		}
 		/*

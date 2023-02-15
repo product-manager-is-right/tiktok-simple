@@ -118,9 +118,9 @@ func sendFavoriteMessage(userId int64, videoId int64, actionType int) error {
 	//using rabbitMQ to store the info
 	sb := strings.Builder{}
 	//使用最高的36，压缩一下
-	sb.WriteString(strconv.FormatInt(userId, 36))
+	sb.WriteString(strconv.Itoa(int(userId)))
 	sb.WriteString("-")
-	sb.WriteString(strconv.FormatInt(videoId, 36))
+	sb.WriteString(strconv.Itoa(int(videoId)))
 	sb.WriteString("-")
 	sb.WriteString(strconv.Itoa(actionType))
 	if err := rabbitMQ.RmqFavorite.Publish(sb.String()); err != nil {

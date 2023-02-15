@@ -17,6 +17,7 @@ func consumerFavorite(msgs <-chan amqp.Delivery) {
 	var err error
 	var userId, videoId int64
 	var actionType int
+	log.Println("开始消费")
 	for d := range msgs {
 		// 参数解析。
 		params := strings.Split(fmt.Sprintf("%s", d.Body), "-")

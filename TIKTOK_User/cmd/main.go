@@ -72,6 +72,7 @@ func startServer() {
 	router.GeneratedRegister(h)
 	rabbitMQ.InitRabbitMQ()
 	rabbitMQ.InitFollowRabbitMQ()
+	rabbitMQ.InitFavoriteRabbitMQ()
 
 	//优雅退出！！！哈哈哈
 	h.OnShutdown = append(h.OnShutdown, func(ctx context.Context) {
