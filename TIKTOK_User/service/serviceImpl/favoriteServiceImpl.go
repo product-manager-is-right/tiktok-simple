@@ -23,7 +23,7 @@ type FavoriteServiceImpl struct {
 创建了一个favor对应关系
 */
 func (fsi *FavoriteServiceImpl) CreateNewFavorite(userId, videoId int64) error {
-	favorite, err := mysql.GetFavorite(userId, videoId)
+	_, err := mysql.GetFavorite(userId, videoId)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return err
 	}
@@ -44,40 +44,17 @@ func (fsi *FavoriteServiceImpl) CreateNewFavorite(userId, videoId int64) error {
 		}
 		return nil
 	}
-	if favorite.Cancel == 0 {
-		return errors.New("已经点赞过了")
-	}
-	// 数据库已经有这条记录，修改Cancel为0
-	//先尝试发送消息队列
-	err = sendFavoriteMessage(userId, videoId, 0)
-	if err != nil {
-		log.Print("发送点赞操作消息队列失败，使用Mysql直接处理数据")
-		if err = mysql.UpdateFavorite(userId, videoId, 0); err != nil {
-			return err
-		}
-	}
-
-	// 启动协程，异步调用
-	if err = sendRemoteFavoriteMessage(videoId, 0); err != nil {
-		go remoteUpdateFavoriteCnt(videoId, 0)
-	}
 	return nil
 }
 
 func (fsi *FavoriteServiceImpl) DeleteFavorite(userId, videoId int64) error {
-	favorite, err := mysql.GetFavorite(userId, videoId)
+	_, err := mysql.GetFavorite(userId, videoId)
 	if err == gorm.ErrRecordNotFound {
 		return errors.New("没有点赞过该视频，无法取消")
 	}
-
-	// 目前处于取消点赞状态
-	if favorite.Cancel == 1 {
-		return errors.New("已经取消点赞了")
-	}
-
 	//先尝试发送到消息队列中
-	if err = sendFavoriteMessage(userId, videoId, 1); err != nil {
-		if err = mysql.UpdateFavorite(userId, videoId, 1); err != nil {
+	if err = sendFavoriteMessage(userId, videoId, 2); err != nil {
+		if err = mysql.DeleteFavorite(userId, videoId); err != nil {
 			return err
 		}
 	}

@@ -16,7 +16,7 @@ type FollowServiceImpl struct {
 }
 
 func (fsi *FollowServiceImpl) CreateNewRelation(userFromId, userToId int64) error {
-	relation, err := mysql.GetRelation(userToId, userFromId)
+	_, err := mysql.GetRelation(userToId, userFromId)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return err
 	}
@@ -38,12 +38,8 @@ func (fsi *FollowServiceImpl) CreateNewRelation(userFromId, userToId int64) erro
 
 	}
 
-	if relation.Cancel == 0 {
-		return errors.New("已经关注过了")
-	}
-
-	// 数据库已经有这条记录，修改Cancel为0
-	if err := mysql.UpdateRelation(userToId, userFromId, 0); err != nil {
+	// 数据库已经有这条记录，删除
+	if err := mysql.DeleteRelation(userToId, userFromId); err != nil {
 		return err
 	}
 
@@ -63,17 +59,12 @@ func CreateNewRelationByMQ(userFromId, userToId int64) error {
 
 }
 func (fsi *FollowServiceImpl) DeleteRelation(userFromId, userToId int64) error {
-	relation, err := mysql.GetRelation(userToId, userFromId)
+	_, err := mysql.GetRelation(userToId, userFromId)
 	if err == gorm.ErrRecordNotFound {
 		return errors.New("没有关注过该用户，无法取关")
 	}
 
-	// 目前处于取关状态
-	if relation.Cancel == 1 {
-		return errors.New("已经取关了")
-	}
-
-	if err := mysql.UpdateRelation(userToId, userFromId, 1); err != nil {
+	if err := mysql.DeleteRelation(userToId, userFromId); err != nil {
 		return err
 	}
 

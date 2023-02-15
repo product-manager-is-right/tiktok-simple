@@ -17,7 +17,7 @@ GetFollowCntByUserId
 func GetFollowCntByUserId(userId int64) (int64, error) {
 	var cnt int64 = 0
 
-	if err := DB.Model(model.Follow{}).Where("user_id_from = ?", userId).Where("cancel = ?", 0).
+	if err := DB.Model(model.Follow{}).Where("user_id_from = ?", userId).
 		Count(&cnt).Error; err != nil {
 		log.Println(err.Error())
 		return 0, err
@@ -35,7 +35,6 @@ func GetFollowerCntByUserId(userId int64) (int64, error) {
 
 	if err := DB.Model(model.Follow{}).
 		Where("user_id_to = ?", userId).
-		Where("cancel = ?", 0).
 		Count(&cnt).Error; err != nil {
 		log.Println(err.Error())
 		return 0, err
@@ -53,7 +52,6 @@ func GetIsFollow(userTo, userFrom int64) (bool, error) {
 
 	if err := DB.Where("user_id_from = ?", userFrom).
 		Where("user_id_to = ?", userTo).
-		Where("cancel = ?", 0).
 		Take(&follow).Error; err == gorm.ErrRecordNotFound {
 		return false, nil
 	} else if err != nil {
@@ -65,7 +63,7 @@ func GetIsFollow(userTo, userFrom int64) (bool, error) {
 }
 
 func CreateNewRelation(userToId, userFromId int64) error {
-	Follow := model.Follow{UserIdTo: userToId, UserIdFrom: userFromId, Cancel: 0}
+	Follow := model.Follow{UserIdTo: userToId, UserIdFrom: userFromId}
 	result := DB.Create(&Follow)
 	return result.Error
 }
@@ -79,10 +77,11 @@ func GetRelation(userToId, userFromId int64) (*model.Follow, error) {
 	return res, nil
 }
 
-func UpdateRelation(userToId, userFromId, cancel int64) error {
-	if err := DB.Model(&model.Follow{}).Where("user_id_to = ?", userToId).Where("user_id_from = ?", userFromId).
-		Update("cancel", cancel).Error; err != nil {
-		return errors.New("关系更新失败")
+func DeleteRelation(userToId, userFromId int64) error {
+	follow := &model.Follow{}
+	if err := DB.Model(follow).Where("user_id_to = ?", userToId).Where("user_id_from = ?", userFromId).
+		Delete(follow).Error; err != nil {
+		return errors.New("关系删除失败")
 	}
 	return nil
 }
@@ -94,7 +93,7 @@ GetFollowingIds
 func GetFollowingIds(userId int64) ([]int64, error) {
 	var ids []int64
 	if err := DB.Model(model.Follow{}).Where("user_id_from = ?", userId).
-		Where("cancel = ?", 0).Pluck("user_id_to", &ids).Error; err != nil {
+		Pluck("user_id_to", &ids).Error; err != nil {
 		return nil, err
 	}
 	// 查询成功。
@@ -105,7 +104,7 @@ func GetFollowingIds(userId int64) ([]int64, error) {
 func GetFollowerIds(userId int64) ([]int64, error) {
 	var ids []int64
 	if err := DB.Model(model.Follow{}).Where("user_id_to = ?", userId).
-		Where("cancel = ?", 0).Pluck("user_id_from", &ids).Error; err != nil {
+		Pluck("user_id_from", &ids).Error; err != nil {
 		return nil, err
 	}
 	// 查询成功。
