@@ -23,11 +23,11 @@ func consumerFavor(msgs <-chan amqp.Delivery) {
 			log.Println("remoteFavorite队列收到错误消息", err.Error())
 			continue
 		}
-		if videoId, err = strconv.ParseInt(params[1], 36, 64); err != nil {
+		if videoId, err = strconv.ParseInt(params[0], 36, 64); err != nil {
 			log.Println("remoteFavorite队列收到错误消息", err.Error())
 			continue
 		}
-		if action, err = strconv.Atoi(params[2]); err != nil {
+		if action, err = strconv.Atoi(params[1]); err != nil {
 			log.Println("remoteFavorite队列收到错误消息", err.Error())
 			continue
 		}

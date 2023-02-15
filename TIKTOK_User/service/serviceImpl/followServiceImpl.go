@@ -20,6 +20,7 @@ func (fsi *FollowServiceImpl) CreateNewRelation(userFromId, userToId int64) erro
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return err
 	}
+
 	// 数据库没有这条记录，插入
 	if err == gorm.ErrRecordNotFound {
 		//TODO：使用rabbitMQ
@@ -34,18 +35,20 @@ func (fsi *FollowServiceImpl) CreateNewRelation(userFromId, userToId int64) erro
 			err := mysql.CreateNewRelation(userToId, userFromId)
 		*/
 
-		return err
+		return nil
 
 	}
-
-	// 数据库已经有这条记录，删除
-	if err := mysql.DeleteRelation(userToId, userFromId); err != nil {
-		return err
-	}
-
-	return nil
+	/*
+		// 数据库已经有这条记录，删除
+		if err := mysql.DeleteRelation(userToId, userFromId); err != nil {
+			return err
+		}
+	*/
+	log.Println("已有关注无法再关注")
+	err = errors.New("已有关注无法再关注")
+	return err
 }
-func CreateNewRelationByMQ(userFromId, userToId int64) error {
+func CreateNewRelationByMQ(userToId, userFromId int64) error {
 	//using rabbitMQ to store the info
 	sb := strings.Builder{}
 	sb.WriteString(strconv.Itoa(int(userFromId)))

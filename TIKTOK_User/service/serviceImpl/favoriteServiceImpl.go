@@ -29,7 +29,7 @@ func (fsi *FavoriteServiceImpl) CreateNewFavorite(userId, videoId int64) error {
 	}
 	// 数据库没有这条记录，插入
 	if err == gorm.ErrRecordNotFound {
-		err = sendFavoriteMessage(userId, videoId, 2)
+		err = sendFavoriteMessage(userId, videoId, 1)
 		if err != nil {
 			log.Print("发送点赞操作消息队列失败，使用Mysql直接处理数据")
 			_, err = mysql.CreateNewFavorite(userId, videoId)
@@ -44,7 +44,9 @@ func (fsi *FavoriteServiceImpl) CreateNewFavorite(userId, videoId int64) error {
 		}
 		return nil
 	}
-	return nil
+	log.Println("已有点赞无法再点赞")
+	err = errors.New("已有点赞")
+	return err
 }
 
 func (fsi *FavoriteServiceImpl) DeleteFavorite(userId, videoId int64) error {
@@ -118,9 +120,9 @@ func sendFavoriteMessage(userId int64, videoId int64, actionType int) error {
 	//using rabbitMQ to store the info
 	sb := strings.Builder{}
 	//使用最高的36，压缩一下
-	sb.WriteString(strconv.Itoa(int(userId)))
+	sb.WriteString(strconv.FormatInt(userId, 36))
 	sb.WriteString("-")
-	sb.WriteString(strconv.Itoa(int(videoId)))
+	sb.WriteString(strconv.FormatInt(videoId, 36))
 	sb.WriteString("-")
 	sb.WriteString(strconv.Itoa(actionType))
 	if err := rabbitMQ.RmqFavorite.Publish(sb.String()); err != nil {

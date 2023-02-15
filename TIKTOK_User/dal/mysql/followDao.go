@@ -71,7 +71,7 @@ func CreateNewRelation(userToId, userFromId int64) error {
 func GetRelation(userToId, userFromId int64) (*model.Follow, error) {
 	var res *model.Follow
 	if err := DB.Where("user_id_to = ?", userToId).Where("user_id_from = ?", userFromId).
-		Take(&res).Error; err != nil {
+		First(&res).Error; err != nil {
 		return nil, err
 	}
 	return res, nil
