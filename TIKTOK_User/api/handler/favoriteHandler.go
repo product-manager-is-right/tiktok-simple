@@ -61,12 +61,12 @@ func FavoriteList(ctx context.Context, c *app.RequestContext) {
 
 	//url获取的用户id
 	userId := c.Query("user_id")
-	// 通过token获取到的登录用户名
-	//user, _ := c.Get(mw.IdentityKey)
 	id, _ := strconv.ParseInt(userId, 10, 64)
+	// 通过token获取到的登录用户名
+	ownerId, _ := c.Get(mw.IdentityKey)
 
 	fsi := serviceImpl.FavoriteServiceImpl{}
-	if vl, err := fsi.GetFavoriteVideosListByUserId(id, 23); err == nil {
+	if vl, err := fsi.GetFavoriteVideosListByUserId(id, ownerId.(int64)); err == nil {
 		c.JSON(consts.StatusOK, vo.FavoriteListResponse{
 			Response:  vo.Response{StatusCode: ResponseFail, StatusMsg: "查询点赞列表成功"},
 			VideoList: vl,

@@ -38,6 +38,9 @@ func initDeps() {
 
 	// 初始化MQ
 	mw.InitRabbitMq()
+
+	// 初始化Redis
+	mw.RedisInit()
 }
 
 func startServer() {

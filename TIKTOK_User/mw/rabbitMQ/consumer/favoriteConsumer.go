@@ -2,6 +2,8 @@ package consumer
 
 import (
 	"TIKTOK_User/dal/mysql"
+	"TIKTOK_User/mw/redis"
+	"context"
 	"fmt"
 	"github.com/streadway/amqp"
 	"log"
@@ -58,11 +60,24 @@ func consumerFavor(msg <-chan amqp.Delivery) {
 			if err = mysql.DeleteFavorite(userId, videoId); err != nil {
 				log.Println("favorite队列消费者操作失败:", err.Error())
 			}
+			// favorite数据库已经改变，删除redis userid对应的喜爱列表， 重试机制保证删除
+			strUserId := strconv.FormatInt(userId, 10)
+			for i := 0; i < 3; i++ {
+				if _, err := redis.FavoriteList.Del(context.Background(), strUserId).Result(); err == nil {
+					break
+				}
+			}
 		case 1:
 			if _, err = mysql.CreateNewFavorite(userId, videoId); err != nil {
 				log.Println("favorite队列消费者操作失败", err.Error())
 			}
+			// favorite数据库已经改变，删除redis userid对应的喜爱列表， 重试机制保证删除
+			strUserId := strconv.FormatInt(userId, 10)
+			for i := 0; i < 3; i++ {
+				if _, err := redis.FavoriteList.Del(context.Background(), strUserId).Result(); err == nil {
+					break
+				}
+			}
 		}
-
 	}
 }

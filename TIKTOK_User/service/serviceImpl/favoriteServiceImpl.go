@@ -4,6 +4,7 @@ import (
 	"TIKTOK_User/dal/mysql"
 	"TIKTOK_User/model/vo"
 	"TIKTOK_User/mw/rabbitMQ/producer"
+	"TIKTOK_User/mw/redis"
 	"TIKTOK_User/resolver"
 	"context"
 	"errors"
@@ -12,6 +13,7 @@ import (
 	"gorm.io/gorm"
 	"log"
 	"strconv"
+	"time"
 )
 
 type FavoriteServiceImpl struct {
@@ -35,6 +37,14 @@ func (fsi *FavoriteServiceImpl) CreateNewFavorite(userId, videoId int64) error {
 			if err != nil {
 				return err
 			}
+			// favorite数据库已经改变，删除redis userid对应的喜爱列表， 重试机制保证删除
+			strUserId := strconv.FormatInt(userId, 10)
+			for i := 0; i < 3; i++ {
+				if _, err := redis.FavoriteList.Del(context.Background(), strUserId).Result(); err == nil {
+					break
+				}
+			}
+
 			go remoteUpdateFavoriteCnt(videoId, 0)
 			return nil
 		}
@@ -54,6 +64,13 @@ func (fsi *FavoriteServiceImpl) DeleteFavorite(userId, videoId int64) error {
 	if err = producer.SendFavoriteMessage(userId, videoId, 0); err != nil {
 		if err = mysql.DeleteFavorite(userId, videoId); err != nil {
 			return err
+		}
+		// favorite数据库已经改变，删除redis userid对应的喜爱列表， 重试机制保证删除
+		strUserId := strconv.FormatInt(userId, 10)
+		for i := 0; i < 3; i++ {
+			if _, err := redis.FavoriteList.Del(context.Background(), strUserId).Result(); err == nil {
+				break
+			}
 		}
 		go remoteUpdateFavoriteCnt(videoId, 1)
 	}
@@ -78,24 +95,57 @@ func remoteUpdateFavoriteCnt(videoId int64, actionType int) {
 	}
 }
 
-func (fsi *FavoriteServiceImpl) GetFavoriteVideosListByUserId(userIdTar, userIdSrc int64) ([]vo.VideoInfo, error) {
+func (fsi *FavoriteServiceImpl) GetFavoriteVideosListByUserId(queryId, ownerId int64) ([]vo.VideoInfo, error) {
 	var videoInfos []vo.VideoInfo
-	videoIds, err := mysql.GetFavoritesById(userIdTar)
-	if err != nil {
-		log.Print("userIdTar=", userIdTar)
-		//fmt.Print("获取视频id列表失败")
-		return nil, err
+	videoIds := make([]int64, 0, 10)
+
+	// 先从redis中查找
+	strQueryId := strconv.FormatInt(queryId, 10)
+	if n, err := redis.FavoriteList.Exists(context.Background(), strQueryId).Result(); err == nil && n > 0 {
+		// 缓存命中
+		vs, err := redis.FavoriteList.SMembers(context.Background(), strQueryId).Result()
+		if err != nil {
+			return nil, err
+		}
+		// 转换str->int64
+		for _, v := range vs {
+			r, err := strconv.ParseInt(v, 10, 64)
+			if err != nil {
+				return nil, errors.New("redis中存储非法")
+			}
+			videoIds = append(videoIds, r)
+		}
+	} else {
+		// 缓存未命中，查询数据库
+		videoIds, err = mysql.GetFavoritesById(queryId)
+		if err != nil {
+			return nil, errors.New("数据库查询失败")
+		}
+		// 转换int64->str
+		strVideoIds := make([]string, len(videoIds))
+		for i, v := range videoIds {
+			strVideoIds[i] = strconv.FormatInt(v, 10)
+		}
+		// 存入redis，不需要处理异常
+		redis.FavoriteList.SAdd(context.Background(), strQueryId, strVideoIds)
+		// 设置过期时间，兜底方案
+		if _, err := redis.FavoriteList.Expire(context.Background(), strQueryId, time.Second*30).Result(); err != nil {
+			// 设置失败，删除该key
+			redis.FavoriteList.Del(context.Background(), strQueryId)
+		}
 	}
 
+	// 查询正确，但列表为空
 	if len(videoIds) == 0 {
-		return nil, errors.New("获取视频id列表为空")
+		return videoInfos, nil
 	}
-	videoInfos, err = getVideoInfosByVideoIds(videoIds, userIdSrc, "favorite_query")
-	if err != nil {
-		log.Print("获取视频信息列表失败")
-	}
-	return videoInfos, err
 
+	videoInfos, err := getVideoInfosByVideoIds(videoIds, ownerId, "favorite_query")
+	if err != nil {
+		log.Print("获取video详细信息失败")
+	}
+
+	return videoInfos, err
 }
 
 // IsFavorite 断是否为喜欢接口,假如userId点赞了videoId，返回true,没有返回false
