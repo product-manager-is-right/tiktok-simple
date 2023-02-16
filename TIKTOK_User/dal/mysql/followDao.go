@@ -62,7 +62,7 @@ func GetIsFollow(userTo, userFrom int64) (bool, error) {
 
 }
 
-func CreateNewRelation(userToId, userFromId int64) error {
+func CreateRelation(userToId, userFromId int64) error {
 	Follow := model.Follow{UserIdTo: userToId, UserIdFrom: userFromId}
 	result := DB.Create(&Follow)
 	return result.Error

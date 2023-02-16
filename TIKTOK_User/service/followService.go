@@ -5,7 +5,7 @@ import (
 )
 
 type FollowService interface {
-	CreateNewRelation(userFromId, userToId int64) error
+	CreateRelation(userFromId, userToId int64) error
 	DeleteRelation(userFromId, userToId int64) error
 	GetFollowListById(userId, ownerId int64) ([]vo.UserInfo, error)
 }

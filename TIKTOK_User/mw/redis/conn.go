@@ -4,7 +4,11 @@ import (
 	"context"
 	"github.com/go-redis/redis/v8"
 	"log"
+	"math/rand"
+	"time"
 )
+
+const RetryTime = 3
 
 var ctx = context.Background()
 var FollowList *redis.Client
@@ -45,4 +49,10 @@ func Init() {
 	}
 
 	log.Println("redis初始化成功")
+}
+
+func SetExpiredTime() time.Duration {
+	n := rand.Intn(30)
+	n += 30
+	return time.Duration(n) * time.Second
 }

@@ -13,7 +13,6 @@ import (
 	"gorm.io/gorm"
 	"log"
 	"strconv"
-	"time"
 )
 
 type FavoriteServiceImpl struct {
@@ -39,7 +38,7 @@ func (fsi *FavoriteServiceImpl) CreateNewFavorite(userId, videoId int64) error {
 			}
 			// favorite数据库已经改变，删除redis userid对应的喜爱列表， 重试机制保证删除
 			strUserId := strconv.FormatInt(userId, 10)
-			for i := 0; i < 3; i++ {
+			for i := 0; i < redis.RetryTime; i++ {
 				if _, err := redis.FavoriteList.Del(context.Background(), strUserId).Result(); err == nil {
 					break
 				}
@@ -129,7 +128,7 @@ func (fsi *FavoriteServiceImpl) GetFavoriteVideosListByUserId(queryId, ownerId i
 		// 存入redis，不需要处理异常
 		redis.FavoriteList.SAdd(context.Background(), strQueryId, strVideoIds)
 		// 设置过期时间，兜底方案
-		if _, err := redis.FavoriteList.Expire(context.Background(), strQueryId, time.Second*30).Result(); err != nil {
+		if _, err := redis.FavoriteList.Expire(context.Background(), strQueryId, redis.SetExpiredTime()).Result(); err != nil {
 			// 设置失败，删除该key
 			redis.FavoriteList.Del(context.Background(), strQueryId)
 		}

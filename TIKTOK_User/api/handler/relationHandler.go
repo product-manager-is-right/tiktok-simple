@@ -28,7 +28,7 @@ func RelationAction(ctx context.Context, c *app.RequestContext) {
 	fsi := serviceImpl.FollowServiceImpl{}
 	if actionType == "1" {
 		//err := fsi.CreateNewRelation(24, userToId)
-		err := fsi.CreateNewRelation(userFromId.(int64), userToId)
+		err := fsi.CreateRelation(userFromId.(int64), userToId)
 		if err != nil {
 			//返回格式
 			c.JSON(consts.StatusOK, vo.FollowActionResponse{
