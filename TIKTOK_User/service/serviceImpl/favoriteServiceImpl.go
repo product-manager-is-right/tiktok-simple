@@ -3,7 +3,7 @@ package serviceImpl
 import (
 	"TIKTOK_User/dal/mysql"
 	"TIKTOK_User/model/vo"
-	"TIKTOK_User/mw/rabbitMQ"
+	"TIKTOK_User/mw/rabbitMQ/producer"
 	"TIKTOK_User/resolver"
 	"context"
 	"errors"
@@ -12,7 +12,6 @@ import (
 	"gorm.io/gorm"
 	"log"
 	"strconv"
-	"strings"
 )
 
 type FavoriteServiceImpl struct {
@@ -29,7 +28,7 @@ func (fsi *FavoriteServiceImpl) CreateNewFavorite(userId, videoId int64) error {
 	}
 	// 数据库没有这条记录，插入
 	if err == gorm.ErrRecordNotFound {
-		err = sendFavoriteMessage(userId, videoId, 1)
+		err = producer.SendFavoriteMessage(userId, videoId, 1)
 		if err != nil {
 			log.Print("发送点赞操作消息队列失败，使用Mysql直接处理数据")
 			_, err = mysql.CreateNewFavorite(userId, videoId)
@@ -52,7 +51,7 @@ func (fsi *FavoriteServiceImpl) DeleteFavorite(userId, videoId int64) error {
 		return errors.New("没有点赞过该视频，无法取消")
 	}
 	//先尝试发送到消息队列中
-	if err = sendFavoriteMessage(userId, videoId, 0); err != nil {
+	if err = producer.SendFavoriteMessage(userId, videoId, 0); err != nil {
 		if err = mysql.DeleteFavorite(userId, videoId); err != nil {
 			return err
 		}
@@ -107,22 +106,4 @@ func (fsi *FavoriteServiceImpl) IsFavorite(userId, videoId int64) (bool, error) 
 		return false, err
 	}
 	return isFavorite, nil
-}
-
-// actionType为0时为将已有的数据库记录改为0，1改为1，2为创建新的数据行
-// 发送结构为 userId-videoId-type的消息到rabbit中
-func sendFavoriteMessage(userId int64, videoId int64, actionType int) error {
-	//using rabbitMQ to store the info
-	sb := strings.Builder{}
-	//使用最高的36，压缩一下
-	sb.WriteString(strconv.FormatInt(userId, 36))
-	sb.WriteString("-")
-	sb.WriteString(strconv.FormatInt(videoId, 36))
-	sb.WriteString("-")
-	sb.WriteString(strconv.Itoa(actionType))
-	if err := rabbitMQ.RmqFavorite.PublishWithEx(sb.String(), "favor"); err != nil {
-		log.Print(err)
-		return err
-	}
-	return nil
 }

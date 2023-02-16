@@ -35,6 +35,9 @@ func initDeps() {
 
 	// 初始化Jwt
 	mw.InitJwt()
+
+	// 初始化MQ
+	mw.InitRabbitMq()
 }
 
 func startServer() {
@@ -71,9 +74,6 @@ func startServer() {
 
 	// 注册路由
 	router.GeneratedRegister(h)
-	rabbitMQ.InitRabbitMQ()
-	rabbitMQ.InitCommentRabbitMQ()
-	rabbitMQ.InitFavoriteRabbitMQ()
 
 	//优雅退出！！！哈哈哈
 	h.OnShutdown = append(h.OnShutdown, func(ctx context.Context) {

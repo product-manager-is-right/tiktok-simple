@@ -2,29 +2,32 @@ package test
 
 import (
 	"TIKTOK_User/dal/mysql"
-	"TIKTOK_User/mw/rabbitMQ"
-	"TIKTOK_User/service/serviceImpl"
+	"TIKTOK_User/mw/rabbitMQ/consumer"
+	"TIKTOK_User/mw/rabbitMQ/producer"
 	"github.com/cloudwego/hertz/pkg/common/test/assert"
-	"log"
 	"testing"
-	"time"
 )
 
-func Test(t *testing.T) {
-	// 初始化数据库
-	mysql.Init()
-
-	rabbitMQ.InitRabbitMQ()
-	// 初始化Follow的相关消息队列，并开启消费。
-	rabbitMQ.InitFollowRabbitMQ()
-	// 初始化Like的相关消息队列，并开启消费。
-	fsi := serviceImpl.FollowServiceImpl{}
-	err := fsi.CreateNewRelation(29, 29)
-	if err != nil {
-		log.Print("there are some errors")
-	}
-	//ageng: 我发现测试案例中mq好像还没有消费就断开了，适当睡眠一下观察终端的打印日志，不然会直接停掉所有协程
-	time.Sleep(time.Second * 2)
+func TestProducerWithEx(t *testing.T) {
+	pe, _ := producer.NewWithExchange("test", "fanout")
+	err := pe.Publish("haha")
 	assert.Nil(t, err)
+}
 
+func TestConsumerWithEx(t *testing.T) {
+	mysql.Init()
+	ce, _ := consumer.NewWithExchange("user", "test", "fanout", "o")
+	msg, _ := ce.Consume()
+	ce2, _ := consumer.NewWithExchange("user", "test", "fanout", "oo")
+	msg2, _ := ce2.Consume()
+	var forever chan interface{}
+	go func() {
+		for v := range msg {
+			println(string(v.Body))
+		}
+	}()
+	for v := range msg2 {
+		println(string(v.Body))
+	}
+	<-forever
 }

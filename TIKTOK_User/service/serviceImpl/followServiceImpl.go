@@ -3,12 +3,10 @@ package serviceImpl
 import (
 	"TIKTOK_User/dal/mysql"
 	"TIKTOK_User/model/vo"
-	"TIKTOK_User/mw/rabbitMQ"
+	"TIKTOK_User/mw/rabbitMQ/producer"
 	"errors"
 	"gorm.io/gorm"
 	"log"
-	"strconv"
-	"strings"
 	//"fmt"
 )
 
@@ -23,54 +21,33 @@ func (fsi *FollowServiceImpl) CreateNewRelation(userFromId, userToId int64) erro
 
 	// 数据库没有这条记录，插入
 	if err == gorm.ErrRecordNotFound {
-		//TODO：使用rabbitMQ
 		//使用rabbitMQ
-		err = CreateNewRelationByMQ(userToId, userFromId)
+		err = producer.SendFollowMessage(userToId, userFromId, 1)
 		if err != nil {
 			log.Print("启动rabbitMQ失败，使用Mysql直接处理数据")
 			err = mysql.CreateNewRelation(userToId, userFromId)
 			return err
 		}
-		/*
-			err := mysql.CreateNewRelation(userToId, userFromId)
-		*/
-
 		return nil
-
 	}
-	/*
-		// 数据库已经有这条记录，删除
-		if err := mysql.DeleteRelation(userToId, userFromId); err != nil {
-			return err
-		}
-	*/
-	log.Println("已有关注无法再关注")
-	err = errors.New("已有关注无法再关注")
+
+	err = errors.New("已经关注了")
 	return err
 }
-func CreateNewRelationByMQ(userToId, userFromId int64) error {
-	//using rabbitMQ to store the info
-	sb := strings.Builder{}
-	sb.WriteString(strconv.Itoa(int(userFromId)))
-	sb.WriteString(" ")
-	sb.WriteString(strconv.Itoa(int(userToId)))
-	if err := rabbitMQ.RmqFollowAdd.PublishWithEx(sb.String(), "follow"); err != nil {
-		log.Print(err)
-		return err
-	}
-	return nil
 
-}
 func (fsi *FollowServiceImpl) DeleteRelation(userFromId, userToId int64) error {
 	_, err := mysql.GetRelation(userToId, userFromId)
 	if err == gorm.ErrRecordNotFound {
 		return errors.New("没有关注过该用户，无法取关")
 	}
-
-	if err := mysql.DeleteRelation(userToId, userFromId); err != nil {
+	// 数据库有这条记录，删除
+	//使用rabbitMQ
+	err = producer.SendFollowMessage(userToId, userFromId, 0)
+	if err != nil {
+		log.Print("启动rabbitMQ失败，使用Mysql直接处理数据")
+		err = mysql.DeleteRelation(userToId, userFromId)
 		return err
 	}
-
 	return nil
 }
 

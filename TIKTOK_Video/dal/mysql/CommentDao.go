@@ -14,9 +14,7 @@ func GetCommentByID(id int64) (*model.Comment, error) {
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	if result.RowsAffected == 0 {
-		return nil, errors.New("查找失败")
-	}
+
 	return res, nil
 }
 
@@ -45,15 +43,11 @@ func InsertComment(commentText string, videoId, userId int64) (*model.Comment, e
 	return &comment, nil
 }
 
-func DeleteCommentByCommentId(commentId, userId int64) error {
+func DeleteCommentByCommentId(commentId int64) error {
 	comment := model.Comment{
-		Id:         commentId,
-		VideoId:    0,
-		UserId:     userId,
-		Comment:    "",
-		CreateDate: 0,
+		Id: commentId,
 	}
-	result := DB.Where("user_id = ?", userId).Delete(&comment)
+	result := DB.Delete(&comment)
 	if result.Error != nil {
 		return result.Error
 	}
