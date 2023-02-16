@@ -4,7 +4,9 @@ import (
 	"TIKTOK_Video/dal/mysql"
 	"TIKTOK_Video/model"
 	"TIKTOK_Video/model/vo"
+	"TIKTOK_Video/mw/rabbitMQ/producer"
 	"errors"
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -73,21 +75,33 @@ func (csi *CommentServiceImpl) ReturnA() string {
 	return "a"
 }
 
-func (csi *CommentServiceImpl) DeleteCommentByCommentId(commentId, userId int64) error {
+func (csi *CommentServiceImpl) DeleteCommentByCommentId(commentId, userId, videoId int64) error {
 	if commentId <= 0 {
 		return errors.New("wrong commentId")
 	}
-	comment, err := mysql.GetCommentByID(commentId)
+	// 判断评论是否存在以及是否有权限访问
+	c, err := mysql.GetCommentByID(commentId)
 	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return errors.New("该评论不存在")
+		}
 		return err
 	}
-	if err = mysql.DeleteCommentByCommentId(commentId, userId); err != nil {
-		return err
+	if c.UserId != userId {
+		return errors.New("无权限操作该评论")
 	}
-	err = mysql.DecrementCommentCount(comment.VideoId)
-	if err != nil {
-		return err
+
+	//首先尝试发送处理到mq中
+	if err := producer.SendDelCommentMessage(commentId, videoId); err != nil {
+		//发送失败。自动同步操作数据库.  这两条应该是一个事务。
+		if err = mysql.DeleteCommentByCommentId(commentId); err != nil {
+			return err
+		}
+		if err = mysql.DecrementCommentCount(videoId); err != nil {
+			return err
+		}
 	}
+
 	return nil
 
 }

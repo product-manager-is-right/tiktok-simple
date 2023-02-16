@@ -3,8 +3,10 @@ package serviceImpl
 import (
 	"TIKTOK_User/dal/mysql"
 	"TIKTOK_User/model/vo"
+	"TIKTOK_User/mw/rabbitMQ/producer"
 	"errors"
 	"gorm.io/gorm"
+	"log"
 	//"fmt"
 )
 
@@ -12,42 +14,40 @@ type FollowServiceImpl struct {
 }
 
 func (fsi *FollowServiceImpl) CreateNewRelation(userFromId, userToId int64) error {
-	relation, err := mysql.GetRelation(userToId, userFromId)
+	_, err := mysql.GetRelation(userToId, userFromId)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return err
 	}
+
 	// 数据库没有这条记录，插入
 	if err == gorm.ErrRecordNotFound {
-		err := mysql.CreateNewRelation(userToId, userFromId)
-		return err
+		//使用rabbitMQ
+		err = producer.SendFollowMessage(userToId, userFromId, 1)
+		if err != nil {
+			log.Print("启动rabbitMQ失败，使用Mysql直接处理数据")
+			err = mysql.CreateNewRelation(userToId, userFromId)
+			return err
+		}
+		return nil
 	}
 
-	if relation.Cancel == 0 {
-		return errors.New("已经关注过了")
-	}
-
-	// 数据库已经有这条记录，修改Cancel为0
-	if err := mysql.UpdateRelation(userToId, userFromId, 0); err != nil {
-		return err
-	}
-
-	return nil
+	err = errors.New("已经关注了")
+	return err
 }
+
 func (fsi *FollowServiceImpl) DeleteRelation(userFromId, userToId int64) error {
-	relation, err := mysql.GetRelation(userToId, userFromId)
+	_, err := mysql.GetRelation(userToId, userFromId)
 	if err == gorm.ErrRecordNotFound {
 		return errors.New("没有关注过该用户，无法取关")
 	}
-
-	// 目前处于取关状态
-	if relation.Cancel == 1 {
-		return errors.New("已经取关了")
-	}
-
-	if err := mysql.UpdateRelation(userToId, userFromId, 1); err != nil {
+	// 数据库有这条记录，删除
+	//使用rabbitMQ
+	err = producer.SendFollowMessage(userToId, userFromId, 0)
+	if err != nil {
+		log.Print("启动rabbitMQ失败，使用Mysql直接处理数据")
+		err = mysql.DeleteRelation(userToId, userFromId)
 		return err
 	}
-
 	return nil
 }
 

@@ -3,6 +3,7 @@ package serviceImpl
 import (
 	"TIKTOK_User/dal/mysql"
 	"TIKTOK_User/model/vo"
+	"TIKTOK_User/mw/rabbitMQ/producer"
 	"TIKTOK_User/resolver"
 	"context"
 	"errors"
@@ -21,49 +22,42 @@ type FavoriteServiceImpl struct {
 创建了一个favor对应关系
 */
 func (fsi *FavoriteServiceImpl) CreateNewFavorite(userId, videoId int64) error {
-	favorite, err := mysql.GetFavorite(userId, videoId)
+	_, err := mysql.GetFavorite(userId, videoId)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return err
 	}
 	// 数据库没有这条记录，插入
 	if err == gorm.ErrRecordNotFound {
-		_, err = mysql.CreateNewFavorite(userId, videoId)
-		// 通知vms 赞 +1
+		err = producer.SendFavoriteMessage(userId, videoId, 1)
 		if err != nil {
-			return err
+			log.Print("发送点赞操作消息队列失败，使用Mysql直接处理数据")
+			_, err = mysql.CreateNewFavorite(userId, videoId)
+			if err != nil {
+				return err
+			}
+			go remoteUpdateFavoriteCnt(videoId, 0)
+			return nil
 		}
-
-		go remoteUpdateFavoriteCnt(videoId, 0)
 		return nil
 	}
-	if favorite.Cancel == 0 {
-		return errors.New("已经点赞过了")
-	}
-	// 数据库已经有这条记录，修改Cancel为0
-	if err := mysql.UpdateFavorite(userId, videoId, 0); err != nil {
-		return err
-	}
-	// 启动协程，异步调用
-	go remoteUpdateFavoriteCnt(videoId, 0)
-	return nil
+	log.Println("已有点赞无法再点赞")
+	err = errors.New("已有点赞")
+	return err
 }
 
 func (fsi *FavoriteServiceImpl) DeleteFavorite(userId, videoId int64) error {
-	favorite, err := mysql.GetFavorite(userId, videoId)
+	_, err := mysql.GetFavorite(userId, videoId)
 	if err == gorm.ErrRecordNotFound {
 		return errors.New("没有点赞过该视频，无法取消")
 	}
-
-	// 目前处于取消点赞状态
-	if favorite.Cancel == 1 {
-		return errors.New("已经取消点赞了")
+	//先尝试发送到消息队列中
+	if err = producer.SendFavoriteMessage(userId, videoId, 0); err != nil {
+		if err = mysql.DeleteFavorite(userId, videoId); err != nil {
+			return err
+		}
+		go remoteUpdateFavoriteCnt(videoId, 1)
 	}
 
-	if err := mysql.UpdateFavorite(userId, videoId, 1); err != nil {
-		return err
-	}
-
-	go remoteUpdateFavoriteCnt(videoId, 1)
 	return nil
 }
 

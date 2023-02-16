@@ -63,15 +63,16 @@ func TestDeleteCommentByCommentIdWithMock(t *testing.T) {
 	var tests = []struct {
 		ownerId   int64
 		commentId int64
+		viderId   int64
 		expectNil bool
 		errorMsg  string
 	}{
 		//{3, 12, true, ""},
-		{3, 27, true, ""},
+		{3, 27, 3, true, ""},
 		//{6, 6, false, "zero row affected"},
 	}
 	instance := service.NewCommentServiceInstance()
-	// todo 本来想像这样子打桩的，但是好像都没有打桩成功
+	// todo 本来想像这样子打桩的，但是好像都没有打桩成功,可能是函数内联的原因，听说使用gomock好点
 	//monkey.Patch(instance.ReturnA, func() string {
 	//	return "b"
 	//})
@@ -86,7 +87,7 @@ func TestDeleteCommentByCommentIdWithMock(t *testing.T) {
 	//})
 	//defer monkey.Unpatch(instance.DeleteCommentByCommentId)
 	for _, test := range tests {
-		err := instance.DeleteCommentByCommentId(test.commentId, test.ownerId)
+		err := instance.DeleteCommentByCommentId(test.commentId, test.ownerId, test.viderId)
 		if test.expectNil {
 			assert.Nil(t, err)
 			//assert.DeepEqual(t,test.errorMsg,err.Error())

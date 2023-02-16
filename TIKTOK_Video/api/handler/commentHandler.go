@@ -59,7 +59,7 @@ func CommentAction(ctx context.Context, c *app.RequestContext) {
 			returnEmptyResponse("comment_id error", c)
 			return
 		}
-		if err = instance.DeleteCommentByCommentId(commentId, userId.(int64)); err != nil {
+		if err = instance.DeleteCommentByCommentId(commentId, userId.(int64), videoId); err != nil {
 			returnEmptyResponse(err.Error(), c)
 		} else {
 			c.JSON(consts.StatusOK, vo.Response{

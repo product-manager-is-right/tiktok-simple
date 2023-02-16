@@ -18,7 +18,6 @@ func GetIsFavorite(userId, videoId int64) (bool, error) {
 
 	if err := DB.Where("user_id = ?", userId).
 		Where("video_id = ?", videoId).
-		Where("cancel", 0).
 		Take(&favorite).Error; err == gorm.ErrRecordNotFound {
 		return false, nil
 	} else if err != nil {
@@ -32,14 +31,15 @@ func GetIsFavorite(userId, videoId int64) (bool, error) {
 创建一个Favorite 关联对象进入数据库
 */
 func CreateNewFavorite(userId, videoId int64) (int64, error) {
-	favorite := model.Favorite{UserId: userId, VideoId: videoId, Cancel: 0}
+	favorite := model.Favorite{UserId: userId, VideoId: videoId}
 	result := DB.Create(&favorite)
 	return favorite.Id, result.Error
 }
 
-func UpdateFavorite(userId, videoId, cancel int64) error {
-	if err := DB.Model(&model.Favorite{}).Where("user_id = ?", userId).Where("video_id = ?", videoId).
-		Update("cancel", cancel).Error; err != nil {
+func DeleteFavorite(userId, videoId int64) error {
+	favor := &model.Favorite{}
+	if err := DB.Model(favor).Where("user_id = ?", userId).Where("video_id = ?", videoId).
+		Delete(favor).Error; err != nil {
 		return errors.New("点赞状态更新失败")
 	}
 	return nil
