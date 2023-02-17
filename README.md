@@ -8,12 +8,11 @@
 
 ## 目录
 
-+ 项目演示 
-
++ 项目演示
   + 配置要求
   + 演示界面
   + 演示视频
-
+  
 + 项目设计
 
   + 文件目录
@@ -73,31 +72,31 @@
 
 + 登录页面
 
-
+<img src="https://raw.githubusercontent.com/product-manager-is-right/tiktok-simple/master/resource/screenShot/%E7%99%BB%E5%BD%95%E9%A1%B5%E9%9D%A2.png" style="zoom:50%;" />
 
 + 视频页面
 
-
+<img src="https://raw.githubusercontent.com/product-manager-is-right/tiktok-simple/master/resource/screenShot/%E8%A7%86%E9%A2%91%E6%96%87%E4%BB%B6.png" style="zoom:50%;" />
 
 + 视频上传
 
-
+<img src="https://raw.githubusercontent.com/product-manager-is-right/tiktok-simple/master/resource/screenShot/%E5%8F%91%E5%B8%83%E8%A7%86%E9%A2%91.png" style="zoom:50%;" />
 
 + 评论列表
 
-
+<img src="https://raw.githubusercontent.com/product-manager-is-right/tiktok-simple/master/resource/screenShot/%E8%AF%84%E8%AE%BA%E5%88%97%E8%A1%A8.png" style="zoom:50%;" />
 
 + 关注列表
 
-
+<img src="https://raw.githubusercontent.com/product-manager-is-right/tiktok-simple/master/resource/screenShot/%E5%85%B3%E6%B3%A8%E5%88%97%E8%A1%A8.png" style="zoom:50%;" />
 
 + 好友列表
 
-
+<img src="https://raw.githubusercontent.com/product-manager-is-right/tiktok-simple/master/resource/screenShot/%E5%A5%BD%E5%8F%8B%E5%88%97%E8%A1%A8.png" style="zoom:50%;" />
 
 + 聊天页面
 
-
+<img src="https://raw.githubusercontent.com/product-manager-is-right/tiktok-simple/master/resource/screenShot/%E5%A5%BD%E5%8F%8B%E8%81%8A%E5%A4%A9.png" style="zoom:50%;" />
 
 #### 1.3 项目视频
 
@@ -108,7 +107,7 @@
 #### 2.1 文件目录
 
 ```txt
-├─TIKTOK_Gateway
+├─TIKTOK_Gateway//网关服务
 │  ├─cache
 │  │  └─naming
 │  ├─cmd
@@ -117,7 +116,7 @@
 │  ├─resolver
 │  ├─route
 │  └─test
-├─TIKTOK_User
+├─TIKTOK_User//用户模块
 │  ├─api
 │  │  ├─handler
 │  │  └─router
@@ -142,15 +141,41 @@
 │  │  ├─cache
 │  │  │  └─naming
 │  │  └─log
-    ├─resolver
-    ├─resources
-    ├─service
-    │  └─ServiceImpl
-    ├─test
-    │  ├─cache
-    │  │  └─naming
-    │  └─log
-    └─util
+│   ├─resolver
+│   ├─resources
+│   ├─service
+│   │  └─ServiceImpl
+│   ├─test
+│   │  ├─cache
+│   │  │  └─naming
+│   │  └─log
+│   └─util
+├─TIKTOK_Video//视频模块
+│   ├─api
+│   │  ├─handler
+│   │  └─router
+│   ├─cache
+│   │  └─naming
+│   ├─cmd
+│   ├─configs
+│   ├─dal
+│   │  └─mysql
+│   ├─log
+│   ├─model
+│   │  └─vo
+│   ├─mw
+│   │  └─rabbitMQ
+│   │      ├─consumer
+│   │      └─producer
+│   ├─resolver
+│   ├─resources
+│   ├─service
+│   │  └─ServiceImpl
+│   ├─test
+│   │  ├─cache
+│   │  │  └─naming
+│   │  └─log
+│   └─util
 
 ```
 
