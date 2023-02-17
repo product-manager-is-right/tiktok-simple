@@ -57,9 +57,9 @@
 
 + 鸣谢
 
-### 项目演示
+### 1 项目演示
 
-#### 项目环境
+#### 1.1 项目环境
 
 + go 1.19
 
@@ -69,31 +69,82 @@
 
 + 配置文件服务器minio
 
-#### 项目页面
+#### 1.2 项目页面
 
 
 
-#### 项目视频
+#### 1.3 项目视频
 
 
 
-### 项目设计
+### 2 项目设计
 
-#### 文件目录
+#### 2.1 文件目录
 
-#### 项目架构设计
+```txt
+├─TIKTOK_Gateway
+│  ├─cache
+│  │  └─naming
+│  ├─cmd
+│  ├─configs
+│  ├─log
+│  ├─resolver
+│  ├─route
+│  └─test
+├─TIKTOK_User
+│  ├─api
+│  │  ├─handler
+│  │  └─router
+│  ├─cache
+│  │  └─naming
+│  ├─cmd
+│  ├─configs
+│  ├─dal
+│  │  └─mysql
+│  ├─log
+│  ├─model
+│  │  └─vo
+│  ├─mw
+│  │  ├─rabbitMQ
+│  │  │  ├─consumer
+│  │  │  └─producer
+│  │  └─redis
+│  ├─resolver
+│  ├─service
+│  │  └─serviceImpl
+│  ├─test
+│  │  ├─cache
+│  │  │  └─naming
+│  │  └─log
+    ├─resolver
+    ├─resources
+    ├─service
+    │  └─ServiceImpl
+    ├─test
+    │  ├─cache
+    │  │  └─naming
+    │  └─log
+    └─util
 
-***项目设计图***
+```
 
 
 
-#### 数据库设计
+#### 2.2 项目架构设计
+
+***项目设计***
+
+![项目设计图](https://raw.githubusercontent.com/product-manager-is-right/tiktok-simple/master/resource/%E5%90%8E%E7%AB%AF%E6%9E%B6%E6%9E%84%E5%9B%BE.png)
+
+....
+
+#### 2.3 数据库设计
 
 ***数据库设计图***
 
 
 
-#### 服务模块
+#### 2.4 服务模块
 
 ##### 用户模块的设计
 
@@ -127,9 +178,9 @@
 + 聊天模块包括发表评论、删除评论和查看评论。
 + 阅读[聊天模块文档]() 获取详细设计。
 
-#### 性能优化
+#### 2.5 性能优化
 
-##### 微服务架构
+##### 2.5.1 微服务架构
 
 ###### 网关
 
@@ -137,25 +188,31 @@
 
 ###### 服务注册
 
-##### Redis架构设计
+##### 2.5.2 Redis架构设计
 
 
 
-##### 消息中间件架构设计
+##### 2.5.3 消息中间件架构设计
+
+***MQ架构设计***
+
+##### ![rabbitMQ](https://raw.githubusercontent.com/product-manager-is-right/tiktok-simple/master/resource/rabbitMQ.png)
+
+我们一共对三个模块使用...
 
 
 
 ##### 数据库索引优化
 
-#### 技术总结
+#### 2.6 技术总结
 
 
 
-### 未来展望
+### 3 未来展望
 
 
 
-### 贡献者以及分工
+### 4 贡献者以及分工
 
 + 宋孟欣（组长） ： 团队分工，视频模块服务，服务发现，消息中间件设计。 联系方式：smxmorgab@gmail.com
 + 张志昊：微服务架构设计，数据库设计，用户模块，网关，服务注册，聊天模块
@@ -165,6 +222,6 @@
 + 杨光光：关注模块，redis缓存设计
 + 詹豪：关注模块，redis缓存设计
 
-### 鸣谢
+### 5 鸣谢
 
 + [字节跳动后端青训营](https://youthcamp.bytedance.com/)
