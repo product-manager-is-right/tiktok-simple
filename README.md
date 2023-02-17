@@ -105,7 +105,7 @@
 
 + 视频模块包括视频Feed流获取（/douyin/feed/ ）、视频投稿（/douyin/publish/action/）和发布列表（/douyin/publish/list/ - 发布列表）。
 
-+ 阅读[视频模块文档](**文档地址**)获取详细信息
++ 阅读[视频模块文档](https://nd8dqd1ncj.feishu.cn/docx/Qev3d1AceoBEw5xhmXrcRQ8rnEd)获取详细信息
 
 ##### 点赞模块的设计
 
