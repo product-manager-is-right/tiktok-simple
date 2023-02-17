@@ -7,6 +7,7 @@ import (
 	"TIKTOK_User/mw/redis"
 	"TIKTOK_User/resolver"
 	"context"
+	"encoding/json"
 	"errors"
 	"github.com/cloudwego/hertz/pkg/common/config"
 	"github.com/cloudwego/hertz/pkg/protocol"
@@ -66,7 +67,7 @@ func (fsi *FavoriteServiceImpl) DeleteFavorite(userId, videoId int64) error {
 		}
 		// favorite数据库已经改变，删除redis userid对应的喜爱列表， 重试机制保证删除
 		strUserId := strconv.FormatInt(userId, 10)
-		for i := 0; i < 3; i++ {
+		for i := 0; i < redis.RetryTime; i++ {
 			if _, err := redis.FavoriteList.Del(context.Background(), strUserId).Result(); err == nil {
 				break
 			}
@@ -96,55 +97,35 @@ func remoteUpdateFavoriteCnt(videoId int64, actionType int) {
 
 func (fsi *FavoriteServiceImpl) GetFavoriteVideosListByUserId(queryId, ownerId int64) ([]vo.VideoInfo, error) {
 	var videoInfos []vo.VideoInfo
-	videoIds := make([]int64, 0, 10)
 
 	// 先从redis中查找
 	strQueryId := strconv.FormatInt(queryId, 10)
-	if n, err := redis.FavoriteList.Exists(context.Background(), strQueryId).Result(); err == nil && n > 0 {
-		// 缓存命中
-		vs, err := redis.FavoriteList.SMembers(context.Background(), strQueryId).Result()
-		if err != nil {
-			return nil, err
+	vs, err := redis.FavoriteList.Get(context.Background(), strQueryId).Result()
+	// 缓存命中
+	if err == nil {
+		// 反序列化
+		if err := json.Unmarshal([]byte(vs), &videoInfos); err != nil {
+			return nil, errors.New("redis Unmarshal:" + err.Error())
 		}
-		// 转换str->int64
-		for _, v := range vs {
-			r, err := strconv.ParseInt(v, 10, 64)
-			if err != nil {
-				return nil, errors.New("redis中存储非法")
-			}
-			videoIds = append(videoIds, r)
-		}
-	} else {
-		// 缓存未命中，查询数据库
-		videoIds, err = mysql.GetFavoritesById(queryId)
-		if err != nil {
-			return nil, errors.New("数据库查询失败")
-		}
-		// 转换int64->str
-		strVideoIds := make([]string, len(videoIds))
-		for i, v := range videoIds {
-			strVideoIds[i] = strconv.FormatInt(v, 10)
-		}
-		// 存入redis，不需要处理异常
-		redis.FavoriteList.SAdd(context.Background(), strQueryId, strVideoIds)
-		// 设置过期时间，兜底方案
-		if _, err := redis.FavoriteList.Expire(context.Background(), strQueryId, redis.SetExpiredTime()).Result(); err != nil {
-			// 设置失败，删除该key
-			redis.FavoriteList.Del(context.Background(), strQueryId)
-		}
-	}
-
-	// 查询正确，但列表为空
-	if len(videoIds) == 0 {
 		return videoInfos, nil
 	}
 
-	videoInfos, err := getVideoInfosByVideoIds(videoIds, ownerId, "favorite_query")
+	// 缓存未命中，查询数据库
+	videoIds, err := mysql.GetFavoritesById(queryId)
 	if err != nil {
-		log.Print("获取video详细信息失败")
+		return nil, errors.New("数据库查询失败")
 	}
 
-	return videoInfos, err
+	videoInfos, err = getVideoInfosByVideoIds(videoIds, ownerId, "favorite_query")
+	if err != nil {
+		return videoInfos, err
+	}
+
+	// 存入redis，不需要处理异常
+	strVideoInfos, _ := json.Marshal(videoInfos)
+	redis.FavoriteList.Set(context.Background(), strQueryId, strVideoInfos, redis.SetExpiredTime())
+
+	return videoInfos, nil
 }
 
 // IsFavorite 断是否为喜欢接口,假如userId点赞了videoId，返回true,没有返回false

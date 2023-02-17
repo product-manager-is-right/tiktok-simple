@@ -6,6 +6,7 @@ import (
 	"TIKTOK_User/mw/rabbitMQ/producer"
 	"TIKTOK_User/mw/redis"
 	"context"
+	"encoding/json"
 	"errors"
 	"gorm.io/gorm"
 	"log"
@@ -85,48 +86,27 @@ func (fsi *FollowServiceImpl) DeleteRelation(userFromId, userToId int64) error {
 
 // GetFollowListById 根据id查询关注列表
 func (fsi *FollowServiceImpl) GetFollowListById(userId, ownerId int64) ([]vo.UserInfo, error) {
-	ids := make([]int64, 0, 10)
+	var userInfos []vo.UserInfo
 
 	// 先从redis中查找
 	strUserId := strconv.FormatInt(userId, 10)
-	if n, err := redis.FollowList.Exists(context.Background(), strUserId).Result(); err == nil && n > 0 {
-		// 缓存命中
-		vs, err := redis.FollowList.SMembers(context.Background(), strUserId).Result()
-		if err != nil {
-			return nil, err
+
+	us, err := redis.FollowList.Get(context.Background(), strUserId).Result()
+	// 缓存命中
+	if err == nil {
+		// 反序列化
+		if err := json.Unmarshal([]byte(us), &userInfos); err != nil {
+			return nil, errors.New("redis Unmarshal:" + err.Error())
 		}
-		// 转换str->int64
-		for _, v := range vs {
-			r, err := strconv.ParseInt(v, 10, 64)
-			if err != nil {
-				return nil, errors.New("redis中存储非法")
-			}
-			ids = append(ids, r)
-		}
-	} else {
-		// 缓存未命中，查询数据库
-		ids, err = mysql.GetFollowingIds(userId)
-		if err != nil {
-			return nil, errors.New("数据库查询失败")
-		}
-		// 转换int64->str
-		followIds := make([]string, len(ids))
-		for i, v := range ids {
-			followIds[i] = strconv.FormatInt(v, 10)
-		}
-		// 存入redis，不需要处理异常
-		redis.FollowList.SAdd(context.Background(), strUserId, followIds)
-		// 设置过期时间，兜底方案
-		if _, err := redis.FollowList.Expire(context.Background(), strUserId, redis.SetExpiredTime()).Result(); err != nil {
-			// 设置失败，删除该key
-			redis.FollowList.Del(context.Background(), strUserId)
-		}
+		return userInfos, nil
 	}
 
-	// 没关注者
-	if len(ids) == 0 {
-		return []vo.UserInfo{}, nil
+	// 缓存未命中，查询数据库
+	ids, err := mysql.GetFollowingIds(userId)
+	if err != nil {
+		return nil, errors.New("数据库查询失败")
 	}
+
 	// 根据每个id来查询用户信息
 	users := make([]vo.UserInfo, 0, len(ids))
 	for _, id := range ids {
@@ -150,6 +130,11 @@ func (fsi *FollowServiceImpl) GetFollowListById(userId, ownerId int64) ([]vo.Use
 		}
 		users = append(users, u)
 	}
+
+	// 存入redis，不需要处理异常
+	strUserInfos, _ := json.Marshal(users)
+	redis.FollowList.Set(context.Background(), strUserId, strUserInfos, redis.SetExpiredTime())
+
 	return users, nil
 }
 
@@ -158,48 +143,26 @@ type FollowerServiceImpl struct {
 
 // GetFollowerListById 根据id查询粉丝列表
 func (fsi *FollowerServiceImpl) GetFollowerListById(userId, ownerId int64) ([]vo.UserInfo, error) {
-	ids := make([]int64, 0, 10)
+	var userInfos []vo.UserInfo
 
 	// 先从redis中查找
 	strUserId := strconv.FormatInt(userId, 10)
-	if n, err := redis.FollowerList.Exists(context.Background(), strUserId).Result(); err == nil && n > 0 {
-		// 缓存命中
-		vs, err := redis.FollowerList.SMembers(context.Background(), strUserId).Result()
-		if err != nil {
-			return nil, err
+	us, err := redis.FollowerList.Get(context.Background(), strUserId).Result()
+	// 缓存命中
+	if err == nil {
+		// 反序列化
+		if err := json.Unmarshal([]byte(us), &userInfos); err != nil {
+			return nil, errors.New("redis Unmarshal:" + err.Error())
 		}
-		// 转换str->int64
-		for _, v := range vs {
-			r, err := strconv.ParseInt(v, 10, 64)
-			if err != nil {
-				return nil, errors.New("redis中存储非法")
-			}
-			ids = append(ids, r)
-		}
-	} else {
-		// 缓存未命中，查询数据库
-		ids, err = mysql.GetFollowerIds(userId)
-		if err != nil {
-			return nil, errors.New("数据库查询失败")
-		}
-		// 转换int64->str
-		followerIds := make([]string, len(ids))
-		for i, v := range ids {
-			followerIds[i] = strconv.FormatInt(v, 10)
-		}
-		// 存入redis，不需要处理异常
-		redis.FollowerList.SAdd(context.Background(), strUserId, followerIds)
-		// 设置过期时间，兜底方案，设置随机的过期时间，防止缓存雪崩
-		if _, err := redis.FollowerList.Expire(context.Background(), strUserId, redis.SetExpiredTime()).Result(); err != nil {
-			// 设置失败，删除该key
-			redis.FollowerList.Del(context.Background(), strUserId)
-		}
+		return userInfos, nil
 	}
 
-	// 没粉丝
-	if len(ids) == 0 {
-		return []vo.UserInfo{}, nil
+	// 缓存未命中，查询数据库
+	ids, err := mysql.GetFollowerIds(userId)
+	if err != nil {
+		return nil, errors.New("数据库查询失败")
 	}
+
 	// 根据每个id来查询用户信息
 	users := make([]vo.UserInfo, 0, len(ids))
 	for _, id := range ids {
@@ -223,5 +186,9 @@ func (fsi *FollowerServiceImpl) GetFollowerListById(userId, ownerId int64) ([]vo
 		}
 		users = append(users, u)
 	}
+
+	// 存入redis，不需要处理异常
+	strUserInfos, _ := json.Marshal(users)
+	redis.FollowerList.Set(context.Background(), strUserId, strUserInfos, redis.SetExpiredTime())
 	return users, nil
 }

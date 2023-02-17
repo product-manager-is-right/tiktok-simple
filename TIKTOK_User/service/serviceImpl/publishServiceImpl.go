@@ -54,6 +54,9 @@ func (psi *PublishServiceImpl) GetVideoList(userIdTar int64, userIdSrc int64) ([
 	mode: "publish_mode" or "favorite_mode" 发布视频列表查询模式/喜欢列表查询模式
 */
 func getVideoInfosByVideoIds(videoIds []int64, userId int64, mode string) ([]vo.VideoInfo, error) {
+	if len(videoIds) == 0 {
+		return []vo.VideoInfo{}, nil
+	}
 	videoInfos, err := RemoteGetVideoInfoCall(videoIds)
 	if err != nil {
 		log.Print("远程调用视频信息失败")
