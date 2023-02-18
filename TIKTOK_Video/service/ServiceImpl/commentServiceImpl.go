@@ -44,8 +44,8 @@ func (csi *CommentServiceImpl) GetCommentListByVideoId(videoId, userId int64) ([
 		return nil, err
 	}
 	//序列化存入redis
-	strVideoInfos, _ := json.Marshal(commentInfos)
-	redis.CommentList.Set(context.Background(), strVideoId, strVideoInfos, redis.SetExpiredTime())
+	strCommentInfos, _ := json.Marshal(commentInfos)
+	redis.CommentList.Set(context.Background(), strVideoId, strCommentInfos, redis.SetExpiredTime())
 	return commentInfos, nil
 }
 

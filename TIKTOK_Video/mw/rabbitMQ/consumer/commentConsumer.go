@@ -49,20 +49,20 @@ func consumerDelComment(msgs <-chan amqp.Delivery) {
 		}
 
 		log.Println("comment接受消息:", "视频", videoId, "评论", commentId)
-		//发送失败。自动同步操作数据库
+		// 这里应该是一个事务
 		if err = mysql.DeleteCommentByCommentId(commentId); err != nil {
 			log.Println("comment队列消费者删除评论失败:", err.Error())
-			strVideoId := strconv.FormatInt(videoId, 10)
-			for i := 0; i < redis.RetryTime; i++ {
-				if _, err := redis.CommentList.Del(context.Background(), strVideoId).Result(); err == nil {
-					break
-				}
-			}
-			continue
 		}
 		if err = mysql.DecrementCommentCount(videoId); err != nil {
 			log.Println("comment队列消费者评论数减一失败:", err.Error())
 		}
+		strVideoId := strconv.FormatInt(videoId, 10)
+		for i := 0; i < redis.RetryTime; i++ {
+			if _, err := redis.CommentList.Del(context.Background(), strVideoId).Result(); err == nil {
+				break
+			}
+		}
+		continue
 	}
 
 }
