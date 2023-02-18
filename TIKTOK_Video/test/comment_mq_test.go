@@ -3,7 +3,7 @@ package test
 import (
 	"TIKTOK_Video/configs"
 	"TIKTOK_Video/dal/mysql"
-	"TIKTOK_Video/mw/rabbitMQ"
+	"TIKTOK_Video/mw"
 	"TIKTOK_Video/service"
 	"github.com/cloudwego/hertz/pkg/common/test/assert"
 	"testing"
@@ -13,8 +13,7 @@ import (
 func TestCommentMQ(t *testing.T) {
 	configs.ReadConfig(configs.TEST)
 	mysql.Init()
-	rabbitMQ.InitRabbitMQ()
-	rabbitMQ.InitCommentRabbitMQ()
+	mw.InitRabbitMq()
 	var err error
 	var tests = []struct {
 		commentId int64

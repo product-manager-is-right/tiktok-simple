@@ -6,7 +6,6 @@ import (
 	"TIKTOK_Video/dal"
 	"TIKTOK_Video/mw"
 	"TIKTOK_Video/mw/rabbitMQ"
-	"TIKTOK_Video/mw/redis"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/cloudwego/hertz/pkg/app/server/registry"
@@ -41,7 +40,7 @@ func initDeps() {
 	mw.InitRabbitMq()
 
 	//初始化redis
-	redis.Init()
+	mw.RedisInit()
 }
 
 func startServer() {
