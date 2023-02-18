@@ -218,7 +218,7 @@
 ##### 关注模块的设计
 
 + 关注模块包括关注（/douyin/relation/action/）、获取关注列表（/douyin/relatioin/follow/list/）、获取粉丝列表（/douyin/relation/follower/list/）。
-+ 阅读[关注模块文档](**文档地址**)获取详细设计
++ 阅读[关注模块文档](https://mc8cteit07.feishu.cn/docx/OyFndy7MfoAEcwxfVv9cjUdXnig)获取详细设计
 
 ##### 评论模块的设计
 
