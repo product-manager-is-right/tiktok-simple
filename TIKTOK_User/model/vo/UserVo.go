@@ -3,6 +3,7 @@ package vo
 /*
 UserInfo 返回用户信息的实体类
 */
+//TODO 需要修添加用户发布视频数量
 type UserInfo struct {
 	Id            int64  `json:"id"`
 	Name          string `json:"name"`

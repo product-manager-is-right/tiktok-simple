@@ -71,32 +71,33 @@
 #### 1.2 项目页面
 
 + 登录页面
+      <img src="https://raw.githubusercontent.com/product-manager-is-right/tiktok-simple/master/resource/screenShot/%E7%99%BB%E5%BD%95%E9%A1%B5%E9%9D%A2.png" alt="Logo" width="200" height="400">
 
-<img src="https://raw.githubusercontent.com/product-manager-is-right/tiktok-simple/master/resource/screenShot/%E7%99%BB%E5%BD%95%E9%A1%B5%E9%9D%A2.png" style="zoom:50%;" />
+
 
 + 视频页面
 
-<img src="https://raw.githubusercontent.com/product-manager-is-right/tiktok-simple/master/resource/screenShot/%E8%A7%86%E9%A2%91%E6%96%87%E4%BB%B6.png" style="zoom:50%;" />
+<img src="https://raw.githubusercontent.com/product-manager-is-right/tiktok-simple/master/resource/screenShot/%E8%A7%86%E9%A2%91%E6%96%87%E4%BB%B6.png" alt="Logo" width="200" height="400"/>
 
 + 视频上传
 
-<img src="https://raw.githubusercontent.com/product-manager-is-right/tiktok-simple/master/resource/screenShot/%E5%8F%91%E5%B8%83%E8%A7%86%E9%A2%91.png" style="zoom:50%;" />
+<img src="https://raw.githubusercontent.com/product-manager-is-right/tiktok-simple/master/resource/screenShot/%E5%8F%91%E5%B8%83%E8%A7%86%E9%A2%91.png" alt="Logo" width="200" height="400" />
 
 + 评论列表
 
-<img src="https://raw.githubusercontent.com/product-manager-is-right/tiktok-simple/master/resource/screenShot/%E8%AF%84%E8%AE%BA%E5%88%97%E8%A1%A8.png" style="zoom:50%;" />
+<img src="https://raw.githubusercontent.com/product-manager-is-right/tiktok-simple/master/resource/screenShot/%E8%AF%84%E8%AE%BA%E5%88%97%E8%A1%A8.png" alt="Logo" width="200" height="400" />
 
 + 关注列表
 
-<img src="https://raw.githubusercontent.com/product-manager-is-right/tiktok-simple/master/resource/screenShot/%E5%85%B3%E6%B3%A8%E5%88%97%E8%A1%A8.png" style="zoom:50%;" />
+<img src="https://raw.githubusercontent.com/product-manager-is-right/tiktok-simple/master/resource/screenShot/%E5%85%B3%E6%B3%A8%E5%88%97%E8%A1%A8.png" alt="Logo" width="200" height="400" />
 
 + 好友列表
 
-<img src="https://raw.githubusercontent.com/product-manager-is-right/tiktok-simple/master/resource/screenShot/%E5%A5%BD%E5%8F%8B%E5%88%97%E8%A1%A8.png" style="zoom:50%;" />
+<img src="https://raw.githubusercontent.com/product-manager-is-right/tiktok-simple/master/resource/screenShot/%E5%A5%BD%E5%8F%8B%E5%88%97%E8%A1%A8.png" alt="Logo" width="200" height="400" />
 
 + 聊天页面
 
-<img src="https://raw.githubusercontent.com/product-manager-is-right/tiktok-simple/master/resource/screenShot/%E5%A5%BD%E5%8F%8B%E8%81%8A%E5%A4%A9.png" style="zoom:50%;" />
+<img src="https://raw.githubusercontent.com/product-manager-is-right/tiktok-simple/master/resource/screenShot/%E5%A5%BD%E5%8F%8B%E8%81%8A%E5%A4%A9.png" alt="Logo" width="200" height="400" />
 
 #### 1.3 项目视频
 
