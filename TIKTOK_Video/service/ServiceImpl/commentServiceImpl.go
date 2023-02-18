@@ -5,8 +5,12 @@ import (
 	"TIKTOK_Video/model"
 	"TIKTOK_Video/model/vo"
 	"TIKTOK_Video/mw/rabbitMQ/producer"
+	"TIKTOK_Video/mw/redis"
+	"context"
+	"encoding/json"
 	"errors"
 	"gorm.io/gorm"
+	"strconv"
 	"time"
 )
 
@@ -18,15 +22,30 @@ func (csi *CommentServiceImpl) GetCommentListByVideoId(videoId, userId int64) ([
 	if videoId < 0 {
 		return nil, errors.New("wrong videoId")
 	}
+	var commentInfos []*vo.CommentInfo
+	// 先从redis中查找
+	strVideoId := strconv.FormatInt(videoId, 10)
+	vs, err := redis.CommentList.Get(context.Background(), strVideoId).Result()
+	// 缓存命中
+	if err == nil {
+		// 反序列化
+		if err := json.Unmarshal([]byte(vs), &commentInfos); err != nil {
+			return nil, errors.New("redis Unmarshal:" + err.Error())
+		}
+		return commentInfos, nil
+	}
 	//根据videoId获取comment
 	comments, err := mysql.GetCommentByVideoIds(videoId)
 	if err != nil {
 		return nil, err
 	}
-	commentInfos, err := bindCommentInfo(comments, userId)
+	commentInfos, err = bindCommentInfo(comments, userId)
 	if err != nil {
 		return nil, err
 	}
+	//序列化存入redis
+	strVideoInfos, _ := json.Marshal(commentInfos)
+	redis.CommentList.Set(context.Background(), strVideoId, strVideoInfos, redis.SetExpiredTime())
 	return commentInfos, nil
 }
 
@@ -100,6 +119,12 @@ func (csi *CommentServiceImpl) DeleteCommentByCommentId(commentId, userId, video
 		if err = mysql.DecrementCommentCount(videoId); err != nil {
 			return err
 		}
+		strVideoId := strconv.FormatInt(videoId, 10)
+		for i := 0; i < redis.RetryTime; i++ {
+			if _, err := redis.CommentList.Del(context.Background(), strVideoId).Result(); err == nil {
+				break
+			}
+		}
 	}
 
 	return nil
@@ -120,6 +145,12 @@ func (csi *CommentServiceImpl) InsertComment(commentText string, videoId, userId
 	comment, err := mysql.InsertComment(commentText, videoId, userId)
 	if err != nil {
 		return nil, err
+	}
+	strVideoId := strconv.FormatInt(videoId, 10)
+	for i := 0; i < redis.RetryTime; i++ {
+		if _, err := redis.CommentList.Del(context.Background(), strVideoId).Result(); err == nil {
+			break
+		}
 	}
 	//到这里没问题，给video的comment_count字段加一
 	if err = mysql.IncrementCommentCount(videoId); err != nil {

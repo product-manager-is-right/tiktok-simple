@@ -2,6 +2,8 @@ package consumer
 
 import (
 	"TIKTOK_Video/dal/mysql"
+	"TIKTOK_Video/mw/redis"
+	"context"
 	"fmt"
 	"github.com/streadway/amqp"
 	"log"
@@ -50,6 +52,12 @@ func consumerDelComment(msgs <-chan amqp.Delivery) {
 		//发送失败。自动同步操作数据库
 		if err = mysql.DeleteCommentByCommentId(commentId); err != nil {
 			log.Println("comment队列消费者删除评论失败:", err.Error())
+			strVideoId := strconv.FormatInt(videoId, 10)
+			for i := 0; i < redis.RetryTime; i++ {
+				if _, err := redis.CommentList.Del(context.Background(), strVideoId).Result(); err == nil {
+					break
+				}
+			}
 			continue
 		}
 		if err = mysql.DecrementCommentCount(videoId); err != nil {

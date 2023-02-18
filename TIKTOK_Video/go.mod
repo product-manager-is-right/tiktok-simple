@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/cloudwego/hertz v0.5.1
+	github.com/go-redis/redis/v8 v8.11.5
 	github.com/hertz-contrib/jwt v1.0.2
 	github.com/hertz-contrib/registry/nacos v0.0.0-20221226122036-3c451682dc72
 	github.com/minio/minio-go/v7 v7.0.47
@@ -23,8 +24,10 @@ require (
 	github.com/bytedance/go-tagexpr/v2 v2.9.2 // indirect
 	github.com/bytedance/gopkg v0.0.0-20220413063733-65bf48ffb3a7 // indirect
 	github.com/bytedance/sonic v1.5.0 // indirect
+	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20211019084208-fb5309c8db06 // indirect
 	github.com/cloudwego/netpoll v0.3.1 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/go-errors/errors v1.0.1 // indirect
