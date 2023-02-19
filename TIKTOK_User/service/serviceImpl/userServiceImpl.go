@@ -43,12 +43,20 @@ func (usi *UserServiceImpl) GetUserInfoById(queryUserId int64, userId int64) (*v
 	//调用dal层 ： 判断主user 是否 关注 queryUser，查询失败为false
 	isFollow, _ := mysql.GetIsFollow(queryUserId, userId)
 
+	workCount, _ := mysql.GetPublishVideoIdsById(queryUserId)
+
+	favorCount, _ := mysql.GetFavoritesById(queryUserId)
+
 	userInfo.Id = queryUserId
 	userInfo.Name = queryUser.Username
 	userInfo.FollowerCount = followerCnt
 	userInfo.FollowCount = followCnt
 	userInfo.IsFollow = isFollow
-
+	userInfo.WorkCount = int64(len(workCount))
+	userInfo.FavoriteCount = int64(len(favorCount))
+	userInfo.Signature = "speak less, do more"
+	userInfo.Background = "http://120.25.2.146:9000/tikpic/backgg.jpg"
+	userInfo.Avatar = "http://120.25.2.146:9000/tikpic/head.jpg"
 	return userInfo, nil
 }
 
@@ -70,12 +78,21 @@ func (usi *UserServiceImpl) GetUsersInfoByIds(queryUserId []int64, userId int64)
 
 		//调用dal层 ： 判断主user 是否 关注 queryUser，查询失败为false
 		isFollow, _ := mysql.GetIsFollow(user.Id, userId)
+		workCount, _ := mysql.GetPublishVideoIdsById(user.Id)
+
+		favorCount, _ := mysql.GetFavoritesById(user.Id)
 
 		info.Id = user.Id
 		info.Name = user.Username
 		info.FollowerCount = followerCnt
 		info.FollowCount = followCnt
 		info.IsFollow = isFollow
+		info.WorkCount = int64(len(workCount))
+		info.FavoriteCount = int64(len(favorCount))
+		info.Signature = "speak less, do more"
+		info.Background = "http://120.25.2.146:9000/tikpic/backg.jpg"
+		info.Avatar = "http://120.25.2.146:9000/tikpic/head1.jpg"
+
 		userInfo[idx] = info
 	}
 	return userInfo, nil

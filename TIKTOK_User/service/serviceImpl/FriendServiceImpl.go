@@ -47,6 +47,7 @@ func (fsi *FriendServiceImpl) GetFriendListById(userId, ownerId int64) ([]vo.Fri
 				FollowerCount: followerCnt,
 				FollowCount:   followCnt,
 				IsFollow:      isFollow,
+				Avatar:        "http://120.25.2.146:9000/tikpic/head1.jpg",
 			},
 			Message: message,
 			MsgType: msgType,
