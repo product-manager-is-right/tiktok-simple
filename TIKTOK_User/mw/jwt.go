@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/hertz-contrib/jwt"
 )
@@ -63,7 +62,12 @@ func InitJwt() {
 			return jwt.MapClaims{}
 		},
 		HTTPStatusMessageFunc: func(e error, ctx context.Context, c *app.RequestContext) string {
-			hlog.CtxErrorf(ctx, "jwt err = %+v", e.Error())
+			if e == jwt.ErrExpiredToken {
+				return "token已过期，请重新登录!"
+			}
+			if e == jwt.ErrFailedAuthentication {
+				return "账号或错误，请重新输入!"
+			}
 			return e.Error()
 		},
 		Unauthorized: func(ctx context.Context, c *app.RequestContext, code int, message string) {
