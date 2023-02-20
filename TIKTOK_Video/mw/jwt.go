@@ -3,7 +3,6 @@ package mw
 import (
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/hertz-contrib/jwt"
 	"log"
@@ -44,14 +43,16 @@ func InitJwt() {
 			return jwt.MapClaims{}
 		},
 		HTTPStatusMessageFunc: func(e error, ctx context.Context, c *app.RequestContext) string {
-			hlog.CtxErrorf(ctx, "jwt err = %+v", e.Error())
+			if e == jwt.ErrExpiredToken {
+				return "token已过期，请重新登录!"
+			}
 			return e.Error()
 		},
 		Unauthorized: func(ctx context.Context, c *app.RequestContext, code int, message string) {
 			if !strings.HasPrefix(string(c.Request.RequestURI()), "/douyin/feed/") {
 				c.JSON(http.StatusOK, utils.H{
 					"status_code": 1,
-					"status_msg":  "jwt authorize fail",
+					"status_msg":  message,
 				})
 			}
 			c.Abort()

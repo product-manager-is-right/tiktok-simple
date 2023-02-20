@@ -5,13 +5,11 @@ import (
 	"TIKTOK_User/model"
 	"TIKTOK_User/util"
 	"context"
-	"errors"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/hertz/pkg/common/utils"
 	"github.com/hertz-contrib/jwt"
 )
@@ -37,7 +35,7 @@ func InitJwt() {
 				return nil, err
 			}
 			if len(users) == 0 {
-				return nil, errors.New("username or password is wrong")
+				return nil, jwt.ErrFailedAuthentication
 			}
 			c.Set("user_id", users[0].Id)
 			return users[0], nil
@@ -64,13 +62,18 @@ func InitJwt() {
 			return jwt.MapClaims{}
 		},
 		HTTPStatusMessageFunc: func(e error, ctx context.Context, c *app.RequestContext) string {
-			hlog.CtxErrorf(ctx, "jwt err = %+v", e.Error())
+			if e == jwt.ErrExpiredToken {
+				return "token已过期，请重新登录!"
+			}
+			if e == jwt.ErrFailedAuthentication {
+				return "账号或错误，请重新输入!"
+			}
 			return e.Error()
 		},
 		Unauthorized: func(ctx context.Context, c *app.RequestContext, code int, message string) {
 			c.JSON(http.StatusOK, utils.H{
 				"status_code": 1,
-				"status_msg":  "jwt authorize fail",
+				"status_msg":  message,
 			})
 			// 鉴权失败，中断handler
 			c.Abort()
