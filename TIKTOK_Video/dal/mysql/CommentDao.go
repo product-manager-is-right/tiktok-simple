@@ -58,7 +58,7 @@ func DeleteCommentByCommentId(commentId int64) error {
 }
 
 func DecrementCommentCount(videoId int64) error {
-	video := model.Video{VideoId: videoId}
+	video := model.Video{Id: videoId}
 	result := DB.Model(&video).Where("video_id = ?", videoId).Update("comment_count", gorm.Expr("comment_count - 1"))
 	var err error
 	if err = result.Error; err != nil {
@@ -71,7 +71,7 @@ func DecrementCommentCount(videoId int64) error {
 }
 
 func IncrementCommentCount(videoId int64) error {
-	video := model.Video{VideoId: videoId}
+	video := model.Video{Id: videoId}
 	result := DB.Model(&video).Where("video_id = ?", videoId).Update("comment_count", gorm.Expr("comment_count + 1"))
 	var err error
 	if err = result.Error; err != nil {

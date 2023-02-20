@@ -13,7 +13,7 @@ func CreateVideo(UserId int64, playUrl string, coverUrl string, title string) (i
 	// TODO : impl
 	video := model.Video{UserId: UserId, PlayUrl: playUrl, CoverUrl: coverUrl, Title: title, PublishTime: time.Now().UnixMilli()}
 	result := DB.Create(&video)
-	return video.VideoId, result.Error
+	return video.Id, result.Error
 }
 
 /*

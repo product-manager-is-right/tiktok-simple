@@ -1,7 +1,7 @@
 package model
 
 type Video struct {
-	VideoId       int64 `column:"video_id"`
+	Id            int64 `column:"id"`
 	UserId        int64
 	PlayUrl       string
 	CoverUrl      string

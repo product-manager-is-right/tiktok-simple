@@ -43,7 +43,7 @@ func GetVideosByTime(LatestTime int64) ([]*model.Video, error) {
 }
 
 func DecrementFavoriteCount(videoId int64) error {
-	video := model.Video{VideoId: videoId}
+	video := model.Video{Id: videoId}
 	result := DB.Model(&video).Where("video_id = ?", videoId).Update("favorite_count", gorm.Expr("favorite_count - 1"))
 	var err error
 	if err = result.Error; err != nil {
@@ -56,7 +56,7 @@ func DecrementFavoriteCount(videoId int64) error {
 }
 
 func IncrementFavoriteCount(videoId int64) error {
-	video := model.Video{VideoId: videoId}
+	video := model.Video{Id: videoId}
 	result := DB.Model(&video).Where("video_id = ?", videoId).Update("favorite_count", gorm.Expr("favorite_count + 1"))
 	var err error
 	if err = result.Error; err != nil {

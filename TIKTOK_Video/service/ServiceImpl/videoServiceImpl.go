@@ -72,7 +72,7 @@ func bindVideoInfo(videos []*model.Video, userId int64) ([]vo.VideoInfo, error) 
 	fsi := FavoriteServiceImpl{}
 	var isFavorite bool
 	for i, video := range videos {
-		videoId := video.VideoId
+		videoId := video.Id
 
 		favoriteCount, _ := mysql.GetFavoriteCountByID(videoId)
 
@@ -150,7 +150,7 @@ func TransVideoInfo(videos []*model.Video) ([]vo.VideoInfo, error) {
 	// 远程调用，获取user/author的个人信息
 
 	for i, video := range videos {
-		videoId := video.VideoId
+		videoId := video.Id
 
 		favoriteCount, _ := mysql.GetFavoriteCountByID(videoId)
 
