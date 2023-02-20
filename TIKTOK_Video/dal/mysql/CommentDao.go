@@ -21,7 +21,7 @@ func GetCommentByID(id int64) (*model.Comment, error) {
 func GetCommentByVideoIds(videoId int64) ([]*model.Comment, error) {
 	obj := model.Comment{}
 	ret := make([]*model.Comment, 0)
-	DB.Model(&obj).Where("video_id = ?", videoId).Order("create_date desc").Find(&ret)
+	DB.Model(&obj).Where("id = ?", videoId).Order("create_date desc").Find(&ret)
 	return ret, nil
 }
 
@@ -59,7 +59,7 @@ func DeleteCommentByCommentId(commentId int64) error {
 
 func DecrementCommentCount(videoId int64) error {
 	video := model.Video{Id: videoId}
-	result := DB.Model(&video).Where("video_id = ?", videoId).Update("comment_count", gorm.Expr("comment_count - 1"))
+	result := DB.Model(&video).Where("id = ?", videoId).Update("comment_count", gorm.Expr("comment_count - 1"))
 	var err error
 	if err = result.Error; err != nil {
 		return err
@@ -72,7 +72,7 @@ func DecrementCommentCount(videoId int64) error {
 
 func IncrementCommentCount(videoId int64) error {
 	video := model.Video{Id: videoId}
-	result := DB.Model(&video).Where("video_id = ?", videoId).Update("comment_count", gorm.Expr("comment_count + 1"))
+	result := DB.Model(&video).Where("id = ?", videoId).Update("comment_count", gorm.Expr("comment_count + 1"))
 	var err error
 	if err = result.Error; err != nil {
 		return err
