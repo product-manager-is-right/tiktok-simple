@@ -9,7 +9,7 @@ import (
 // GetVideoByID 暂时先使用id 后期扩展为时间
 func GetVideoByID(id int64) (*model.Video, error) {
 	res := &model.Video{}
-	if err := DB.Where("id = ?", id).
+	if err := DB.Where("video_id = ?", id).
 		Find(&res).Error; err != nil {
 		return nil, err
 	}
@@ -18,7 +18,7 @@ func GetVideoByID(id int64) (*model.Video, error) {
 }
 func GetFavoriteCountByID(id int64) (int64, error) {
 	res := &model.Video{}
-	if err := DB.Where("id = ?", id).
+	if err := DB.Where("video_id = ?", id).
 		First(&res).Error; err != nil {
 		return 0, err
 	}
@@ -27,7 +27,7 @@ func GetFavoriteCountByID(id int64) (int64, error) {
 }
 func GetCommentCountByID(id int64) (int64, error) {
 	res := &model.Video{}
-	if err := DB.Where("id = ?", id).
+	if err := DB.Where("video_id = ?", id).
 		First(&res).Error; err != nil {
 		return 0, err
 	}
@@ -43,8 +43,8 @@ func GetVideosByTime(LatestTime int64) ([]*model.Video, error) {
 }
 
 func DecrementFavoriteCount(videoId int64) error {
-	video := model.Video{Id: videoId}
-	result := DB.Model(&video).Where("id = ?", videoId).Update("favorite_count", gorm.Expr("favorite_count - 1"))
+	video := model.Video{VideoId: videoId}
+	result := DB.Model(&video).Where("video_id = ?", videoId).Update("favorite_count", gorm.Expr("favorite_count - 1"))
 	var err error
 	if err = result.Error; err != nil {
 		return err
@@ -56,8 +56,8 @@ func DecrementFavoriteCount(videoId int64) error {
 }
 
 func IncrementFavoriteCount(videoId int64) error {
-	video := model.Video{Id: videoId}
-	result := DB.Model(&video).Where("id = ?", videoId).Update("favorite_count", gorm.Expr("favorite_count + 1"))
+	video := model.Video{VideoId: videoId}
+	result := DB.Model(&video).Where("video_id = ?", videoId).Update("favorite_count", gorm.Expr("favorite_count + 1"))
 	var err error
 	if err = result.Error; err != nil {
 		return err
