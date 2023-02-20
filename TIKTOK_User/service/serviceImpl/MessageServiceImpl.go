@@ -4,7 +4,6 @@ import (
 	"TIKTOK_User/dal/mysql"
 	"TIKTOK_User/model/vo"
 	"errors"
-	"time"
 )
 
 type MessageServiceImpl struct {
@@ -31,23 +30,30 @@ func (msi *MessageServiceImpl) SendMessage(toUserId int64, ownerId int64, conten
 	return nil
 }
 
-func (msi *MessageServiceImpl) GetMessage(toUserId int64, ownerId int64) ([]vo.MessageInfo, error) {
+func (msi *MessageServiceImpl) GetMessage(toUserId int64, ownerId int64, preTime int64) ([]vo.MessageInfo, error) {
 	var res []vo.MessageInfo
-
+	//检查最新消息的时间
+	m1 := mysql.GetLatestMessage(toUserId, ownerId)
+	m2 := mysql.GetLatestMessage(ownerId, toUserId)
+	if m1.CreateTime <= preTime || m2.CreateTime <= preTime {
+		return res, nil
+	}
 	messageList, err := mysql.GetMessage(toUserId, ownerId)
 	if err != nil {
 		return res, err
 	}
 	for _, message := range messageList {
-		m := vo.MessageInfo{
-			ID:         message.Id,
-			ToUserId:   message.UserIdTo,
-			FromUserId: message.UserIdFrom,
-			Content:    message.Message,
-			CreateTime: time.Unix(message.CreateTime, 0).Format("2006-01-02 15:04:05"),
+		if message.CreateTime > preTime {
+			m := vo.MessageInfo{
+				ID:         message.Id,
+				ToUserId:   message.UserIdTo,
+				FromUserId: message.UserIdFrom,
+				Content:    message.Message,
+				CreateTime: message.CreateTime,
+			}
+			res = append(res, m)
 		}
 
-		res = append(res, m)
 	}
 	return res, nil
 }

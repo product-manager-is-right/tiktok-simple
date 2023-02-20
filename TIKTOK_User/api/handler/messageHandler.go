@@ -48,6 +48,9 @@ func MessageAction(ctx context.Context, c *app.RequestContext) {
 func MessageChat(ctx context.Context, c *app.RequestContext) {
 	ownerId, _ := c.Get(mw.IdentityKey)
 	t := c.Query("to_user_id")
+	//TODO:处理pre_msg_time
+	preT := c.Query("pre_msg_time")
+	preTime, err := strconv.ParseInt(preT, 10, 64)
 	toUserId, err := strconv.ParseInt(t, 10, 64)
 	if t == "" || err != nil {
 		c.JSON(consts.StatusOK, vo.MessageActionResponse{
@@ -59,7 +62,7 @@ func MessageChat(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	msi := serviceImpl.MessageServiceImpl{}
-	messageList, err := msi.GetMessage(toUserId, ownerId.(int64))
+	messageList, err := msi.GetMessage(toUserId, ownerId.(int64), preTime)
 	if err != nil {
 		c.JSON(consts.StatusOK, vo.ChatResponse{
 			Response: vo.Response{
