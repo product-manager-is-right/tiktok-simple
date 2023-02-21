@@ -12,6 +12,7 @@
   + 配置要求
   + 演示界面
   + 演示视频
+  + 项目部署
   
 + 项目设计
 
@@ -103,6 +104,12 @@
 
 
 
+#### 1.4 项目部署
+
+我们采用了docker的方式进行部署
+
+
+
 ### 2 项目设计
 
 #### 2.1 文件目录
@@ -112,46 +119,37 @@
 │  ├─cache
 │  │  └─naming
 │  ├─cmd
-│  ├─configs
+│  ├─configs//配置文件
 │  ├─log
-│  ├─resolver
-│  ├─route
+│  ├─resolver//网关的均衡负载算法
+│  ├─route//路由
 │  └─test
 ├─TIKTOK_User//用户模块
 │  ├─api
-│  │  ├─handler
-│  │  └─router
+│  │  ├─handler//控制层
+│  │  └─router//路由
 │  ├─cache
 │  │  └─naming
 │  ├─cmd
-│  ├─configs
+│  ├─configs//User模块的配置文件
 │  ├─dal
-│  │  └─mysql
+│  │  └─mysql//mysql链接
 │  ├─log
-│  ├─model
+│  ├─model//实体类
 │  │  └─vo
 │  ├─mw
-│  │  ├─rabbitMQ
-│  │  │  ├─consumer
-│  │  │  └─producer
-│  │  └─redis
-│  ├─resolver
+│  │  ├─rabbitMQ//消息中间件
+│  │  │  ├─consumer//消费者
+│  │  │  └─producer//生产者
+│  │  └─redis//redis启动
+│  ├─resolver//服务发现
 │  ├─service
-│  │  └─serviceImpl
-│  ├─test
+│  │  └─serviceImpl//服务实现
+│  ├─test//测试类
 │  │  ├─cache
 │  │  │  └─naming
 │  │  └─log
-│   ├─resolver
-│   ├─resources
-│   ├─service
-│   │  └─ServiceImpl
-│   ├─test
-│   │  ├─cache
-│   │  │  └─naming
-│   │  └─log
-│   └─util
-├─TIKTOK_Video//视频模块
+├─TIKTOK_Video//视频模块，结构与User一致
 │   ├─api
 │   │  ├─handler
 │   │  └─router
@@ -202,7 +200,7 @@
 
 + 用户模块包括用户注册（/douyin/user/register/）、用户登录（/douyin/user/login/）和用户信息（/douyin/user/）三个接口。
 
-+ 阅读[用户模块文档](**文档地址**)获取详细信息
++ 阅读[用户模块文档](https://nd8dqd1ncj.feishu.cn/docx/QeAVdIxa5oUpqzxIVV1cw4i8nUh)获取详细信息
 
 ##### 视频模块的设计
 
@@ -227,8 +225,8 @@
 
 ##### 聊天模块的设计
 
-+ 聊天模块包括发表评论、删除评论和查看评论。
-+ 阅读[聊天模块文档]() 获取详细设计。
++ 聊天模块获取好友列表，获取聊天记录，以及聊天消息的发送。
++ 阅读[聊天模块文档](https://nd8dqd1ncj.feishu.cn/docx/TYGldpnuMo9urFxc6h4cbzninOL) 获取详细设计。
 
 #### 2.5 性能优化
 
@@ -236,13 +234,27 @@
 
 ###### 网关
 
+网关是介于客户端和服务器端之间的中间层，所有的外部请求都会先经过 网关这一层。在本项目中，我们使用网关对传入请求进行均衡负载，安全性的判断（限制上传视频大小）以及统一不同服务器的接口。
+
 ###### 服务注册、发现
 我们使用nacos作为微服务注册，服务发现组件。为了提高系统的可用性，我们基于docker和docker-compose容器化部署了包含3个节点的nacos集群，为了给客户端提供统一的nacos访问地址，我们还部署了1个nginx节点，用作反向代理和负载均衡，客户端发送的请求会由nginx负载均衡到3个Nacos节点中的随机一个。
 
+同时为了服务之间的能够相互通信我们新建了一下接口
+
+```go
+//查询video数据库的详细信息判断video数据库是否点赞
+/douyin/favorite/IsFavor/
+//将用户上传的视频存储在um数据库中
+/douyin/publish/UserVideo/
+//根据User端返回的videoid，查询video数据库的详细信息
+/douyin/publish/GetVideos/
+```
 
 ##### 2.5.2 Redis架构设计
 
+![redis](https://raw.githubusercontent.com/product-manager-is-right/tiktok-simple/dev/resource/redis.png)
 
+使用redis为喜欢视频列表，喜欢列表，关注列表以及评论列表缓存,程序会先查询redis当中是否有缓存，如果没有再从数据库中查询。在存入redis的时候我们会将列表json以便存储。
 
 ##### 2.5.3 消息中间件架构设计
 
@@ -266,7 +278,11 @@
 
 ### 3 未来展望
 
+#### 3.1 完全分布式
 
+我们在未来可以将每一块的服务彻底拆分开来，将其分为，喜欢，点赞，关注，再使用grpc进行服务之间的通信，实现服务之间的解耦。
+
+可以更新补充网关部分的均衡负载算法，可以根据服务器的业务不同和请求不同，改变网关的均衡负载算法
 
 ### 4 贡献者以及分工
 
