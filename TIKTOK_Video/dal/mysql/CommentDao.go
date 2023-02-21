@@ -26,6 +26,7 @@ func GetCommentByVideoIds(videoId int64) ([]*model.Comment, error) {
 }
 
 func InsertComment(commentText string, videoId, userId int64) (*model.Comment, error) {
+	//封装评论
 	comment := model.Comment{
 		Id:         0,
 		VideoId:    videoId,

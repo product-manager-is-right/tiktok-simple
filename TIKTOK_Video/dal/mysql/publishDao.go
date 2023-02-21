@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"TIKTOK_Video/model"
+	"log"
 	"time"
 )
 
@@ -13,6 +14,7 @@ func CreateVideo(UserId int64, playUrl string, coverUrl string, title string) (i
 	// TODO : impl
 	video := model.Video{UserId: UserId, PlayUrl: playUrl, CoverUrl: coverUrl, Title: title, PublishTime: time.Now().UnixMilli()}
 	result := DB.Create(&video)
+	log.Print(video.VideoId)
 	return video.VideoId, result.Error
 }
 
