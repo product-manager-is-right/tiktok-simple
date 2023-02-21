@@ -17,7 +17,8 @@ func main() {
 
 	// 创建服务
 	addr := ":" + strconv.Itoa(myConfig.Port)
-	h := server.New(server.WithHostPorts(addr))
+	h := server.New(server.WithHostPorts(addr),
+		server.WithMaxRequestBodySize(20<<20))
 
 	// 路由注册
 	route.Register(myConfig, h)
