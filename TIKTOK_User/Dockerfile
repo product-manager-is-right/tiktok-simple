@@ -2,6 +2,7 @@ FROM golang:1.19-alpine3.17 AS builder
 
 WORKDIR /build
 ENV GOPROXY https://goproxy.cn
+ENV GOPATH .
 ADD go.mod .
 COPY . .
 RUN go mod download
