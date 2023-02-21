@@ -121,7 +121,7 @@ func RemoteGetVideoInfoCall(videoIds []int64) ([]vo.VideoInfo, error) {
 				FavoriteCount: video.FavoriteCount,
 				CommentCount:  video.CommentCount,
 				IsFavorite:    video.IsFavorite,
-				Title:         "Test",
+				Title:         video.Title,
 			}
 
 		}
