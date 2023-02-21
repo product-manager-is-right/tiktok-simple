@@ -1,0 +1,27 @@
+version: 3
+
+services:
+  tiktok_gateway:
+    container_name: tiktok_gateway
+    build:
+      context: ./TIKTOK_Gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8070:8070"
+    restart: always
+  tiktok_user:
+    container_name: tiktok_user
+    build:
+      context: ./TIKTOK_User
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    restart: always
+  tiktok_video:
+    container_name: tiktok_video
+    build:
+      context: ./TIKTOK_Video
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    restart: always
