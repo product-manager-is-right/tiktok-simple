@@ -1,11 +1,11 @@
-FROM golang:alpine AS builder
+FROM golang:1.19-alpine3.17 AS builder
 
 WORKDIR /build
 
 ENV GOPROXY https://goproxy.cn
 ADD go.mod .
 COPY . .
-RUN go build -o tiktok_video ./cmd/main.go
+RUN go build -o TIKTOK_Video ./cmd/main.go
 
 
 FROM alpine
