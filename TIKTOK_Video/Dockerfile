@@ -2,6 +2,7 @@ FROM golang:alpine AS builder
 
 WORKDIR /build
 
+ENV GOPROXY https://goproxy.cn
 ADD go.mod .
 COPY . .
 RUN go build -o tiktok_video ./cmd/main.go
