@@ -29,7 +29,7 @@ func (csi *CommentServiceImpl) GetCommentListByVideoId(videoId, userId int64) ([
 	// 缓存命中
 	if err == nil {
 		// 反序列化
-		if err := json.Unmarshal([]byte(vs), &commentInfos); err != nil {
+		if err = json.Unmarshal([]byte(vs), &commentInfos); err != nil {
 			return nil, errors.New("redis Unmarshal:" + err.Error())
 		}
 		return commentInfos, nil
@@ -111,7 +111,7 @@ func (csi *CommentServiceImpl) DeleteCommentByCommentId(commentId, userId, video
 	}
 
 	//首先尝试发送处理到mq中
-	if err := producer.SendDelCommentMessage(commentId, videoId); err != nil {
+	if err = producer.SendDelCommentMessage(commentId, videoId); err != nil {
 		//发送失败。自动同步操作数据库.  这两条应该是一个事务。
 		if err = mysql.DeleteCommentByCommentId(commentId); err != nil {
 			return err
@@ -121,7 +121,7 @@ func (csi *CommentServiceImpl) DeleteCommentByCommentId(commentId, userId, video
 		}
 		strVideoId := strconv.FormatInt(videoId, 10)
 		for i := 0; i < redis.RetryTime; i++ {
-			if _, err := redis.CommentList.Del(context.Background(), strVideoId).Result(); err == nil {
+			if _, err = redis.CommentList.Del(context.Background(), strVideoId).Result(); err == nil {
 				break
 			}
 		}
@@ -148,7 +148,7 @@ func (csi *CommentServiceImpl) InsertComment(commentText string, videoId, userId
 	}
 	strVideoId := strconv.FormatInt(videoId, 10)
 	for i := 0; i < redis.RetryTime; i++ {
-		if _, err := redis.CommentList.Del(context.Background(), strVideoId).Result(); err == nil {
+		if _, err = redis.CommentList.Del(context.Background(), strVideoId).Result(); err == nil {
 			break
 		}
 	}
