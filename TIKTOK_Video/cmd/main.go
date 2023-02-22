@@ -10,6 +10,7 @@ import (
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/cloudwego/hertz/pkg/app/server/registry"
 	"github.com/cloudwego/hertz/pkg/common/utils"
+	"github.com/cloudwego/hertz/pkg/network/standard"
 	"github.com/hertz-contrib/registry/nacos"
 	"github.com/nacos-group/nacos-sdk-go/clients"
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
@@ -63,7 +64,7 @@ func startServer() {
 	r := nacos.NewNacosRegistry(cli)
 
 	addr := ":" + viper.GetString("port")
-	h := server.Default(
+	h := server.New(
 		server.WithHostPorts(addr),
 		server.WithRegistry(r, &registry.Info{
 			ServiceName: viper.GetString("nacos.serviceName"),
@@ -71,6 +72,7 @@ func startServer() {
 			Weight:      10,
 			Tags:        nil,
 		}),
+		server.WithTransport(standard.NewTransporter),
 		// Maximum wait time before exit, if not specified the default is 3s
 		server.WithExitWaitTime(3*time.Second),
 	)

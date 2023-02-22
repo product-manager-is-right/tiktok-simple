@@ -4,6 +4,7 @@ import (
 	"TIKTOK_Gateway/configs"
 	"TIKTOK_Gateway/route"
 	"github.com/cloudwego/hertz/pkg/app/server"
+	"github.com/cloudwego/hertz/pkg/network/standard"
 	"log"
 	"strconv"
 )
@@ -18,8 +19,8 @@ func main() {
 	// 创建服务
 	addr := ":" + strconv.Itoa(myConfig.Port)
 	h := server.New(server.WithHostPorts(addr),
-		server.WithMaxRequestBodySize(20<<20))
-
+		server.WithMaxRequestBodySize(20<<20),
+		server.WithTransport(standard.NewTransporter))
 	// 路由注册
 	route.Register(myConfig, h)
 
