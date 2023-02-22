@@ -4,17 +4,17 @@ nohup ../fastgithub/fastgithub_linux-x64/fastgithub &
 #切换要部署的分支
 git checkout dev
 
-#拉取最新代码
+#拉取最新代码,如果卡住,把这个地方注释了
 git pull origin
+
+#删除镜像
+docker rmi tiktok-simple_tiktok_gateway:latest
+docker rmi tiktok-simple_tiktok_video:latest
+docker rmi tiktok-simple_tiktok_user:latest
 
 #停止删除容器
 docker-compose stop
 docker-compose rm -f
-
-#删除镜像
-docker rmi tiktok_user
-docker rmi tiktok_video
-docker rmi tiktok_gateway
 
 #重新启动容器
 docker-compose up -d
