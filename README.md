@@ -223,7 +223,7 @@
 ##### 评论模块的设计
 
 + 评论模块包括评论（/douyin/comment/action/）和查看评论（/douyin/comment/list/）。
-+ 阅读[评论模块文档]() 获取详细设计。
++ 阅读[评论模块文档](https://hoyew2yzsw.feishu.cn/docx/LX3fdY3IdoB18DxO0OHcxcdRnUb) 获取详细设计。
 
 ##### 聊天模块的设计
 
