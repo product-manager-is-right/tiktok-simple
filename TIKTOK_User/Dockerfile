@@ -9,5 +9,4 @@ ADD go.mod .
 COPY . .
 RUN go mod download
 RUN go build -o tiktok_user ./cmd/main.go
-RUN ls .
 ENTRYPOINT  ["./tiktok_user"]
