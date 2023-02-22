@@ -8,7 +8,7 @@ nacos:
   password: nacos
 
 mysql:
-  dsn: root1:root1234@tcp(120.25.2.146:3306)/tiktok_ums?charset=utf8&parseTime=True&loc=Local
+  dsn: root1:root1234@tcp(127.0.0.1:3306)/tiktok_ums?charset=utf8&parseTime=True&loc=Local
 
 rabbitmq:
   url: amqp://guest:guest@120.25.2.146:5672/
