@@ -4,6 +4,7 @@ import (
 	"TIKTOK_User/dal/mysql"
 	"TIKTOK_User/model/vo"
 	"errors"
+	"sort"
 )
 
 type MessageServiceImpl struct {
@@ -53,8 +54,8 @@ func (msi *MessageServiceImpl) GetMessage(toUserId int64, ownerId int64, preTime
 			}
 			res = append(res, m)
 		}
-
 	}
+	sort.Sort(Messages(res))
 	return res, nil
 }
 
@@ -67,4 +68,18 @@ func (msi *MessageServiceImpl) GetLatestMessage(toUserId, fromUserId int64) (mes
 		return m.Message, 1
 	}
 	return m.Message, 0
+}
+
+// 结构体数组排序
+type Messages []vo.MessageInfo
+
+// 排序函数实现
+func (m Messages) Len() int {
+	return len(m)
+}
+func (m Messages) Swap(i, j int) {
+	m[i], m[j] = m[j], m[i]
+}
+func (m Messages) Less(i, j int) bool {
+	return m[i].CreateTime < m[j].CreateTime
 }
