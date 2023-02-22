@@ -64,7 +64,7 @@ func startServer() {
 	r := nacos.NewNacosRegistry(cli)
 
 	addr := ":" + viper.GetString("port")
-	h := server.New(
+	h := server.Default(
 		server.WithHostPorts(addr),
 		server.WithRegistry(r, &registry.Info{
 			ServiceName: viper.GetString("nacos.serviceName"),
