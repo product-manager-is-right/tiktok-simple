@@ -193,7 +193,8 @@
 #### 2.3 数据库设计
 
 ***数据库设计图***
-
+##### 2.5.1 数据库安全以及索引优化
++ 阅读[数据库安全以及索引文档](https://zv0hnc8742.feishu.cn/docx/YtSsdvp7LoCFN3xp1OXckQYyn2c)获取详细信息
 
 
 #### 2.4 服务模块
@@ -213,7 +214,7 @@
 ##### 点赞模块的设计
 
 + 点赞模块包括点赞操作（/douyin/favorite/action/）和获取点赞列表（/douyin/favorite/list/）。
-+ 阅读[点赞模块文档](**文档地址**)获取详细信息
++ 阅读[点赞模块文档](https://zv0hnc8742.feishu.cn/docx/Cfk9daRdgo9tI9xZdddcDo5an2d)获取详细信息
 
 ##### 关注模块的设计
 
